@@ -1,8 +1,5 @@
 ﻿namespace Giants.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
     using AutoMapper;
 
     public static class Mapper
@@ -22,6 +19,7 @@
                         var config = new MapperConfiguration(cfg => {
                             cfg.CreateMap<DataContract.ServerInfo, Services.ServerInfo>();
                             cfg.CreateMap<Services.ServerInfo, DataContract.ServerInfo>();
+                            cfg.CreateMap<Services.ServerInfo, DataContract.ServerInfoWithHostAddress>();
                         });
 
                         Instance = new AutoMapper.Mapper(config);

@@ -2,12 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     using System.Text;
 
-    public class ServerInfoWithHostAddress
+    public class ServerInfoWithHostAddress : ServerInfo
     {
-        public ServerInfo ServerInfo { get; set; }
-    
+        [Required]
         public string HostIpAddress { get; set; }
     }
 }
