@@ -10,6 +10,6 @@
     {
         Task<IEnumerable<ServerInfo>> GetAllServers();
 
-        Task AddServer(IPAddress ipAddress, ServerInfo server);
+        Task AddServer(ServerInfo server);
     }
 }

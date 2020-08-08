@@ -59,7 +59,7 @@ namespace Giants.Web.Controllers
             serverInfoEntity.HostIpAddress = requestIpAddress.ToString();
             serverInfoEntity.LastHeartbeat = DateTime.UtcNow;
 
-            await this.serverRegistryService.AddServer(requestIpAddress, serverInfoEntity);
+            await this.serverRegistryService.AddServer(serverInfoEntity);
         }
     }
 }
