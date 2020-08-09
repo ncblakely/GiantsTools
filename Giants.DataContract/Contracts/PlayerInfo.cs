@@ -1,17 +1,23 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Giants.DataContract
 {
     public class PlayerInfo
     {
+        [Required]
         public int Index { get; set; }
 
+        [Required]
         public string Name { get; set; }
 
+        [Required]
         public int Frags { get; set; }
 
+        [Required]
         public int Deaths { get; set; }
 
+        [Required]
         public string TeamName { get; set; }
 
         public override bool Equals(object obj)
