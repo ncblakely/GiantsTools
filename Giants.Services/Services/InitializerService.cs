@@ -4,11 +4,11 @@
     using System.Threading.Tasks;
     using Microsoft.Extensions.Hosting;
 
-    public class InitializerHostedService : IHostedService
+    public class InitializerService : IHostedService
     {
         private readonly IServerRegistryStore serverRegistryStore;
 
-        public InitializerHostedService(IServerRegistryStore serverRegistryStore)
+        public InitializerService(IServerRegistryStore serverRegistryStore)
         {
             this.serverRegistryStore = serverRegistryStore;
         }

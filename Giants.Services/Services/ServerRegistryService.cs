@@ -28,19 +28,12 @@
         }
 
         public async Task AddServer(
-            ServerInfo server)
+            ServerInfo serverInfo)
         {
-            if (server == null)
-            {
-                throw new ArgumentNullException(nameof(server));
-            }
+            ArgumentUtility.CheckForNull(serverInfo, nameof(serverInfo));
+            ArgumentUtility.CheckStringForNullOrEmpty(serverInfo.HostIpAddress, nameof(serverInfo.HostIpAddress));
 
-            if (string.IsNullOrEmpty(server.HostIpAddress))
-            {
-                throw new ArgumentException(nameof(server.HostIpAddress));
-            }
-
-            await this.registryStore.UpsertServerInfo(server ?? throw new ArgumentNullException(nameof(server)));
+            await this.registryStore.UpsertServerInfo(serverInfo);
         }
 
         public async Task<IEnumerable<ServerInfo>> GetAllServers()

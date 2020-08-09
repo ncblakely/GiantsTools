@@ -36,6 +36,8 @@
             string partitionKey = null)
             where T : IIdentifiable
         {
+            ArgumentUtility.CheckForNull(selectExpression, nameof(selectExpression));
+
             if (partitionKey == null)
             {
                 partitionKey = typeof(T).Name;
@@ -109,6 +111,8 @@
         public async Task<T> GetItemById<T>(string id, string partitionKey = null)
             where T : IIdentifiable
         {
+            ArgumentUtility.CheckStringForNullOrEmpty(id, nameof(id));
+
             return (await this.GetItems<T>(t => t.id == id, partitionKey)).FirstOrDefault();
         }
 
@@ -118,6 +122,8 @@
             ItemRequestOptions itemRequestOptions = null)
             where T : IIdentifiable
         {
+            ArgumentUtility.CheckForNull(item, nameof(item));
+
             await this.container.UpsertItemAsync(item, partitionKey, itemRequestOptions);
         }
 
@@ -142,6 +148,8 @@
             string partitionKey = null,
             ItemRequestOptions requestOptions = null)
         {
+            ArgumentUtility.CheckStringForNullOrEmpty(id, nameof(id));
+
             if (partitionKey == null)
             {
                 partitionKey = typeof(T).Name;

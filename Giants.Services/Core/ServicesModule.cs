@@ -12,7 +12,7 @@
             services.AddSingleton<IServerRegistryStore, CosmosDbServerRegistryStore>();
             services.AddSingleton<IDateTimeProvider, DefaultDateTimeProvider>();
 
-            services.AddHostedService<InitializerHostedService>();
+            services.AddHostedService<InitializerService>();
             services.AddHostedService<ServerRegistryCleanupService>();
         }
     }

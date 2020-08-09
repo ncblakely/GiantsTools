@@ -39,7 +39,7 @@ namespace Giants.Web.Controllers
             IEnumerable<Services.ServerInfo> serverInfo = await this.serverRegistryService.GetAllServers();
 
             IMapper mapper = Services.Mapper.GetMapper();
-            return serverInfo
+            var mappedServers = serverInfo
                 .Select(x => 
                 {
                     var serverInfo = mapper.Map<ServerInfoWithHostAddress>(x);
@@ -47,19 +47,34 @@ namespace Giants.Web.Controllers
                     return serverInfo;
                 })
                 .ToList();
+
+            string requestIpAddress = this.GetRequestIpAddress();
+            logger.LogInformation("Returning {Count} servers to {IPAddress}", mappedServers.Count, requestIpAddress);
+
+            return mappedServers;
         }
 
         [HttpPost]
         public async Task AddServer([FromBody]DataContract.ServerInfo serverInfo)
         {
-            IPAddress requestIpAddress = this.httpContextAccessor.HttpContext.Connection.RemoteIpAddress.MapToIPv4();
-            this.logger.LogInformation($"Request to add server from {requestIpAddress}");
+            ArgumentUtility.CheckForNull(serverInfo, nameof(serverInfo));
+
+            string requestIpAddress = this.GetRequestIpAddress();
+
+            this.logger.LogInformation("Request to add server from {IPAddress}", requestIpAddress);
 
             var serverInfoEntity = mapper.Map<Services.ServerInfo>(serverInfo);
             serverInfoEntity.HostIpAddress = requestIpAddress.ToString();
             serverInfoEntity.LastHeartbeat = DateTime.UtcNow;
 
             await this.serverRegistryService.AddServer(serverInfoEntity);
+
+            this.logger.LogInformation("Added server successfully for {IPAddress}", requestIpAddress);
+        }
+
+        private string GetRequestIpAddress()
+        {
+            return this.httpContextAccessor.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
         }
     }
 }

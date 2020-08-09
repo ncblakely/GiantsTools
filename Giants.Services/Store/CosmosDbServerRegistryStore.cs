@@ -34,6 +34,8 @@
             Expression<Func<ServerInfo, bool>> whereExpression = null,
             string partitionKey = null)
         {
+            ArgumentUtility.CheckForNull(selectExpression, nameof(selectExpression));
+
             return await this.client.GetItems<ServerInfo, TSelect>(
                 selectExpression: selectExpression,
                 whereExpression: whereExpression,
@@ -42,11 +44,15 @@
 
         public async Task<ServerInfo> GetServerInfo(string ipAddress)
         {
+            ArgumentUtility.CheckStringForNullOrEmpty(ipAddress, nameof(ipAddress));
+
             return await this.client.GetItemById<ServerInfo>(ipAddress);
         }
 
         public async Task UpsertServerInfo(ServerInfo serverInfo)
         {
+            ArgumentUtility.CheckForNull(serverInfo, nameof(serverInfo));
+
             await this.client.UpsertItem(
                 item: serverInfo,
                 partitionKey: new PartitionKey(serverInfo.DocumentType));
@@ -54,6 +60,8 @@
 
         public async Task DeleteServers(IEnumerable<string> ids, string partitionKey = null)
         {
+            ArgumentUtility.CheckEnumerableForNullOrEmpty(ids, nameof(ids));
+
             foreach (string id in ids)
             { 
                 this.logger.LogInformation("Deleting server for host IP {IPAddress}", id);
