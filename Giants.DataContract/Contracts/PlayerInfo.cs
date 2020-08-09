@@ -1,9 +1,5 @@
 ﻿namespace Giants.DataContract
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-
     public class PlayerInfo
     {
         public int Index { get; set; }

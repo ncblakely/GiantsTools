@@ -11,6 +11,9 @@
             services.AddSingleton<IServerRegistryService, ServerRegistryService>();
             services.AddSingleton<IServerRegistryStore, CosmosDbServerRegistryStore>();
             services.AddSingleton<IDateTimeProvider, DefaultDateTimeProvider>();
+
+            services.AddHostedService<InitializerHostedService>();
+            services.AddHostedService<ServerRegistryCleanupService>();
         }
     }
 }

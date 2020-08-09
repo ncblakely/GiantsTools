@@ -7,12 +7,19 @@
 
     public interface IServerRegistryStore
     {
-        public Task Initialize();
+        Task Initialize();
 
-        public Task<IEnumerable<ServerInfo>> GetServerInfos(Expression<Func<ServerInfo, bool>> whereExpression = null);
+        Task<IEnumerable<ServerInfo>> GetServerInfos(Expression<Func<ServerInfo, bool>> whereExpression = null, string partitionKey = null);
 
-        public Task<ServerInfo> GetServerInfo(string ipAddress);
+        Task<IEnumerable<TSelect>> GetServerInfos<TSelect>(
+            Expression<Func<ServerInfo, TSelect>> selectExpression,
+            Expression<Func<ServerInfo, bool>> whereExpression = null,
+            string partitionKey = null);
 
-        public Task UpsertServerInfo(ServerInfo serverInfo);
+        Task<ServerInfo> GetServerInfo(string ipAddress);
+
+        Task UpsertServerInfo(ServerInfo serverInfo);
+
+        Task DeleteServers(IEnumerable<string> ids, string partitionKey = null);
     }
 }

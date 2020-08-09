@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Giants.Services;
-using Microsoft.Extensions.Hosting;
-
-namespace Giants.WebApi
+﻿namespace Giants.Services
 {
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Microsoft.Extensions.Hosting;
+
     public class InitializerHostedService : IHostedService
     {
         private readonly IServerRegistryStore serverRegistryStore;

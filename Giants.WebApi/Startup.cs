@@ -1,6 +1,5 @@
 using AutoMapper;
 using Giants.Services;
-using Giants.WebApi;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -27,7 +26,7 @@ namespace Giants.Web
 
             services.AddHttpContextAccessor();
             services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddHostedService<InitializerHostedService>();
+            
 
             ServicesModule.RegisterServices(services, Configuration);
 

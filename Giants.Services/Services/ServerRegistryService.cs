@@ -46,7 +46,7 @@
         public async Task<IEnumerable<ServerInfo>> GetAllServers()
         {
             return (await this.registryStore
-                .GetServerInfos(c => c.LastHeartbeat > this.dateTimeProvider.UtcNow - this.timeoutPeriod))
+                .GetServerInfos(whereExpression: c => c.LastHeartbeat > this.dateTimeProvider.UtcNow - this.timeoutPeriod))
                 .Take(this.maxServerCount);
         }
     }

@@ -32,10 +32,15 @@
 
         public async Task<IEnumerable<TSelect>> GetItems<T, TSelect>(
             Expression<Func<T, TSelect>> selectExpression,
-            string partitionKey,
-            Expression<Func<T, bool>> whereExpression = null)
+            Expression<Func<T, bool>> whereExpression = null,
+            string partitionKey = null)
             where T : IIdentifiable
         {
+            if (partitionKey == null)
+            {
+                partitionKey = typeof(T).Name;
+            }
+
             IQueryable<T> query = this.container
                 .GetItemLinqQueryable<T>(requestOptions: new QueryRequestOptions
                 {
@@ -130,6 +135,26 @@
             });
 
             this.container = containerResponse.Container;
+        }
+
+        public async Task DeleteItem<T>(
+            string id,
+            string partitionKey = null,
+            ItemRequestOptions requestOptions = null)
+        {
+            if (partitionKey == null)
+            {
+                partitionKey = typeof(T).Name;
+            }
+
+            try
+            { 
+                await this.container.DeleteItemAsync<T>(id, new PartitionKey(partitionKey), requestOptions);
+            }
+            catch (CosmosException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                // Ignore
+            }
         }
     }
 }

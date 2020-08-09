@@ -12,13 +12,6 @@
     {
         private ConcurrentDictionary<string, ServerInfo> servers = new ConcurrentDictionary<string, ServerInfo>();
 
-        public Task<IEnumerable<ServerInfo>> GetServerInfos(
-            Expression<Func<ServerInfo, bool>> whereExpression = null)
-        {
-            return Task.FromResult(
-                this.servers.Values.AsEnumerable());
-        }
-
         public Task<ServerInfo> GetServerInfo(string ipAddress)
         {
             if (servers.ContainsKey(ipAddress))
@@ -39,6 +32,26 @@
         public Task UpsertServerInfo(ServerInfo serverInfo)
         {
             this.servers.TryAdd(serverInfo.HostIpAddress, serverInfo);
+
+            return Task.CompletedTask;
+        }
+
+        public Task<IEnumerable<ServerInfo>> GetServerInfos(Expression<Func<ServerInfo, bool>> whereExpression = null, string partitionKey = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<TSelect>> GetServerInfos<TSelect>(Expression<Func<ServerInfo, TSelect>> selectExpression, Expression<Func<ServerInfo, bool>> whereExpression = null, string partitionKey = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteServers(IEnumerable<string> ids, string partitionKey = null)
+        {
+            foreach (string id in ids)
+            {
+                this.servers.TryRemove(id, out _);
+            }
 
             return Task.CompletedTask;
         }
