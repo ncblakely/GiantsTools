@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 namespace Giants.Web.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class ServersController : ControllerBase
     {
         private readonly IMapper mapper;

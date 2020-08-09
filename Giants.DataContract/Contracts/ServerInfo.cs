@@ -3,8 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Text;
+    using System.Linq;
 
     public class ServerInfo
     {
@@ -13,12 +12,11 @@
         public string GameName { get; set; }
 
         [Required]
-        [StringLength(100)]
-        public string Version { get; set; }
+        public VersionInfo Version { get; set; }
 
         [Required]
         [StringLength(100)]
-        public string SessionName { get; set; } // was "HostName"
+        public string SessionName { get; set; }
 
         [Required]
         public int Port { get; set; }
@@ -52,5 +50,42 @@
 
         [Required]
         public IList<PlayerInfo> PlayerInfo { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is ServerInfo info &&
+                   GameName == info.GameName &&
+                   EqualityComparer<VersionInfo>.Default.Equals(Version, info.Version) &&
+                   SessionName == info.SessionName &&
+                   Port == info.Port &&
+                   MapName == info.MapName &&
+                   GameType == info.GameType &&
+                   NumPlayers == info.NumPlayers &&
+                   GameState == info.GameState &&
+                   TimeLimit == info.TimeLimit &&
+                   FragLimit == info.FragLimit &&
+                   TeamFragLimit == info.TeamFragLimit &&
+                   FirstBaseComplete == info.FirstBaseComplete &&
+                   PlayerInfo.SequenceEqual(info.PlayerInfo);
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode hash = new HashCode();
+            hash.Add(GameName);
+            hash.Add(Version);
+            hash.Add(SessionName);
+            hash.Add(Port);
+            hash.Add(MapName);
+            hash.Add(GameType);
+            hash.Add(NumPlayers);
+            hash.Add(GameState);
+            hash.Add(TimeLimit);
+            hash.Add(FragLimit);
+            hash.Add(TeamFragLimit);
+            hash.Add(FirstBaseComplete);
+            hash.Add(PlayerInfo);
+            return hash.ToHashCode();
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿namespace Giants.Services
 {
     using Giants.Services.Core;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +12,7 @@
             services.AddSingleton<IServerRegistryService, ServerRegistryService>();
             services.AddSingleton<IServerRegistryStore, CosmosDbServerRegistryStore>();
             services.AddSingleton<IDateTimeProvider, DefaultDateTimeProvider>();
+            services.AddSingleton<IMemoryCache, MemoryCache>();
 
             services.AddHostedService<InitializerService>();
             services.AddHostedService<ServerRegistryCleanupService>();
