@@ -343,4 +343,4 @@ healthchecksdb
 
 #GPatch
 GPatch/Files
-GPatch/Launcher
+GPatch/Launcher/*.exe

@@ -14,7 +14,7 @@ namespace Giants.Launcher
 		private const string REGISTRY_KEY = @"HKEY_CURRENT_USER\Software\PlanetMoon\Giants";
 		private const int OPTIONS_VERSION = 3;
 
-		private static Dictionary<string, object> _Settings = new Dictionary<string, object>();
+		private static readonly Dictionary<string, object> _Settings = new Dictionary<string, object>();
 
 		// List of renderers compatible with the user's system.
 		static public List<RendererInterop.Capabilities> CompatibleRenderers;

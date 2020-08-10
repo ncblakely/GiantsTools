@@ -39,28 +39,28 @@ namespace Giants.Launcher
 
     public class Updater
     {
-		Uri _updateUri;
-		Version _appVersion;
-		AsyncCompletedEventHandler _updateCompletedCallback;
-		DownloadProgressChangedEventHandler _updateProgressCallback;
+        private readonly Uri updateUri;
+		private readonly Version appVersion;
+		private AsyncCompletedEventHandler updateCompletedCallback;
+		private DownloadProgressChangedEventHandler updateProgressCallback;
 		
 		public Updater(Uri updateUri, Version appVersion)
 		{
-			_updateUri = updateUri;
-			_appVersion = appVersion;
+			this.updateUri = updateUri;
+			this.appVersion = appVersion;
 		}
 		public void DownloadUpdateInfo(AsyncCompletedEventHandler downloadCompleteCallback, DownloadProgressChangedEventHandler downloadProgressCallback)
         {
 			WebClient client = new WebClient();
 
 			// Keep track of our progress callbacks
-			_updateCompletedCallback = downloadCompleteCallback;
-			_updateProgressCallback = downloadProgressCallback;
+			updateCompletedCallback = downloadCompleteCallback;
+			updateProgressCallback = downloadProgressCallback;
 
 			// Download update info XML
 			client.Proxy = null;
 			client.DownloadDataCompleted += new DownloadDataCompletedEventHandler(DownloadDataCallback);
-			client.DownloadDataAsync(_updateUri);
+			client.DownloadDataAsync(updateUri);
         }
 
 		private int GetHttpFileSize(Uri uri)
@@ -124,8 +124,8 @@ namespace Giants.Launcher
                 Proxy = null
             };
             client.DownloadFileAsync(info.DownloadUri, path, info);
-			client.DownloadFileCompleted += _updateCompletedCallback;
-			client.DownloadProgressChanged += _updateProgressCallback;
+			client.DownloadFileCompleted += updateCompletedCallback;
+			client.DownloadProgressChanged += updateProgressCallback;
 		}
 
 		private void StartLauncherUpdate(XElement root)
@@ -165,8 +165,8 @@ namespace Giants.Launcher
                 Proxy = null
             };
             client.DownloadFileAsync(info.DownloadUri, path, info);
-			client.DownloadFileCompleted += _updateCompletedCallback;
-			client.DownloadProgressChanged += _updateProgressCallback;
+			client.DownloadFileCompleted += updateCompletedCallback;
+			client.DownloadProgressChanged += updateProgressCallback;
 		}
 
 		private void DownloadDataCallback(Object sender, DownloadDataCompletedEventArgs e)
@@ -189,8 +189,8 @@ namespace Giants.Launcher
 						StartLauncherUpdate(root);
 						return;
 					}
-					else if (gameVersion > _appVersion)
-						StartGameUpdate(root, _appVersion);
+					else if (gameVersion > appVersion)
+						StartGameUpdate(root, appVersion);
 				}
 			}
 

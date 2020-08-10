@@ -1,25 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
 using System.IO;
+using System.Windows.Forms;
 
 namespace Giants.Launcher
 {
-	public partial class OptionsForm : Form
+    public partial class OptionsForm : Form
 	{
-		string _gamePath = null;
+        private readonly string gamePath = null;
 
 		public OptionsForm(string title, string gamePath)
 		{
 			InitializeComponent();
 
 			this.Text = title;
-			_gamePath = gamePath;
+			this.gamePath = gamePath;
 		}
 
 		private void OptionsForm_Load(object sender, EventArgs e)
@@ -232,12 +227,12 @@ namespace Giants.Launcher
 		private void btnCancel_Click(object sender, EventArgs e)
 		{
 			this.Close();
-			GameSettings.Load(_gamePath);
+			GameSettings.Load(gamePath);
 		}
 
 		private void btnResetDefaults_Click(object sender, EventArgs e)
 		{
-			GameSettings.SetDefaults(_gamePath);
+			GameSettings.SetDefaults(gamePath);
 			SetOptions();
 		}
 	}
