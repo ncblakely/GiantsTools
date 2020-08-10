@@ -24,10 +24,11 @@ namespace Giants.Web
         {
             services.AddControllers();
 
+            services.AddOpenApiDocument();
+
             services.AddHttpContextAccessor();
             services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
             
-
             ServicesModule.RegisterServices(services, Configuration);
 
             IMapper mapper = Services.Mapper.GetMapper();
@@ -40,6 +41,7 @@ namespace Giants.Web
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseOpenApi();
             }
 
             app.UseHttpsRedirection();
