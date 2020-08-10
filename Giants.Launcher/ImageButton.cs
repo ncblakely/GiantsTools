@@ -17,17 +17,17 @@ namespace Giants.Launcher
 		{
 			get
 			{
-				return m_DialogResult;
+				return this.m_DialogResult;
 			}
 			set
 			{
-				m_DialogResult = value;
+                this.m_DialogResult = value;
 			}
 		}
 
 		public void NotifyDefault(bool value)
 		{
-			isDefault = value;
+            this.isDefault = value;
 		}
 
 		public void PerformClick()
@@ -44,8 +44,8 @@ namespace Giants.Launcher
 		[Description("Image to show when the button is hovered over.")]
 		public Image HoverImage
 		{
-			get { return m_HoverImage; }
-			set { m_HoverImage = value; if (hover) Image = value; }
+			get { return this.m_HoverImage; }
+			set { this.m_HoverImage = value; if (this.hover) this.Image = value; }
 		}
 		#endregion
 		#region DownImage
@@ -55,8 +55,8 @@ namespace Giants.Launcher
 		[Description("Image to show when the button is depressed.")]
 		public Image DownImage
 		{
-			get { return m_DownImage; }
-			set { m_DownImage = value; if (down) Image = value; }
+			get { return this.m_DownImage; }
+			set { this.m_DownImage = value; if (this.down) this.Image = value; }
 		}
 		#endregion
 		#region NormalImage
@@ -66,8 +66,8 @@ namespace Giants.Launcher
 		[Description("Image to show when the button is not in any other state.")]
 		public Image NormalImage
 		{
-			get { return m_NormalImage; }
-			set { m_NormalImage = value; if (!(hover || down)) Image = value; }
+			get { return this.m_NormalImage; }
+			set { this.m_NormalImage = value; if (!(this.hover || this.down)) this.Image = value; }
 		}
 		#endregion
 
@@ -155,60 +155,60 @@ namespace Giants.Launcher
 		#region Events
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
-			hover = true;
-			if (down)
+            this.hover = true;
+			if (this.down)
 			{
-				if ((m_DownImage != null) && (Image != m_DownImage))
-					Image = m_DownImage;
+				if ((this.m_DownImage != null) && (this.Image != this.m_DownImage))
+                    this.Image = this.m_DownImage;
 			}
 			else
-				if (m_HoverImage != null)
-					Image = m_HoverImage;
+				if (this.m_HoverImage != null)
+                this.Image = this.m_HoverImage;
 				else
-					Image = m_NormalImage;
+                this.Image = this.m_NormalImage;
 			base.OnMouseMove(e);
 		}
 
 		protected override void OnMouseLeave(EventArgs e)
 		{
-			hover = false;
-			Image = m_NormalImage;
+            this.hover = false;
+            this.Image = this.m_NormalImage;
 			base.OnMouseLeave(e);
 		}
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			base.Focus();
-			OnMouseUp(null);
-			down = true;
-			if (m_DownImage != null)
-				Image = m_DownImage;
+            this.OnMouseUp(null);
+            this.down = true;
+			if (this.m_DownImage != null)
+                this.Image = this.m_DownImage;
 			base.OnMouseDown(e);
 		}
 
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
-			down = false;
-			if (hover)
+            this.down = false;
+			if (this.hover)
 			{
-				if (m_HoverImage != null)
-					Image = m_HoverImage;
+				if (this.m_HoverImage != null)
+                    this.Image = this.m_HoverImage;
 			}
 			else
-				Image = m_NormalImage;
+                this.Image = this.m_NormalImage;
 			base.OnMouseUp(e);
 		}
 
 		protected override void OnLostFocus(EventArgs e)
 		{
-			OnMouseUp(null);
+            this.OnMouseUp(null);
 			base.OnLostFocus(e);
 		}
 
 		protected override void OnPaint(PaintEventArgs pe)
 		{
 			base.OnPaint(pe);
-			if ((!string.IsNullOrEmpty(Text)) && (pe != null) && (base.Font != null))
+			if ((!string.IsNullOrEmpty(this.Text)) && (pe != null) && (base.Font != null))
 			{
 				SolidBrush drawBrush = new SolidBrush(base.ForeColor);
 				SizeF drawStringSize = pe.Graphics.MeasureString(base.Text, base.Font);
@@ -223,7 +223,7 @@ namespace Giants.Launcher
 
 		protected override void OnTextChanged(EventArgs e)
 		{
-			Refresh();
+            this.Refresh();
 			base.OnTextChanged(e);
 		}
 		#endregion

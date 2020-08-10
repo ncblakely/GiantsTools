@@ -1,10 +1,11 @@
 ﻿namespace Giants.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
+    using System.Threading.Tasks;
 
     public interface IUpdaterStore
     {
+        Task<VersionInfo> GetVersionInfo(string gameName);
+
+        Task Initialize();
     }
 }

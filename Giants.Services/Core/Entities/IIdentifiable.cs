@@ -1,4 +1,4 @@
-﻿namespace Giants.Services.Core.Entities
+﻿namespace Giants.Services
 {
     public interface IIdentifiable
     {

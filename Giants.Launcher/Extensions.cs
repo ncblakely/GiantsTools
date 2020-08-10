@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Win32;
 
 namespace Giants.Launcher
 {
-	public static class RegistryExtensions
+    public static class RegistryExtensions
 	{
 		// Extension to Registry.GetValue() that returns the default value if the returned object does not
 		// match the type specified.

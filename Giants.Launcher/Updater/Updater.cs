@@ -8,35 +8,6 @@ using System.Xml.Linq;
 
 namespace Giants.Launcher
 {
-    public enum UpdateType
-	{
-		Launcher,
-		Game,
-	}
-
-    public class UpdateInfo
-    {
-        public Version VersionFrom { get; set; }
-		public Version VersionTo { get; set; }
-		public Uri DownloadUri 
-		{ 
-			get 
-			{ 
-				return _downloadUri; 
-			} 
-			set 
-			{
-				_downloadUri = value;
-				FileName = Path.GetFileName(value.AbsoluteUri); 
-			} 
-		}
-		public int FileSize { get; set; }
-		public string FileName { get; set; }
-		public UpdateType UpdateType { get; set; }
-
-		private Uri _downloadUri;
-    }
-
     public class Updater
     {
         private readonly Uri updateUri;
@@ -53,14 +24,14 @@ namespace Giants.Launcher
         {
 			WebClient client = new WebClient();
 
-			// Keep track of our progress callbacks
-			updateCompletedCallback = downloadCompleteCallback;
-			updateProgressCallback = downloadProgressCallback;
+            // Keep track of our progress callbacks
+            this.updateCompletedCallback = downloadCompleteCallback;
+            this.updateProgressCallback = downloadProgressCallback;
 
 			// Download update info XML
 			client.Proxy = null;
-			client.DownloadDataCompleted += new DownloadDataCompletedEventHandler(DownloadDataCallback);
-			client.DownloadDataAsync(updateUri);
+			client.DownloadDataCompleted += new DownloadDataCompletedEventHandler(this.DownloadDataCallback);
+			client.DownloadDataAsync(this.updateUri);
         }
 
 		private int GetHttpFileSize(Uri uri)
@@ -109,7 +80,7 @@ namespace Giants.Launcher
 			if (File.Exists(path))
 				File.Delete(path);
 
-			info.FileSize = GetHttpFileSize(info.DownloadUri);
+			info.FileSize = this.GetHttpFileSize(info.DownloadUri);
 			if (info.FileSize == -1)
 			{
 				string errorMsg = string.Format(Resources.UpdateDownloadFailedText, "File not found on server.");
@@ -124,8 +95,8 @@ namespace Giants.Launcher
                 Proxy = null
             };
             client.DownloadFileAsync(info.DownloadUri, path, info);
-			client.DownloadFileCompleted += updateCompletedCallback;
-			client.DownloadProgressChanged += updateProgressCallback;
+			client.DownloadFileCompleted += this.updateCompletedCallback;
+			client.DownloadProgressChanged += this.updateProgressCallback;
 		}
 
 		private void StartLauncherUpdate(XElement root)
@@ -151,7 +122,7 @@ namespace Giants.Launcher
 			if (File.Exists(path))
 				File.Delete(path);
 
-			info.FileSize = GetHttpFileSize(info.DownloadUri);
+			info.FileSize = this.GetHttpFileSize(info.DownloadUri);
 			if (info.FileSize == -1)
 			{
 				string errorMsg = string.Format(Resources.UpdateDownloadFailedText, "File not found on server.");
@@ -165,8 +136,8 @@ namespace Giants.Launcher
                 Proxy = null
             };
             client.DownloadFileAsync(info.DownloadUri, path, info);
-			client.DownloadFileCompleted += updateCompletedCallback;
-			client.DownloadProgressChanged += updateProgressCallback;
+			client.DownloadFileCompleted += this.updateCompletedCallback;
+			client.DownloadProgressChanged += this.updateProgressCallback;
 		}
 
 		private void DownloadDataCallback(Object sender, DownloadDataCompletedEventArgs e)
@@ -186,11 +157,11 @@ namespace Giants.Launcher
 					Version ourVersion = new Version(Application.ProductVersion);
 					if (launcherVersion > ourVersion)
 					{
-						StartLauncherUpdate(root);
+                        this.StartLauncherUpdate(root);
 						return;
 					}
-					else if (gameVersion > appVersion)
-						StartGameUpdate(root, appVersion);
+					else if (gameVersion > this.appVersion)
+                        this.StartGameUpdate(root, this.appVersion);
 				}
 			}
 

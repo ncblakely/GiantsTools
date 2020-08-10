@@ -24,7 +24,7 @@ namespace Giants.Launcher
 
         public LauncherForm()
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
             // Set window title
             this.Text = GAME_NAME;
@@ -40,31 +40,31 @@ namespace Giants.Launcher
 			GameSettings.Save();
 
 			foreach (string c in Environment.GetCommandLineArgs())
-				_commandLine = _commandLine + c + " ";
+                this._commandLine = this._commandLine + c + " ";
 
-            string commandLine = string.Format("{0} -launcher", _commandLine.Trim());
+            string commandLine = string.Format("{0} -launcher", this._commandLine.Trim());
 
 			try
 			{
 				Process gameProcess = new Process();
 
                 gameProcess.StartInfo.Arguments = commandLine;
-				gameProcess.StartInfo.FileName = _gamePath;
-				gameProcess.StartInfo.WorkingDirectory = Path.GetDirectoryName(_gamePath);
+				gameProcess.StartInfo.FileName = this._gamePath;
+				gameProcess.StartInfo.WorkingDirectory = Path.GetDirectoryName(this._gamePath);
 	
 				gameProcess.Start();
 				Application.Exit();
 			}
 			catch(Exception ex)
 			{
-				MessageBox.Show(string.Format("Failed to launch game process at: {0}. {1}", _gamePath, ex.Message),
+				MessageBox.Show(string.Format("Failed to launch game process at: {0}. {1}", this._gamePath, ex.Message),
 					"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 
         private void btnOptions_Click(object sender, EventArgs e)
         {
-            OptionsForm form = new OptionsForm(GAME_NAME + " Options", _gamePath);
+            OptionsForm form = new OptionsForm(GAME_NAME + " Options", this._gamePath);
 
             //form.MdiParent = this;
 			form.ShowDialog();
@@ -74,14 +74,14 @@ namespace Giants.Launcher
         {
             // Find the game executable, first looking for it relative to our current directory and then
             // using the registry path if that fails.
-            _gamePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\" + GAME_PATH;
-            if (!File.Exists(_gamePath))
+            this._gamePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\" + GAME_PATH;
+            if (!File.Exists(this._gamePath))
             {
-                _gamePath = (string)Registry.GetValue(REGISTRY_KEY, REGISTRY_VALUE, null);
-                if (_gamePath != null)
-                    _gamePath = Path.Combine(_gamePath, GAME_PATH);
+                this._gamePath = (string)Registry.GetValue(REGISTRY_KEY, REGISTRY_VALUE, null);
+                if (this._gamePath != null)
+                    this._gamePath = Path.Combine(this._gamePath, GAME_PATH);
 
-                if (_gamePath == null || !File.Exists(_gamePath))
+                if (this._gamePath == null || !File.Exists(this._gamePath))
                 {
                     string message = string.Format(Resources.AppNotFound, GAME_NAME);
                     MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -94,7 +94,7 @@ namespace Giants.Launcher
 			try
 			{
 				
-				FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(_gamePath);
+				FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(this._gamePath);
 				gameVersion = new Version(fvi.FileVersion.Replace(',', '.'));
 			}
 			finally
@@ -108,13 +108,13 @@ namespace Giants.Launcher
 			}
 
 			// Read game settings from registry
-			GameSettings.Load(_gamePath);
+			GameSettings.Load(this._gamePath);
 
 			if ((int)GameSettings.Get("NoAutoUpdate") == 0)
 			{
-				// Check for updates
-				_Updater = new Updater(new Uri(UPDATE_URL), gameVersion);
-				_Updater.DownloadUpdateInfo(LauncherForm_DownloadCompletedCallback, LauncherForm_DownloadProgressCallback);
+                // Check for updates
+                this._Updater = new Updater(new Uri(UPDATE_URL), gameVersion);
+                this._Updater.DownloadUpdateInfo(this.LauncherForm_DownloadCompletedCallback, this.LauncherForm_DownloadProgressCallback);
 			}
         }
 
@@ -124,16 +124,16 @@ namespace Giants.Launcher
 			if (e.Button == MouseButtons.Left)
 			{
 				NativeMethods.ReleaseCapture();
-				NativeMethods.SendMessage(Handle, NativeMethods.WM_NCLBUTTONDOWN, NativeMethods.HT_CAPTION, 0);
+				NativeMethods.SendMessage(this.Handle, NativeMethods.WM_NCLBUTTONDOWN, NativeMethods.HT_CAPTION, 0);
 			}
 
 		}
 
 		private void LauncherForm_Shown(object sender, EventArgs e)
 		{
-			btnOptions.Visible = true;
-			btnPlay.Visible = true;
-			btnExit.Visible = true;
+            this.btnOptions.Visible = true;
+            this.btnPlay.Visible = true;
+            this.btnExit.Visible = true;
 
 			// Play intro sound
 			SoundPlayer player = new SoundPlayer(Resources.LauncherStart);
@@ -145,9 +145,9 @@ namespace Giants.Launcher
 			if (e.Cancelled)
 				return;
 
-			updateProgressBar.Value = 0;
-			updateProgressBar.Visible = false;
-			txtProgress.Visible = false;
+            this.updateProgressBar.Value = 0;
+            this.updateProgressBar.Visible = false;
+            this.txtProgress.Visible = false;
 
 			if (e.Error != null)
 			{
@@ -187,13 +187,13 @@ namespace Giants.Launcher
 
 		private void LauncherForm_DownloadProgressCallback(object sender, DownloadProgressChangedEventArgs e)
 		{
-			updateProgressBar.Visible = true;
-			updateProgressBar.Value = e.ProgressPercentage;
+            this.updateProgressBar.Visible = true;
+            this.updateProgressBar.Value = e.ProgressPercentage;
 
 			UpdateInfo info = (UpdateInfo)e.UserState;
 
-			txtProgress.Visible = true;
-			txtProgress.Text = string.Format(Resources.DownloadProgress, e.ProgressPercentage, (info.FileSize / 1024) / 1024);
+            this.txtProgress.Visible = true;
+            this.txtProgress.Text = string.Format(Resources.DownloadProgress, e.ProgressPercentage, (info.FileSize / 1024) / 1024);
 		}
     }
 }

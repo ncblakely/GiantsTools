@@ -104,17 +104,17 @@ namespace Giants.Launcher
 
 			public Capabilities(string filePath, ref RendererInterop.GFXCapabilityInfo gfxCaps)
 			{
-				FilePath = filePath;
-				FileName = Path.GetFileName(filePath);
-				MaxAnisotropy = gfxCaps.maxAnisotropy;
-				Flags = (RendererFlag)gfxCaps.flags;
-				Priority = gfxCaps.priority;
-				Name = gfxCaps.rendererName;
+                this.FilePath = filePath;
+                this.FileName = Path.GetFileName(filePath);
+                this.MaxAnisotropy = gfxCaps.maxAnisotropy;
+                this.Flags = (RendererFlag)gfxCaps.flags;
+                this.Priority = gfxCaps.priority;
+                this.Name = gfxCaps.rendererName;
 			}
 
 			public override string ToString()
 			{
-				return string.Format("{0} ({1})", Name, Path.GetFileName(FilePath));
+				return string.Format("{0} ({1})", this.Name, Path.GetFileName(this.FilePath));
 			}
 
 			public int CompareTo(object obj)

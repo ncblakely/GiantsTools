@@ -3,7 +3,7 @@
     using System;
     using System.ComponentModel.DataAnnotations;
 
-    public class VersionInfo
+    public class GiantsVersion
     {
         [Required]
         public int Build { get; set; }
@@ -19,7 +19,7 @@
 
         public override bool Equals(object obj)
         {
-            return obj is VersionInfo info &&
+            return obj is GiantsVersion info &&
                    Build == info.Build &&
                    Major == info.Major &&
                    Minor == info.Minor &&
@@ -29,6 +29,11 @@
         public override int GetHashCode()
         {
             return HashCode.Combine(Build, Major, Minor, Revision);
+        }
+
+        public Version ToVersion()
+        {
+            return new Version(this.Major, this.Minor, this.Build, this.Revision);
         }
     }
 }

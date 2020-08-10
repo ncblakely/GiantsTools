@@ -36,7 +36,7 @@
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            this.timer = new Timer(TimerCallback, null, TimeSpan.Zero, this.cleanupInterval);
+            this.timer = new Timer(this.TimerCallback, null, TimeSpan.Zero, this.cleanupInterval);
 
             return Task.CompletedTask;
         }
@@ -68,7 +68,7 @@
 
             if (expiredServers.Any())
             {
-                logger.LogInformation("Cleaning up {Count} servers.", expiredServers.Count);
+                this.logger.LogInformation("Cleaning up {Count} servers.", expiredServers.Count);
 
                 await this.serverRegistryStore.DeleteServers(expiredServers);
             }

@@ -49,7 +49,7 @@
             }
 
             // Check cache before we write to store
-            ConcurrentDictionary<string, ServerInfo> allServerInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, PopulateCache);
+            ConcurrentDictionary<string, ServerInfo> allServerInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, this.PopulateCache);
 
             if (allServerInfo.ContainsKey(serverInfo.HostIpAddress))
             {
@@ -80,7 +80,7 @@
 
         public async Task<IEnumerable<ServerInfo>> GetAllServers()
         {
-            ConcurrentDictionary<string, ServerInfo> serverInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, PopulateCache);
+            ConcurrentDictionary<string, ServerInfo> serverInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, this.PopulateCache);
 
             return serverInfo.Values;
         }

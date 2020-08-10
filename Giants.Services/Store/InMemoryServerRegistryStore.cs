@@ -14,9 +14,9 @@
 
         public Task<ServerInfo> GetServerInfo(string ipAddress)
         {
-            if (servers.ContainsKey(ipAddress))
+            if (this.servers.ContainsKey(ipAddress))
             { 
-                return Task.FromResult(servers[ipAddress]);
+                return Task.FromResult(this.servers[ipAddress]);
             }
 
             return Task.FromResult((ServerInfo)null);

@@ -5,7 +5,6 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using Giants.Services.Core.Entities;
     using Microsoft.Azure.Cosmos;
     using Microsoft.Azure.Cosmos.Linq;
 
@@ -129,11 +128,12 @@
 
         public async Task Initialize(string partitionKeyPath = null)
         {
+            // TODO: Use static shared cosmos client
             this.client = new CosmosClient(
                 this.connectionString,
                 this.authKeyOrResourceToken);
 
-            var databaseResponse = await this.client.CreateDatabaseIfNotExistsAsync(databaseId);
+            var databaseResponse = await this.client.CreateDatabaseIfNotExistsAsync(this.databaseId);
             var containerResponse = await databaseResponse.Database.CreateContainerIfNotExistsAsync(new ContainerProperties()
             {
                 Id = containerId,
