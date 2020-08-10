@@ -340,3 +340,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+#GPatch
+GPatch/Files
+GPatch/Launcher
