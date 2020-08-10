@@ -85,6 +85,18 @@
             return serverInfo.Values;
         }
 
+        public async Task DeleteServer(string ipAddress)
+        {
+            ArgumentUtility.CheckStringForNullOrEmpty(ipAddress, nameof(ipAddress));
+
+            ServerInfo serverInfo = await this.registryStore.GetServerInfo(ipAddress);
+
+            if (serverInfo != null)
+            {
+                await this.registryStore.DeleteServer(serverInfo.id);
+            }
+        }
+
         private async Task<ConcurrentDictionary<string, ServerInfo>> PopulateCache(ICacheEntry entry)
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1);

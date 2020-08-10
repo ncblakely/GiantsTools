@@ -33,6 +33,16 @@ namespace Giants.Web.Controllers
             this.serverRegistryService = serverRegistryService;
         }
 
+        [HttpDelete]
+        public async Task DeleteServer()
+        {
+            string requestIpAddress = this.GetRequestIpAddress();
+
+            this.logger.LogInformation("Deleting server from {IPAddress}", requestIpAddress);
+
+            await this.serverRegistryService.DeleteServer(requestIpAddress);
+        }
+
         [HttpGet]
         public async Task<IEnumerable<DataContract.ServerInfoWithHostAddress>> GetServers()
         {

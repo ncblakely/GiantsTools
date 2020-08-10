@@ -58,6 +58,11 @@
                 partitionKey: new PartitionKey(serverInfo.DocumentType));
         }
 
+        public async Task DeleteServer(string id, string partitionKey = null)
+        {
+            await this.client.DeleteItem<ServerInfo>(id, partitionKey);
+        }
+
         public async Task DeleteServers(IEnumerable<string> ids, string partitionKey = null)
         {
             ArgumentUtility.CheckEnumerableForNullOrEmpty(ids, nameof(ids));

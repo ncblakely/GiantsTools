@@ -38,12 +38,26 @@
 
         public Task<IEnumerable<ServerInfo>> GetServerInfos(Expression<Func<ServerInfo, bool>> whereExpression = null, string partitionKey = null)
         {
-            throw new NotImplementedException();
+            IQueryable<ServerInfo> serverInfoQuery = this.servers.Values.AsQueryable();
+
+            if (whereExpression != null)
+            {
+                serverInfoQuery = serverInfoQuery.Where(whereExpression);
+            }
+
+            return Task.FromResult(serverInfoQuery.AsEnumerable());
         }
 
         public Task<IEnumerable<TSelect>> GetServerInfos<TSelect>(Expression<Func<ServerInfo, TSelect>> selectExpression, Expression<Func<ServerInfo, bool>> whereExpression = null, string partitionKey = null)
         {
-            throw new NotImplementedException();
+            IQueryable<ServerInfo> serverInfoQuery = this.servers.Values.AsQueryable();
+
+            if (whereExpression != null)
+            {
+                serverInfoQuery = serverInfoQuery.Where(whereExpression);
+            }
+
+            return Task.FromResult(serverInfoQuery.Select(selectExpression).AsEnumerable());
         }
 
         public Task DeleteServers(IEnumerable<string> ids, string partitionKey = null)
@@ -52,6 +66,13 @@
             {
                 this.servers.TryRemove(id, out _);
             }
+
+            return Task.CompletedTask;
+        }
+
+        public Task DeleteServer(string id, string partitionKey = null)
+        {
+            this.servers.TryRemove(id, out ServerInfo _);
 
             return Task.CompletedTask;
         }
