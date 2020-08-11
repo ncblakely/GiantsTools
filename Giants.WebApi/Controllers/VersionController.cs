@@ -22,9 +22,9 @@ namespace Giants.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<DataContract.VersionInfo> GetVersionInfo(string gameName)
+        public async Task<DataContract.VersionInfo> GetVersionInfo(string appName)
         {
-            Services.VersionInfo versionInfo = await this.updaterService.GetVersionInfo(gameName);
+            Services.VersionInfo versionInfo = await this.updaterService.GetVersionInfo(appName);
 
             return mapper.Map<DataContract.VersionInfo>(versionInfo);
         }

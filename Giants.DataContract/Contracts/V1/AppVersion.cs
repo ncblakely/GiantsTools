@@ -3,7 +3,7 @@
     using System;
     using System.ComponentModel.DataAnnotations;
 
-    public class GiantsVersion
+    public class AppVersion
     {
         [Required]
         public int Build { get; set; }
@@ -19,7 +19,7 @@
 
         public override bool Equals(object obj)
         {
-            return obj is GiantsVersion info &&
+            return obj is AppVersion info &&
                    Build == info.Build &&
                    Major == info.Major &&
                    Minor == info.Minor &&

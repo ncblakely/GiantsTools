@@ -6,15 +6,12 @@
     public class VersionInfo
     {
         [Required]
-        public string GameName { get; set; }
+        public string AppName { get; set; }
 
         [Required]
-        public GiantsVersion GameVersion { get; set; }
+        public AppVersion Version { get; set; }
 
         [Required]
-        public GiantsVersion LauncherVersion { get; set; }
-
-        [Required]
-        public Uri PatchUri { get; set; }
+        public Uri InstallerUri { get; set; }
     }
 }

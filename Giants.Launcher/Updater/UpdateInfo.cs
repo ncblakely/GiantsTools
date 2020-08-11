@@ -5,24 +5,8 @@ namespace Giants.Launcher
 {
     public class UpdateInfo
     {
-        public Version VersionFrom { get; set; }
-		public Version VersionTo { get; set; }
-		public Uri DownloadUri 
-		{ 
-			get 
-			{ 
-				return this.downloadUri; 
-			} 
-			set 
-			{
-                this.downloadUri = value;
-                this.FileName = Path.GetFileName(value.AbsoluteUri); 
-			} 
-		}
 		public int FileSize { get; set; }
-		public string FileName { get; set; }
-		public UpdateType UpdateType { get; set; }
-
-		private Uri downloadUri;
+		public string FilePath { get; set; }
+		public ApplicationType ApplicationType { get; set; }
     }
 }

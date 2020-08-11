@@ -1,37 +1,43 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Linq;
+using Giants.WebApi.Clients;
 
 namespace Giants.Launcher
 {
     public class Updater
     {
-        private readonly Uri updateUri;
 		private readonly Version appVersion;
-		private AsyncCompletedEventHandler updateCompletedCallback;
-		private DownloadProgressChangedEventHandler updateProgressCallback;
+        private readonly AsyncCompletedEventHandler updateCompletedCallback;
+		private readonly DownloadProgressChangedEventHandler updateProgressCallback;
 		
-		public Updater(Uri updateUri, Version appVersion)
+		public Updater(
+			Version appVersion,
+			AsyncCompletedEventHandler updateCompletedCallback,
+			DownloadProgressChangedEventHandler updateProgressCallback)
 		{
-			this.updateUri = updateUri;
 			this.appVersion = appVersion;
-		}
-		public void DownloadUpdateInfo(AsyncCompletedEventHandler downloadCompleteCallback, DownloadProgressChangedEventHandler downloadProgressCallback)
+            this.updateCompletedCallback = updateCompletedCallback;
+            this.updateProgressCallback = updateProgressCallback;
+        }
+
+		public Task UpdateApplication(ApplicationType applicationType, VersionInfo versionInfo)
         {
-			WebClient client = new WebClient();
+			try
+			{
+				if (this.ToVersion(versionInfo.Version) > this.appVersion)
+				{
+					this.StartApplicationUpdate(applicationType, versionInfo);
+				}
+			}
+			catch (Exception)
+            {
+            }
 
-            // Keep track of our progress callbacks
-            this.updateCompletedCallback = downloadCompleteCallback;
-            this.updateProgressCallback = downloadProgressCallback;
-
-			// Download update info XML
-			client.Proxy = null;
-			client.DownloadDataCompleted += new DownloadDataCompletedEventHandler(this.DownloadDataCallback);
-			client.DownloadDataAsync(this.updateUri);
+			return Task.CompletedTask;
         }
 
 		private int GetHttpFileSize(Uri uri)
@@ -52,125 +58,53 @@ namespace Giants.Launcher
 
 		}
 
-		private void StartGameUpdate(XElement root, Version currentVersion)
+		private void StartApplicationUpdate(ApplicationType applicationType, VersionInfo versionInfo)
 		{
-			var updates = from update in root.Elements("Update")
-						  select new UpdateInfo()
-						  {
-							  VersionFrom = new Version(update.Attribute("FromVersion").Value),
-							  VersionTo = new Version(update.Attribute("ToVersion").Value),
-							  DownloadUri = new Uri(update.Attribute("Url").Value),
-							  UpdateType = UpdateType.Game
-						  };
-
-			// Grab the download path for the update to our current version, otherwise fall back to the full installer
-			// (specially defined as FromVersion 0.0.0.0 in the XML)
-			UpdateInfo info = updates.FirstOrDefault(update => update.VersionFrom == currentVersion);
-			if (info == null)
-				info = updates.Single(update => update.VersionFrom == new Version("0.0.0.0"));
-
 			// Display update prompt
-			string updateMsg = string.Format(Resources.UpdateAvailableText, info.VersionTo.ToString());
-			if (MessageBox.Show(updateMsg, Resources.UpdateAvailableTitle, MessageBoxButtons.YesNo) == DialogResult.No)
-				return; // User declined update
+			string updateMsg = applicationType == ApplicationType.Game ?
+								string.Format(Resources.UpdateAvailableText, this.ToVersion(versionInfo.Version).ToString()) :
+								string.Format(Resources.LauncherUpdateAvailableText, this.ToVersion(versionInfo.Version).ToString());
 
-			string path = Path.Combine(Path.GetTempPath(), info.FileName);
+			if (MessageBox.Show(updateMsg, Resources.UpdateAvailableTitle, MessageBoxButtons.YesNo) == DialogResult.No)
+			{
+				return; // User declined update
+			}
+
+			string patchFileName = Path.GetFileName(versionInfo.InstallerUri.AbsoluteUri);
+			string localPath = Path.Combine(Path.GetTempPath(), patchFileName);
 
 			// Delete the file locally if it already exists, just to be safe
-			if (File.Exists(path))
-				File.Delete(path);
+			if (File.Exists(localPath))
+			{
+				File.Delete(localPath);
+			}
 
-			info.FileSize = this.GetHttpFileSize(info.DownloadUri);
-			if (info.FileSize == -1)
+			int fileSize = this.GetHttpFileSize(versionInfo.InstallerUri);
+			if (fileSize == -1)
 			{
 				string errorMsg = string.Format(Resources.UpdateDownloadFailedText, "File not found on server.");
 				MessageBox.Show(errorMsg, Resources.UpdateDownloadFailedTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
 
-
-            // Download the update
-            WebClient client = new WebClient()
+			var updateInfo = new UpdateInfo()
             {
-                Proxy = null
+				FilePath = localPath,
+				FileSize = fileSize,
+				ApplicationType = applicationType
             };
-            client.DownloadFileAsync(info.DownloadUri, path, info);
+
+			// Download the update
+			// TODO: Super old code, replace this with async HttpClient
+			WebClient client = new WebClient(); 
+            client.DownloadFileAsync(versionInfo.InstallerUri, localPath, updateInfo);
 			client.DownloadFileCompleted += this.updateCompletedCallback;
 			client.DownloadProgressChanged += this.updateProgressCallback;
 		}
 
-		private void StartLauncherUpdate(XElement root)
+        private Version ToVersion(AppVersion version)
 		{
-			var query = from update in root.Descendants("LauncherUpdate")
-					   select new UpdateInfo()
-					   {
-						   VersionTo = new Version(update.Attribute("ToVersion").Value),
-						   DownloadUri = new Uri(update.Attribute("Url").Value),
-						   UpdateType = UpdateType.Launcher
-					   };
-
-			UpdateInfo info = query.FirstOrDefault();
-
-			// Display update prompt
-			string updateMsg = string.Format(Resources.LauncherUpdateAvailableText, info.VersionTo.ToString());
-			if (MessageBox.Show(updateMsg, Resources.UpdateAvailableTitle, MessageBoxButtons.YesNo) == DialogResult.No)
-				return; // User declined update
-
-			string path = Path.Combine(Path.GetTempPath(), info.FileName);
-			
-			// Delete the file locally if it already exists, just to be safe
-			if (File.Exists(path))
-				File.Delete(path);
-
-			info.FileSize = this.GetHttpFileSize(info.DownloadUri);
-			if (info.FileSize == -1)
-			{
-				string errorMsg = string.Format(Resources.UpdateDownloadFailedText, "File not found on server.");
-				MessageBox.Show(errorMsg, Resources.UpdateDownloadFailedTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
-				return;
-			}
-
-            // Download the update
-            WebClient client = new WebClient()
-            {
-                Proxy = null
-            };
-            client.DownloadFileAsync(info.DownloadUri, path, info);
-			client.DownloadFileCompleted += this.updateCompletedCallback;
-			client.DownloadProgressChanged += this.updateProgressCallback;
+			return new Version(version.Major, version.Minor, version.Build, version.Revision);
 		}
-
-		private void DownloadDataCallback(Object sender, DownloadDataCompletedEventArgs e)
-		{
-			try
-			{
-				if (!e.Cancelled && e.Error == null)
-				{
-					byte[] data = (byte[])e.Result;
-					string textData = System.Text.Encoding.UTF8.GetString(data);
-
-					XElement root = XElement.Parse(textData);
-
-					Version launcherVersion = new Version(root.Attribute("CurrentLauncherVersion").Value);
-					Version gameVersion = new Version(root.Attribute("CurrentGameVersion").Value);
-
-					Version ourVersion = new Version(Application.ProductVersion);
-					if (launcherVersion > ourVersion)
-					{
-                        this.StartLauncherUpdate(root);
-						return;
-					}
-					else if (gameVersion > this.appVersion)
-                        this.StartGameUpdate(root, this.appVersion);
-				}
-			}
-
-			catch (Exception ex)
-			{
-#if DEBUG
-				MessageBox.Show(string.Format("Exception in DownloadDataCallback: {0}", ex.Message));
-#endif
-			}
-		}
-    }
+	}
 }

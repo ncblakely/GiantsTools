@@ -4,7 +4,7 @@ namespace Giants.Services
 {
     public class VersionInfo : DataContract.VersionInfo, IIdentifiable
     {
-        public string id => GenerateId(this.GameName);
+        public string id => GenerateId(this.AppName);
 
         public string DocumentType => nameof(VersionInfo);
 

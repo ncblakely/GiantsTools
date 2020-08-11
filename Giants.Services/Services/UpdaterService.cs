@@ -11,11 +11,11 @@ namespace Giants.Services
             this.updaterStore = updaterStore;
         }
 
-        public async Task<VersionInfo> GetVersionInfo(string gameName)
+        public async Task<VersionInfo> GetVersionInfo(string appName)
         {
-            ArgumentUtility.CheckStringForNullOrEmpty(gameName, nameof(gameName));
+            ArgumentUtility.CheckStringForNullOrEmpty(appName, nameof(appName));
 
-            return await this.updaterStore.GetVersionInfo(gameName);
+            return await this.updaterStore.GetVersionInfo(appName);
         }
     }
 }

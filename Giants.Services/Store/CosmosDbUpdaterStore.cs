@@ -23,16 +23,16 @@
             this.configuration = configuration;
         }
 
-        public async Task<VersionInfo> GetVersionInfo(string gameName)
+        public async Task<VersionInfo> GetVersionInfo(string appName)
         {
             VersionInfo versionInfo = await this.memoryCache.GetOrCreateAsync<VersionInfo>(
-                key: GetCacheKey(gameName),
+                key: GetCacheKey(appName),
                 factory: async (entry) => 
                 {
                     entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
 
                     return await this.client.GetItemById<VersionInfo>(
-                        VersionInfo.GenerateId(gameName),
+                        VersionInfo.GenerateId(appName),
                         nameof(VersionInfo));
                 });
 

@@ -12,7 +12,7 @@
         public string GameName { get; set; }
 
         [Required]
-        public GiantsVersion Version { get; set; }
+        public AppVersion Version { get; set; }
 
         [Required]
         [StringLength(100)]
@@ -55,7 +55,7 @@
         {
             return obj is ServerInfo info &&
                    GameName == info.GameName &&
-                   EqualityComparer<GiantsVersion>.Default.Equals(Version, info.Version) &&
+                   EqualityComparer<AppVersion>.Default.Equals(Version, info.Version) &&
                    SessionName == info.SessionName &&
                    Port == info.Port &&
                    MapName == info.MapName &&

@@ -19,7 +19,7 @@
         "operationId": "Version_GetVersionInfo",
         "parameters": [
           {
-            "name": "gameName",
+            "name": "appName",
             "in": "query",
             "schema": {
               "type": "string",
@@ -106,30 +106,26 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "gameName",
-          "gameVersion",
-          "launcherVersion",
-          "patchUri"
+          "appName",
+          "version",
+          "installerUri"
         ],
         "properties": {
-          "gameName": {
+          "appName": {
             "type": "string",
             "minLength": 1
           },
-          "gameVersion": {
-            "$ref": "#/components/schemas/GiantsVersion"
+          "version": {
+            "$ref": "#/components/schemas/AppVersion"
           },
-          "launcherVersion": {
-            "$ref": "#/components/schemas/GiantsVersion"
-          },
-          "patchUri": {
+          "installerUri": {
             "type": "string",
             "format": "uri",
             "minLength": 1
           }
         }
       },
-      "GiantsVersion": {
+      "AppVersion": {
         "type": "object",
         "additionalProperties": false,
         "required": [
@@ -202,7 +198,7 @@
             "minLength": 0
           },
           "version": {
-            "$ref": "#/components/schemas/GiantsVersion"
+            "$ref": "#/components/schemas/AppVersion"
           },
           "sessionName": {
             "type": "string",

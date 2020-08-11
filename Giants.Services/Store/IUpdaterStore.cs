@@ -4,7 +4,7 @@
 
     public interface IUpdaterStore
     {
-        Task<VersionInfo> GetVersionInfo(string gameName);
+        Task<VersionInfo> GetVersionInfo(string appName);
 
         Task Initialize();
     }

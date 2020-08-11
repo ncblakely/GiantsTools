@@ -48,20 +48,20 @@ namespace Giants.WebApi.Clients
         partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
     
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<VersionInfo> GetVersionInfoAsync(string gameName)
+        public System.Threading.Tasks.Task<VersionInfo> GetVersionInfoAsync(string appName)
         {
-            return GetVersionInfoAsync(gameName, System.Threading.CancellationToken.None);
+            return GetVersionInfoAsync(appName, System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<VersionInfo> GetVersionInfoAsync(string gameName, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<VersionInfo> GetVersionInfoAsync(string appName, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Version?");
-            if (gameName != null) 
+            if (appName != null) 
             {
-                urlBuilder_.Append(System.Uri.EscapeDataString("gameName") + "=").Append(System.Uri.EscapeDataString(ConvertToString(gameName, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
+                urlBuilder_.Append(System.Uri.EscapeDataString("appName") + "=").Append(System.Uri.EscapeDataString(ConvertToString(appName, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
             }
             urlBuilder_.Length--;
     
@@ -550,27 +550,23 @@ namespace Giants.WebApi.Clients
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v11.0.0.0)")]
     public partial class VersionInfo 
     {
-        [Newtonsoft.Json.JsonProperty("gameName", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("appName", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
-        public string GameName { get; set; }
+        public string AppName { get; set; }
     
-        [Newtonsoft.Json.JsonProperty("gameVersion", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("version", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
-        public GiantsVersion GameVersion { get; set; } = new GiantsVersion();
+        public AppVersion Version { get; set; } = new AppVersion();
     
-        [Newtonsoft.Json.JsonProperty("launcherVersion", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("installerUri", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
-        public GiantsVersion LauncherVersion { get; set; } = new GiantsVersion();
-    
-        [Newtonsoft.Json.JsonProperty("patchUri", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required]
-        public System.Uri PatchUri { get; set; }
+        public System.Uri InstallerUri { get; set; }
     
     
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class GiantsVersion 
+    public partial class AppVersion 
     {
         [Newtonsoft.Json.JsonProperty("build", Required = Newtonsoft.Json.Required.Always)]
         public int Build { get; set; }
@@ -607,7 +603,7 @@ namespace Giants.WebApi.Clients
     
         [Newtonsoft.Json.JsonProperty("version", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
-        public GiantsVersion Version { get; set; } = new GiantsVersion();
+        public AppVersion Version { get; set; } = new AppVersion();
     
         [Newtonsoft.Json.JsonProperty("sessionName", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]

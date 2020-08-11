@@ -1,6 +1,6 @@
 ﻿namespace Giants.Launcher
 {
-    public enum UpdateType
+    public enum ApplicationType
 	{
 		Launcher,
 		Game,

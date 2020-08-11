@@ -5,7 +5,7 @@
 
     public class FileUpdaterStore : IUpdaterStore
     {
-        public Task<VersionInfo> GetVersionInfo(string gameName)
+        public Task<VersionInfo> GetVersionInfo(string appName)
         {
             throw new NotImplementedException();
         }
