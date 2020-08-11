@@ -1,0 +1,268 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VisualStudioToolFile
+	Name="Direct3D Shader Compiler"
+	Version="8.00"
+	>
+	<Rules>
+		<CustomBuildRule
+			Name="CompileShader"
+			DisplayName="Effect File"
+			CommandLine="fxc [AllOptions] $(InputPath) /Fo fxo\$(InputName).fxo"
+			Outputs="$(InputDir)$(InputName).fxo"
+			FileExtensions="*.fx"
+			ExecutionDescription="Compiling $(InputFileName)..."
+			>
+			<Properties>
+				<BooleanProperty
+					Name="NoLogo"
+					DisplayName="Suppress copyright message"
+					Switch="/nologo"
+					DefaultValue="true"
+				/>
+				<BooleanProperty
+					Name="DisablePreshaders"
+					DisplayName="Disable preshaders"
+					Switch="/Op"
+				/>
+				<BooleanProperty
+					Name="DisableOpts"
+					DisplayName="Disable optimizations"
+					Switch="/Od"
+				/>
+				<EnumProperty
+					Name="Optimization"
+					DisplayName="Optimization"
+					>
+					<Values>
+						<EnumValue
+							Value="0"
+							DisplayName="Use default"
+						/>
+						<EnumValue
+							Value="1"
+							Switch="/O0"
+							DisplayName="Level 0"
+						/>
+						<EnumValue
+							Value="2"
+							Switch="/O1"
+							DisplayName="Level 1"
+						/>
+						<EnumValue
+							Value="3"
+							Switch="/O2"
+							DisplayName="Level 2"
+						/>
+						<EnumValue
+							Value="4"
+							Switch="/O3"
+							DisplayName="Level 3"
+						/>
+					</Values>
+				</EnumProperty>
+				<BooleanProperty
+					Name="DisableValidation"
+					DisplayName="Disable validation"
+					Switch="/Vd"
+				/>
+				<BooleanProperty
+					Name="EnableDebugging"
+					DisplayName="Enable Debugging"
+					Switch="/Zi"
+				/>
+				<EnumProperty
+					Name="PackMatrices"
+					DisplayName="Pack Matrix Order"
+					>
+					<Values>
+						<EnumValue
+							Value="0"
+							DisplayName="Use default"
+						/>
+						<EnumValue
+							Value="1"
+							Switch="/Zpr"
+							DisplayName="Pack matrices in row-major order"
+						/>
+						<EnumValue
+							Value="2"
+							Switch="/Zpc"
+							DisplayName="Pack matrices in column-major order"
+						/>
+					</Values>
+				</EnumProperty>
+				<BooleanProperty
+					Name="PartialPrecision"
+					DisplayName="Force partial precision"
+					Switch="/Gpp"
+				/>
+				<EnumProperty
+					Name="FlowControlConstructs"
+					DisplayName="Flow control constructs"
+					>
+					<Values>
+						<EnumValue
+							Value="0"
+							DisplayName="No preference (default)"
+						/>
+						<EnumValue
+							Value="1"
+							Switch="/Gfa"
+							DisplayName="Avoid flow control constructs"
+						/>
+						<EnumValue
+							Value="2"
+							Switch="/Gfp"
+							DisplayName="Prefer Flow control constructs"
+						/>
+					</Values>
+				</EnumProperty>
+				<BooleanProperty
+					Name="PerfMode"
+					DisplayName="Disable Effect Performance Mode"
+					Switch="/Gdp"
+				/>
+				<BooleanProperty
+					Name="StrictMode"
+					DisplayName="Strict mode"
+					Switch="/Ges"
+				/>
+				<BooleanProperty
+					Name="CompatibilityMode"
+					DisplayName="Backwards compatibility mode"
+					Switch="/Gec"
+				/>
+				<BooleanProperty
+					Name="IEEEMode"
+					DisplayName="Force IEE strictness"
+					Switch="/Gis"
+				/>
+				<EnumProperty
+					Name="Profile"
+					DisplayName="Profile"
+					Description="Target Profile"
+					DefaultValue="18"
+					>
+					<Values>
+						<EnumValue
+							Value="0"
+							Switch="/Tvs_1_1"
+							DisplayName="vs_1_1"
+						/>
+						<EnumValue
+							Value="1"
+							Switch="/Tvs_2_0"
+							DisplayName="vs_2_0"
+						/>
+						<EnumValue
+							Value="2"
+							Switch="/Tvs_2_a"
+							DisplayName="vs_2_a"
+						/>
+						<EnumValue
+							Value="3"
+							Switch="/Tvs_2_sw"
+							DisplayName="vs_2_sw"
+						/>
+						<EnumValue
+							Value="4"
+							Switch="/Tvs_3_0"
+							DisplayName="vs_3_0"
+						/>
+						<EnumValue
+							Value="5"
+							Switch="/Tvs_3_sw"
+							DisplayName="vs_3_sw"
+						/>
+						<EnumValue
+							Value="6"
+							Switch="/Tvs_4_0"
+							DisplayName="vs_4_0"
+						/>
+						<EnumValue
+							Value="7"
+							Switch="/Tvs_4_1"
+							DisplayName="vs_4_1"
+						/>
+						<EnumValue
+							Value="8"
+							Switch="/Tps_2_0"
+							DisplayName="ps_2_0"
+						/>
+						<EnumValue
+							Value="9"
+							Switch="/Tps_2_a"
+							DisplayName="ps_2_a"
+						/>
+						<EnumValue
+							Value="10"
+							Switch="/Tps_2_b"
+							DisplayName="ps_2_b"
+						/>
+						<EnumValue
+							Value="11"
+							Switch="/Tps_2_sw"
+							DisplayName="ps_2_sw"
+						/>
+						<EnumValue
+							Value="12"
+							Switch="/Tps_3_0"
+							DisplayName="ps_3_0"
+						/>
+						<EnumValue
+							Value="13"
+							Switch="/Tps_3_sw"
+							DisplayName="ps_3_sw"
+						/>
+						<EnumValue
+							Value="14"
+							Switch="/Tps_4_0"
+							DisplayName="ps_4_0"
+						/>
+						<EnumValue
+							Value="15"
+							Switch="/Tps_4_1"
+							DisplayName="ps_4_1"
+						/>
+						<EnumValue
+							Value="16"
+							Switch="/Tgs_4_0"
+							DisplayName="gs_4_0"
+						/>
+						<EnumValue
+							Value="17"
+							Switch="/Tgs_4_1"
+							DisplayName="gs_4_1"
+						/>
+						<EnumValue
+							Value="18"
+							Switch="/Tfx_2_0"
+							DisplayName="fx_2_0"
+						/>
+						<EnumValue
+							Value="19"
+							Switch="/Tfx_4_0"
+							DisplayName="fx_4_0"
+						/>
+						<EnumValue
+							Value="20"
+							Switch="/Tfx_4_1"
+							DisplayName="fx_4_1"
+						/>
+					</Values>
+				</EnumProperty>
+				<BooleanProperty
+					Name="LoadD3DX931DLL"
+					DisplayName="Load d3dx9_31.dll"
+					Switch="/LD"
+				/>
+				<BooleanProperty
+					Name="ChildEffect"
+					DisplayName="Compile as child effect"
+					Description="Compile as child effect for FX 4.x targets"
+					Switch="/Gch"
+				/>
+			</Properties>
+		</CustomBuildRule>
+	</Rules>
+</VisualStudioToolFile>
