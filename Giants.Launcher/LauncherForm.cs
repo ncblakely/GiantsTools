@@ -19,7 +19,6 @@ namespace Giants.Launcher
         private const string GAME_PATH = "GiantsMain.exe";
 		private const string REGISTRY_KEY = @"HKEY_CURRENT_USER\Software\PlanetMoon\Giants";
 		private const string REGISTRY_VALUE = "DestDir";
-		private const string UPDATE_URL = @"https://google.com"; // update me
         private readonly VersionClient httpClient;
 
         private string commandLine = String.Empty;
@@ -28,13 +27,13 @@ namespace Giants.Launcher
 
         public LauncherForm()
         {
-            this.InitializeComponent();
+			this.InitializeComponent();
 
 			// Set window title
 			this.Text = GAME_NAME;
 
 			this.httpClient = new VersionClient(new HttpClient());
-			this.httpClient.BaseUrl = "https://giants.azurewebsites.net";
+			this.httpClient.BaseUrl = "https://giants.azurewebsites.net"; // TODO: Read from file
 		}
 
         private void btnExit_Click(object sender, EventArgs e)
@@ -98,36 +97,36 @@ namespace Giants.Launcher
                 }
             }
 
-			Version gameVersion = null;
-			try
-			{
-				
-				FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(this.gamePath);
-				gameVersion = new Version(fvi.FileVersion.Replace(',', '.'));
-			}
-			finally
-			{
-				if (gameVersion == null)
-				{
-					string message = string.Format(Resources.AppNotFound, GAME_NAME);
-					MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-					Application.Exit();
-				}
-			}
-
 			// Read game settings from registry
 			GameSettings.Load(this.gamePath);
 
 			if ((int)GameSettings.Get("NoAutoUpdate") == 0)
 			{
-                // Check for updates
-                this.updater = new Updater(
+				Version gameVersion = null;
+				try
+				{
+
+					FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(this.gamePath);
+					gameVersion = new Version(fvi.FileVersion.Replace(',', '.'));
+				}
+				finally
+				{
+					if (gameVersion == null)
+					{
+						string message = string.Format(Resources.AppNotFound, GAME_NAME);
+						MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+						Application.Exit();
+					}
+				}
+
+				// Check for updates
+				this.updater = new Updater(
                     appVersion: gameVersion,
                     updateCompletedCallback: this.LauncherForm_DownloadCompletedCallback,
                     updateProgressCallback: this.LauncherForm_DownloadProgressCallback);
 
-				Task<VersionInfo> gameVersionInfo = this.GetVersionInfo("Giants");
-				Task<VersionInfo> launcherVersionInfo = this.GetVersionInfo("GiantsLauncher");
+				Task<VersionInfo> gameVersionInfo = this.GetVersionInfo(ApplicationNames.Giants);
+				Task<VersionInfo> launcherVersionInfo = this.GetVersionInfo(ApplicationNames.GiantsLauncher);
 
 				await Task.WhenAll(gameVersionInfo, launcherVersionInfo);
 

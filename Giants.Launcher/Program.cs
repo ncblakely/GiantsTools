@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
-using System.Threading;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace Giants.Launcher
 {
@@ -21,7 +20,7 @@ namespace Giants.Launcher
                 if (!mutex.WaitOne(TimeSpan.Zero, true))
                 {
                     // Another instance must be running, switch the first process we find with the same name to the foreground:
-                    string appName = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                    string appName = Process.GetCurrentProcess().MainModule.FileName;
                     Process[] processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(appName));
 
                     Process otherProcess = processes.FirstOrDefault(p => p.Id != Process.GetCurrentProcess().Id);
@@ -37,7 +36,19 @@ namespace Giants.Launcher
 
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new LauncherForm());
+
+                try
+                {
+                    Application.Run(new LauncherForm());
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        text: $"Unable to start launcher: {ex.Message}",
+                        caption: "Fatal Error",
+                        buttons: MessageBoxButtons.OK,
+                        icon: MessageBoxIcon.Error);
+                }
             }
         }
     }
