@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
@@ -10,16 +11,16 @@ namespace Giants.Launcher
 {
     public class Updater
     {
-		private readonly Version appVersion;
+        private readonly IDictionary<ApplicationType, Version> appVersions;
         private readonly AsyncCompletedEventHandler updateCompletedCallback;
 		private readonly DownloadProgressChangedEventHandler updateProgressCallback;
 		
 		public Updater(
-			Version appVersion,
+			IDictionary<ApplicationType, Version> appVersions,
 			AsyncCompletedEventHandler updateCompletedCallback,
 			DownloadProgressChangedEventHandler updateProgressCallback)
 		{
-			this.appVersion = appVersion;
+            this.appVersions = appVersions;
             this.updateCompletedCallback = updateCompletedCallback;
             this.updateProgressCallback = updateProgressCallback;
         }
@@ -28,7 +29,7 @@ namespace Giants.Launcher
         {
 			try
 			{
-				if (this.ToVersion(versionInfo.Version) > this.appVersion)
+				if (this.ToVersion(versionInfo.Version) > this.appVersions[applicationType])
 				{
 					this.StartApplicationUpdate(applicationType, versionInfo);
 				}

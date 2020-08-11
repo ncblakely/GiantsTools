@@ -78,6 +78,7 @@
   <ItemGroup>
     <Compile Include="ApplicationNames.cs" />
     <Compile Include="Updater\ApplicationType.cs" />
+    <Compile Include="VersionHelper.cs" />
     <Compile Include="WindowType.cs" />
     <Compile Include="GameSettings.cs" />
     <Compile Include="ImageButton.cs">

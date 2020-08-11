@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -102,28 +103,25 @@ namespace Giants.Launcher
 
 			if ((int)GameSettings.Get("NoAutoUpdate") == 0)
 			{
-				Version gameVersion = null;
-				try
+				Version gameVersion = VersionHelper.GetGameVersion(this.gamePath);
+				if (gameVersion == null)
 				{
+					string message = string.Format(Resources.AppNotFound, GAME_NAME);
+					MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					Application.Exit();
+				}
 
-					FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(this.gamePath);
-					gameVersion = new Version(fvi.FileVersion.Replace(',', '.'));
-				}
-				finally
+				var appVersions = new Dictionary<ApplicationType, Version>()
 				{
-					if (gameVersion == null)
-					{
-						string message = string.Format(Resources.AppNotFound, GAME_NAME);
-						MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-						Application.Exit();
-					}
-				}
+					[ApplicationType.Game] = gameVersion,
+					[ApplicationType.Launcher] = VersionHelper.GetLauncherVersion()
+				};
 
 				// Check for updates
 				this.updater = new Updater(
-                    appVersion: gameVersion,
-                    updateCompletedCallback: this.LauncherForm_DownloadCompletedCallback,
-                    updateProgressCallback: this.LauncherForm_DownloadProgressCallback);
+				appVersions: appVersions,
+                updateCompletedCallback: this.LauncherForm_DownloadCompletedCallback,
+                updateProgressCallback: this.LauncherForm_DownloadProgressCallback);
 
 				Task<VersionInfo> gameVersionInfo = this.GetVersionInfo(ApplicationNames.Giants);
 				Task<VersionInfo> launcherVersionInfo = this.GetVersionInfo(ApplicationNames.GiantsLauncher);
