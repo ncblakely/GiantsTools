@@ -91,7 +91,7 @@
 		Goto NoDotNET${FrameworkVersion}
 	${Else}
 		DetailPrint ".NET Framework $dotNetReadableVersion${FrameworkVersion} found, no need to install."
-		Goto NoDotNET${FrameworkVersion}
+		Goto NewDotNET${FrameworkVersion}
 	${EndIf}
 
 NoDotNET${FrameworkVersion}:

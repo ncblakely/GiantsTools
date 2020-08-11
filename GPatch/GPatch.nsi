@@ -42,7 +42,7 @@ SetCompressor /SOLID lzma
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "GPatch1_498_177_0.exe"
+OutFile "Output\GPatch1_498_177_0.exe"
 InstallDir "$PROGRAMFILES\Giants\"
 InstallDirRegKey HKCU "SOFTWARE\PlanetMoon\Giants" "DestDir"
 ShowInstDetails hide
@@ -72,7 +72,9 @@ Section
   Delete $INSTDIR\bin\Shaders\*.*
   Delete $INSTDIR\gg_dx7r.dll
   Delete $INSTDIR\gg_dx8r.dll
+  Delete $INSTDIR\gg_dx9r.dll
   Delete $INSTDIR\Giants.exe
+  Delete $INSTDIR\GiantsMain.exe
   Delete $INSTDIR\*.vso
   Delete $INSTDIR\*.pso
   
