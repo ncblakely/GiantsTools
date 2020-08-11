@@ -1,17 +1,18 @@
+Unicode True
 SetCompressor /SOLID lzma
 
 !define PRODUCT_NAME "Giants: Citizen Kabuto"
 !define PRODUCT_VERSION "1.498"
 
 ; MUI 1.67 compatible ------
-!include "MUI.nsh"
+!include "MUI2.nsh"
+!include "DotNetChecker.nsh"
 
 ; MUI Settings
 !define MUI_ABORTWARNING
 !define MUI_ICON "GPatch.ico"
 
 ; Welcome page
-;!insertmacro MUI_PAGE_WELCOME
 ; Directory page
 !insertmacro MUI_PAGE_DIRECTORY
 ; Instfiles page
@@ -35,13 +36,6 @@ SetCompressor /SOLID lzma
 
 ; Language selection settings
 !define MUI_LANGDLL_WINDOWTITLE "Setup Language"
-
-; Language strings
-LangString AskInstallGSA ${LANG_ENGLISH} "The GameSpy Arcade gaming service supports multiplayer matchmaking for Giants: Citizen Kabuto.  Find buddies, download patches, and chat with new opponents online.  Install GameSpy Arcade?"
-LangString AskInstallGSA ${LANG_FRENCH} "Le service de jeu GameSpy Arcade gère désormais les parties multijoueurs de Giants: Citizen Kabuto.  Trouvez des amis, téléchargez des patchs et discustez avec de nouveaux adversaires en ligne.  Installer GameSpy Arcade ?"
-LangString AskInstallGSA ${LANG_GERMAN} "Der 'GameSpy Arcade Gaming Service' unterstützt Multiplayer-Matchmaking für Giants: Citizen Kabuto. Finde Freunde, lade Patches herunter und chatte online mit neuen Gegnern. GameSpy Arcade installieren?"
-LangString AskInstallGSA ${LANG_SPANISH} "Ahora, el servicio de juegos de GameSpy Arcade acepta las partidas multijugador de Giants: Citizen Kabuto. Busca amigos, descarga parches y charla con nuevos rivales conectados. ¿Deseas instalar GameSpy Arcade?"
-LangString AskInstallGSA ${LANG_ITALIAN} "Il servizio giochi di GameSpy Arcade supporta l'abbinamento di più giocatori per Giants: Cittadino Kabuto.  Trova amici, scarica le patch e chatta coi nuovi avversari online.  Installare GameSpy Arcade?"
 
 !include LogicLib.nsh
 
@@ -96,19 +90,21 @@ Section
   
 SectionEnd
 
-!define NETVersion "3.5"
-!define NETInstaller "dotnetfx35setup.exe"
+!define NETVersion "4.7.2"
+!define NETInstallerFileName "NDP472-KB4054531-Web.exe"
+!define NETInstallerPath "Files\Redist\NDP472-KB4054531-Web.exe"
+
 Section "MS .NET Framework v${NETVersion}" SecFramework
   IfFileExists "$WINDIR\Microsoft.NET\Framework\v${NETVersion}" NETFrameworkInstalled 0
-  File /oname=$TEMP\${NETInstaller} "Files\Redist\${NETInstaller}"
-
-  DetailPrint "Starting Microsoft .NET Framework v${NETVersion} Setup..."
-  ExecWait "$TEMP\${NETInstaller}"
+  File /oname=$TEMP\${NETInstallerFileName} "${NETInstallerPath}"
+  
+  !insertmacro CheckNetFramework 472
   Return
 
   NETFrameworkInstalled:
   DetailPrint "Microsoft .NET Framework is already installed!"
 SectionEnd
+
 
 ;--------------------------------
 ;Installer Functions

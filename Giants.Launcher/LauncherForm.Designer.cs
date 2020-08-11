@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LauncherForm));
-            this.btnExit = new Launcher.ImageButton();
-            this.btnOptions = new Launcher.ImageButton();
-            this.btnPlay = new Launcher.ImageButton();
+            this.btnExit = new Giants.Launcher.ImageButton();
+            this.btnOptions = new Giants.Launcher.ImageButton();
+            this.btnPlay = new Giants.Launcher.ImageButton();
             this.updateProgressBar = new System.Windows.Forms.ProgressBar();
             this.txtProgress = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.btnExit)).BeginInit();
@@ -44,11 +44,11 @@
             this.btnExit.BackColor = System.Drawing.Color.Transparent;
             this.btnExit.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnExit.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnExit.DownImage = Resources.exitpush;
-            this.btnExit.HoverImage = Resources.exithover;
+            this.btnExit.DownImage = global::Giants.Launcher.Resources.exitpush;
+            this.btnExit.HoverImage = global::Giants.Launcher.Resources.exithover;
             this.btnExit.Location = new System.Drawing.Point(618, 451);
             this.btnExit.Name = "btnExit";
-            this.btnExit.NormalImage = Resources.exit;
+            this.btnExit.NormalImage = global::Giants.Launcher.Resources.exit;
             this.btnExit.Size = new System.Drawing.Size(100, 50);
             this.btnExit.TabIndex = 8;
             this.btnExit.TabStop = false;
@@ -60,11 +60,11 @@
             this.btnOptions.BackColor = System.Drawing.Color.Transparent;
             this.btnOptions.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnOptions.DialogResult = System.Windows.Forms.DialogResult.None;
-            this.btnOptions.DownImage = Resources.optionspush;
-            this.btnOptions.HoverImage = Resources.optionshover;
+            this.btnOptions.DownImage = global::Giants.Launcher.Resources.optionspush;
+            this.btnOptions.HoverImage = global::Giants.Launcher.Resources.optionshover;
             this.btnOptions.Location = new System.Drawing.Point(618, 395);
             this.btnOptions.Name = "btnOptions";
-            this.btnOptions.NormalImage = Resources.options;
+            this.btnOptions.NormalImage = global::Giants.Launcher.Resources.options;
             this.btnOptions.Size = new System.Drawing.Size(118, 50);
             this.btnOptions.TabIndex = 7;
             this.btnOptions.TabStop = false;
@@ -76,8 +76,8 @@
             this.btnPlay.BackColor = System.Drawing.Color.Transparent;
             this.btnPlay.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnPlay.DialogResult = System.Windows.Forms.DialogResult.None;
-            this.btnPlay.DownImage = Resources.playpush;
-            this.btnPlay.HoverImage = Resources.playhover;
+            this.btnPlay.DownImage = global::Giants.Launcher.Resources.playpush;
+            this.btnPlay.HoverImage = global::Giants.Launcher.Resources.playhover;
             this.btnPlay.Location = new System.Drawing.Point(618, 339);
             this.btnPlay.Name = "btnPlay";
             this.btnPlay.NormalImage = ((System.Drawing.Image)(resources.GetObject("btnPlay.NormalImage")));

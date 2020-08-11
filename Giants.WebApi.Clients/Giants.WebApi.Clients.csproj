@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
@@ -25,9 +25,14 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
   <Target Name="NSwag" AfterTargets="Build">
     <Copy SourceFiles="@(ReferencePath)" DestinationFolder="$(OutDir)References" />
-    <Exec Command="$(NSwagExe_Core31) run nswag.nswag /variables:Configuration=$(Configuration),OutDir=$(OutDir)" />
+    <Exec Command="$(NSwagExe) run nswag.nswag /variables:Configuration=$(Configuration),OutDir=$(OutDir)" />
     <RemoveDir Directories="$(OutDir)References" />
   </Target>
 
