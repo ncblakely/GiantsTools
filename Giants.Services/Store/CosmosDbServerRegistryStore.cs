@@ -20,6 +20,8 @@
         private readonly IDateTimeProvider dateTimeProvider;
         private readonly TimeSpan timeoutPeriod;
         private CosmosDbClient client;
+
+        private const int ServerRefreshIntervalInMinutes = 1;
         
         public CosmosDbServerRegistryStore(
             ILogger<CosmosDbServerRegistryStore> logger,
@@ -104,7 +106,12 @@
 
             if (allServerInfo.ContainsKey(serverInfo.HostIpAddress))
             {
-                if (allServerInfo[serverInfo.HostIpAddress].Equals(serverInfo))
+                ServerInfo existingServerInfo = allServerInfo[serverInfo.HostIpAddress];
+
+                // DDOS protection: skip write to Cosmos if parameters have not changed,
+                // or it's not been long enough.
+                if (existingServerInfo.Equals(serverInfo) 
+                    && Math.Abs((existingServerInfo.LastHeartbeat - serverInfo.LastHeartbeat).TotalMinutes) < ServerRefreshIntervalInMinutes)
                 {
                     this.logger.LogInformation("State for {IPAddress} is unchanged. Skipping write to store.", serverInfo.HostIpAddress);
                     return;
