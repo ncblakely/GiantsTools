@@ -101,7 +101,7 @@ namespace Giants.Launcher
 			// Read game settings from registry
 			GameSettings.Load(this.gamePath);
 
-			if ((int)GameSettings.Get("NoAutoUpdate") == 0)
+			if (GameSettings.Get<int>("NoAutoUpdate") == 0)
 			{
 				Version gameVersion = VersionHelper.GetGameVersion(this.gamePath);
 				if (gameVersion == null)

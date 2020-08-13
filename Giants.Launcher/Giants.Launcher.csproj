@@ -77,6 +77,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationNames.cs" />
+    <Compile Include="Native\Capabilities.cs" />
+    <Compile Include="SettingKeys.cs" />
     <Compile Include="Updater\ApplicationType.cs" />
     <Compile Include="VersionHelper.cs" />
     <Compile Include="WindowType.cs" />

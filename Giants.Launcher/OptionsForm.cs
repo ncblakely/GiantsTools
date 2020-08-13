@@ -28,9 +28,13 @@ namespace Giants.Launcher
             this.cmbRenderer.Items.Clear();
             this.cmbRenderer.Items.AddRange(GameSettings.CompatibleRenderers.ToArray());
 
-			RendererInterop.Capabilities renderer = GameSettings.CompatibleRenderers.Find(r => StringComparer.OrdinalIgnoreCase.Compare(Path.GetFileName(r.FilePath), GameSettings.Get("Renderer")) == 0);
+			RendererInterop.Capabilities renderer = GameSettings.CompatibleRenderers.Find(
+				r => StringComparer.OrdinalIgnoreCase.Compare(Path.GetFileName(r.FilePath), GameSettings.Get<string>("Renderer")) == 0);
+
 			if (renderer != null)
+			{
                 this.cmbRenderer.SelectedItem = renderer;
+			}
 			else
 			{
 				renderer = GameSettings.CompatibleRenderers.Find(r => r.Name == "DirectX 7");
@@ -57,21 +61,28 @@ namespace Giants.Launcher
 
 		private void PopulateAntialiasing()
 		{
-			List<KeyValuePair<string, int>> AntialiasingOptions = new List<KeyValuePair<string, int>>();
-
-			AntialiasingOptions.Add(new KeyValuePair<string, int>("None (Best performance)", 0));
+			var antialiasingOptions = new List<KeyValuePair<string, int>>();
+			antialiasingOptions.Add(new KeyValuePair<string, int>(Resources.OptionNone, 0));
 
 			var renderer = (RendererInterop.Capabilities)this.cmbRenderer.SelectedItem;
 			if (renderer != null)
 			{
-				if ((renderer.Flags & RendererInterop.Capabilities.RendererFlag.MSAA2x) == RendererInterop.Capabilities.RendererFlag.MSAA2x)
-					AntialiasingOptions.Add(new KeyValuePair<string, int>("2 Samples", 2));
-				if ((renderer.Flags & RendererInterop.Capabilities.RendererFlag.MSAA4x) == RendererInterop.Capabilities.RendererFlag.MSAA4x)
-					AntialiasingOptions.Add(new KeyValuePair<string, int>("4 Samples", 4));
-				if ((renderer.Flags & RendererInterop.Capabilities.RendererFlag.MSAA8x) == RendererInterop.Capabilities.RendererFlag.MSAA8x)
-					AntialiasingOptions.Add(new KeyValuePair<string, int>("8 Samples", 8));
-				if ((renderer.Flags & RendererInterop.Capabilities.RendererFlag.MSAA16x) == RendererInterop.Capabilities.RendererFlag.MSAA16x)
-					AntialiasingOptions.Add(new KeyValuePair<string, int>("16 Samples", 16));
+				if (renderer.Flags.HasFlag(RendererInterop.Capabilities.RendererFlag.MSAA2x))
+				{
+					antialiasingOptions.Add(new KeyValuePair<string, int>(string.Format(Resources.OptionSamples, 2), 2));
+				}
+				if (renderer.Flags.HasFlag(RendererInterop.Capabilities.RendererFlag.MSAA4x))
+				{
+					antialiasingOptions.Add(new KeyValuePair<string, int>(string.Format(Resources.OptionSamples, 4), 4));
+				}
+				if (renderer.Flags.HasFlag(RendererInterop.Capabilities.RendererFlag.MSAA8x))
+				{
+					antialiasingOptions.Add(new KeyValuePair<string, int>(string.Format(Resources.OptionSamples, 8), 8));
+				}
+				if (renderer.Flags.HasFlag(RendererInterop.Capabilities.RendererFlag.MSAA16x))
+				{
+					antialiasingOptions.Add(new KeyValuePair<string, int>(string.Format(Resources.OptionSamples, 16), 16));
+				}
 			}
 
 			// Try to keep current selection when repopulating
@@ -81,7 +92,7 @@ namespace Giants.Launcher
 				currentValue = (int)this.cmbAntialiasing.SelectedValue;
 			}
 
-            this.cmbAntialiasing.DataSource = AntialiasingOptions;
+            this.cmbAntialiasing.DataSource = antialiasingOptions;
             this.cmbAntialiasing.DisplayMember = "Key";
             this.cmbAntialiasing.ValueMember = "Value";
 
@@ -101,7 +112,7 @@ namespace Giants.Launcher
 		{
 			List<KeyValuePair<string, int>> AnisotropyOptions = new List<KeyValuePair<string, int>>();
 
-			AnisotropyOptions.Add(new KeyValuePair<string, int>("None (Best performance)", 0));
+			AnisotropyOptions.Add(new KeyValuePair<string, int>(Resources.OptionNone, 0));
 
 			var renderer = (RendererInterop.Capabilities)this.cmbRenderer.SelectedItem;
 			if (renderer != null)
@@ -110,7 +121,7 @@ namespace Giants.Launcher
 				{
 					if (!this.IsPowerOfTwo(i)) continue;
 
-					AnisotropyOptions.Add(new KeyValuePair<string,int>(String.Format("{0} Samples", i), i));
+					AnisotropyOptions.Add(new KeyValuePair<string,int>(string.Format(Resources.OptionSamples, i), i));
 				}
 			}
 

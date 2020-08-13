@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace Giants.Launcher
 {
-    class RendererInterop
+    partial class RendererInterop
     {
 #pragma warning disable 649
         public struct GFXCapabilityInfo
@@ -48,9 +48,9 @@ namespace Giants.Launcher
 
         public static List<Capabilities> GetCompatibleRenderers(string gamePath)
         {
-            DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(gamePath));
-
-            List<Capabilities> Capabilities = new List<Capabilities>();
+            var dir = new DirectoryInfo(
+                Path.GetDirectoryName(gamePath));
+            var capabilities = new List<Capabilities>();
 
             // Search current directory for compatible renderers:
             foreach (FileInfo file in dir.GetFiles("gg_*.dll"))
@@ -58,82 +58,21 @@ namespace Giants.Launcher
                 try
                 {
                     // Make interop call to native renderer DLLs to get capability info
-                    RendererInterop.GFXCapabilityInfo interopCaps = new RendererInterop.GFXCapabilityInfo();
+                    var interopCaps = new RendererInterop.GFXCapabilityInfo();
                     string path = Path.Combine(file.DirectoryName, file.Name);
-                    if (RendererInterop.GetRendererCapabilities(path, ref interopCaps))
+                    if (GetRendererCapabilities(path, ref interopCaps))
                     {
-
                         Capabilities caps = new Capabilities(path, ref interopCaps);
-                        Capabilities.Add(caps);
-                        //cmbRenderer.Items.Add(caps);
+                        capabilities.Add(caps);
                     }
-
-
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message, Resources.Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
-            return Capabilities;
-
-            // Select highest priority renderer
-            //cmbRenderer.SelectedItem = _RendererCaps.Max();
-        }
-
-        public class Capabilities : IComparable
-        {
-            [Flags]
-            public enum RendererFlag
-            {
-                LowBitDepthAllowed = 0x1,
-
-                // Multisampling support flags:
-                MSAA2x = 0x2,
-                MSAA4x = 0x4,
-                MSAA8x = 0x8,
-                MSAA16x = 0x10,
-
-                // Other options:
-                VSync = 0x20,
-                TripleBuffer = 0x40,
-
-
-            };
-
-            public Capabilities(string filePath, ref RendererInterop.GFXCapabilityInfo gfxCaps)
-            {
-                this.FilePath = filePath;
-                this.FileName = Path.GetFileName(filePath);
-                this.MaxAnisotropy = gfxCaps.maxAnisotropy;
-                this.Flags = (RendererFlag)gfxCaps.flags;
-                this.Priority = gfxCaps.priority;
-                this.Name = gfxCaps.rendererName;
-            }
-
-            public override string ToString()
-            {
-                return string.Format("{0} ({1})", this.Name, Path.GetFileName(this.FilePath));
-            }
-
-            public int CompareTo(object obj)
-            {
-                if (obj == null) return 1;
-
-                Capabilities other = obj as Capabilities;
-                if (other != null)
-                    return this.Priority.CompareTo(other.Priority);
-                else
-                    throw new ArgumentException();
-            }
-
-            public string FilePath { get; private set; }
-            public string FileName { get; private set; }
-            public int MaxAnisotropy { get; private set; }
-            public RendererFlag Flags { get; private set; }
-            public int Priority { get; private set; }
-            public string Name { get; private set; }
+            return capabilities;
         }
     }
 }

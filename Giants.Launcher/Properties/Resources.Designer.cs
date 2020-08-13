@@ -89,6 +89,42 @@ namespace Giants.Launcher {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        internal static string Error {
+            get {
+                return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not locate any renderers compatible with your system. The most compatible renderer has been selected, but you may experience difficulty running the game..
+        /// </summary>
+        internal static string ErrorNoRenderers {
+            get {
+                return ResourceManager.GetString("ErrorNoRenderers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not read game settings!\n\nReason: {0}.
+        /// </summary>
+        internal static string ErrorSettingsLoad {
+            get {
+                return ResourceManager.GetString("ErrorSettingsLoad", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not save game settings!\n\nReason: {0}.
+        /// </summary>
+        internal static string ErrorSettingsSave {
+            get {
+                return ResourceManager.GetString("ErrorSettingsSave", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap exit {
@@ -137,6 +173,15 @@ namespace Giants.Launcher {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to start launcher: {0}.
+        /// </summary>
+        internal static string LauncherFatalError {
+            get {
+                return ResourceManager.GetString("LauncherFatalError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
         /// </summary>
         internal static System.IO.UnmanagedMemoryStream LauncherStart {
@@ -155,12 +200,30 @@ namespace Giants.Launcher {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to None (Best performance).
+        /// </summary>
+        internal static string OptionNone {
+            get {
+                return ResourceManager.GetString("OptionNone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap options {
             get {
                 object obj = ResourceManager.GetObject("options", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} Samples.
+        /// </summary>
+        internal static string OptionSamples {
+            get {
+                return ResourceManager.GetString("OptionSamples", resourceCulture);
             }
         }
         

@@ -37,18 +37,26 @@ namespace Giants.Launcher
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
+
+                Form form;
                 try
                 {
-                    Application.Run(new LauncherForm());
+                    form = new LauncherForm();
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(
-                        text: $"Unable to start launcher: {ex.Message}",
-                        caption: "Fatal Error",
+                        text: string.Format(Resources.LauncherFatalError, ex.Message),
+                        caption: Resources.Error,
                         buttons: MessageBoxButtons.OK,
                         icon: MessageBoxIcon.Error);
+
+                    Application.Exit();
+                    return;
                 }
+
+                Application.Run(form);
+
             }
         }
     }

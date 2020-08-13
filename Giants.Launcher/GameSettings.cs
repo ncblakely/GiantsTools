@@ -10,21 +10,29 @@ namespace Giants.Launcher
     static class GameSettings
     {
         // Constants
-        private const string REGISTRY_KEY = @"HKEY_CURRENT_USER\Software\PlanetMoon\Giants";
-        private const int OPTIONS_VERSION = 3;
+        private const string RegistryKey = @"HKEY_CURRENT_USER\Software\PlanetMoon\Giants";
+        private const int OptionsVersion = 3;
 
         private static readonly Dictionary<string, object> Settings = new Dictionary<string, object>();
 
         // List of renderers compatible with the user's system.
-        static public List<RendererInterop.Capabilities> CompatibleRenderers;
+        public static List<RendererInterop.Capabilities> CompatibleRenderers;
+
+        public static T Get<T>(string settingName)
+        {
+            return (T)Get(settingName);
+        }
 
         public static object Get(string settingName)
         {
             if (Settings.ContainsKey(settingName))
+            {
                 return Settings[settingName];
+            }
             else
+            { 
                 return 0;
-
+            }
         }
 
         public static void Modify(string settingName, object settingValue)
@@ -35,17 +43,15 @@ namespace Giants.Launcher
         public static void SetDefaults(string gamePath)
         {
             // Set default settings:
-            Settings["Renderer"] = "gg_dx7r.dll";
-            Settings["Antialiasing"] = 0;
-            Settings["AnisotropicFiltering"] = 0;
-            Settings["VideoWidth"] = 640;
-            Settings["VideoHeight"] = 480;
-            Settings["VideoDepth"] = 32;
-            Settings["Windowed"] = 0;
-            Settings["BorderlessWindow"] = 0;
-            Settings["VerticalSync"] = 1;
-            Settings["TripleBuffering"] = 1;
-            Settings["NoAutoUpdate"] = 0;
+            Settings[SettingKeys.Renderer] = "gg_dx7r.dll";
+            Settings[SettingKeys.Antialiasing] = 0;
+            Settings[SettingKeys.AnisotropicFiltering] = 0;
+            Settings[SettingKeys.VideoDepth] = 32;
+            Settings[SettingKeys.Windowed] = 0;
+            Settings[SettingKeys.BorderlessWindow] = 0;
+            Settings[SettingKeys.VerticalSync] = 1;
+            Settings[SettingKeys.TripleBuffering] = 1;
+            Settings[SettingKeys.NoAutoUpdate] = 0;
 
             // Get a list of renderers compatible with the user's system
             if (CompatibleRenderers == null)
@@ -54,44 +60,51 @@ namespace Giants.Launcher
                 if (CompatibleRenderers.Count == 0)
                 {
                     MessageBox.Show(
-                        "Could not locate any renderers compatible with your system. " +
-                        "The most compatible renderer has been selected, but you may experience difficulty running the game.",
-                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        text: Resources.ErrorNoRenderers,
+                        caption: Resources.Error,
+                        buttons: MessageBoxButtons.OK,
+                        icon: MessageBoxIcon.Error);
                 }
             }
 
             // Select the highest priority renderer
-            if (CompatibleRenderers.Count > 0)
-                Settings["Renderer"] = Path.GetFileName(CompatibleRenderers.Max().FilePath);
+            if (CompatibleRenderers.Any())
+            {
+                Settings[SettingKeys.Renderer] = Path.GetFileName(CompatibleRenderers.Max().FilePath);
+            }
 
             // Set the current desktop resolution, leaving bit depth at the default 32:
-            Settings["VideoWidth"] = Screen.PrimaryScreen.Bounds.Width;
-            Settings["VideoHeight"] = Screen.PrimaryScreen.Bounds.Height;
+            Settings[SettingKeys.VideoWidth] = Screen.PrimaryScreen.Bounds.Width;
+            Settings[SettingKeys.VideoHeight] = Screen.PrimaryScreen.Bounds.Height;
         }
 
         public static void Load(string gamePath)
         {
             SetDefaults(gamePath);
 
-            if ((int)Registry.GetValue(REGISTRY_KEY, "GameOptionsVersion", 0) == OPTIONS_VERSION)
+            if ((int)Registry.GetValue(RegistryKey, SettingKeys.GameOptionsVersion, 0) == OptionsVersion)
             {
                 try
                 {
-                    Settings["Renderer"] = RegistryExtensions.GetValue(REGISTRY_KEY, "Renderer", Settings["Renderer"], typeof(string));
-                    Settings["Antialiasing"] = RegistryExtensions.GetValue(REGISTRY_KEY, "Antialiasing", Settings["Antialiasing"], typeof(int));
-                    Settings["AnisotropicFiltering"] = RegistryExtensions.GetValue(REGISTRY_KEY, "AnisotropicFiltering", Settings["AnisotropicFiltering"], typeof(int));
-                    Settings["VideoWidth"] = RegistryExtensions.GetValue(REGISTRY_KEY, "VideoWidth", Settings["VideoWidth"], typeof(int));
-                    Settings["VideoHeight"] = RegistryExtensions.GetValue(REGISTRY_KEY, "VideoHeight", Settings["VideoHeight"], typeof(int));
-                    Settings["VideoDepth"] = RegistryExtensions.GetValue(REGISTRY_KEY, "VideoDepth", Settings["VideoDepth"], typeof(int));
-                    Settings["Windowed"] = RegistryExtensions.GetValue(REGISTRY_KEY, "Windowed", Settings["Windowed"], typeof(int));
-                    Settings["BorderlessWindow"] = RegistryExtensions.GetValue(REGISTRY_KEY, "BorderlessWindow", Settings["BorderlessWindow"], typeof(int));
-                    Settings["VerticalSync"] = RegistryExtensions.GetValue(REGISTRY_KEY, "VerticalSync", Settings["VerticalSync"], typeof(int));
-                    Settings["TripleBuffering"] = RegistryExtensions.GetValue(REGISTRY_KEY, "TripleBuffering", Settings["TripleBuffering"], typeof(int));
-                    Settings["NoAutoUpdate"] = RegistryExtensions.GetValue(REGISTRY_KEY, "NoAutoUpdate", Settings["NoAutoUpdate"], typeof(int));
+                    Settings[SettingKeys.Renderer] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.Renderer, SettingKeys.Renderer, typeof(string));
+                    Settings[SettingKeys.Antialiasing] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.Antialiasing, Settings[SettingKeys.Antialiasing], typeof(int));
+                    Settings[SettingKeys.AnisotropicFiltering] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.AnisotropicFiltering, Settings[SettingKeys.AnisotropicFiltering], typeof(int));
+                    Settings[SettingKeys.VideoWidth] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.VideoWidth, Settings[SettingKeys.VideoWidth], typeof(int));
+                    Settings[SettingKeys.VideoHeight] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.VideoHeight, Settings[SettingKeys.VideoHeight], typeof(int));
+                    Settings[SettingKeys.VideoDepth] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.VideoDepth, Settings[SettingKeys.VideoDepth], typeof(int));
+                    Settings[SettingKeys.Windowed] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.Windowed, Settings[SettingKeys.Windowed], typeof(int));
+                    Settings[SettingKeys.BorderlessWindow] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.BorderlessWindow, Settings[SettingKeys.BorderlessWindow], typeof(int));
+                    Settings[SettingKeys.VerticalSync] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.VerticalSync, Settings[SettingKeys.VerticalSync], typeof(int));
+                    Settings[SettingKeys.TripleBuffering] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.TripleBuffering, Settings[SettingKeys.TripleBuffering], typeof(int));
+                    Settings[SettingKeys.NoAutoUpdate] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.NoAutoUpdate, Settings[SettingKeys.NoAutoUpdate], typeof(int));
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(string.Format("Could not read game settings from registry!\n\nReason: {0}", ex.Message));
+                    MessageBox.Show(
+                        text: string.Format(Resources.ErrorSettingsLoad, ex.Message),
+                        caption: Resources.Error,
+                        buttons: MessageBoxButtons.OK,
+                        icon: MessageBoxIcon.Error);
                 }
             }
         }
@@ -100,22 +113,26 @@ namespace Giants.Launcher
         {
             try
             {
-                Registry.SetValue(REGISTRY_KEY, "GameOptionsVersion", 3, RegistryValueKind.DWord);
-                Registry.SetValue(REGISTRY_KEY, "Renderer", Settings["Renderer"], RegistryValueKind.String);
-                Registry.SetValue(REGISTRY_KEY, "Antialiasing", Settings["Antialiasing"], RegistryValueKind.DWord);
-                Registry.SetValue(REGISTRY_KEY, "AnisotropicFiltering", Settings["AnisotropicFiltering"], RegistryValueKind.DWord);
-                Registry.SetValue(REGISTRY_KEY, "VideoWidth", Settings["VideoWidth"], RegistryValueKind.DWord);
-                Registry.SetValue(REGISTRY_KEY, "VideoHeight", Settings["VideoHeight"], RegistryValueKind.DWord);
-                Registry.SetValue(REGISTRY_KEY, "VideoDepth", Settings["VideoDepth"], RegistryValueKind.DWord);
-                Registry.SetValue(REGISTRY_KEY, "Windowed", Settings["Windowed"], RegistryValueKind.DWord);
-                Registry.SetValue(REGISTRY_KEY, "BorderlessWindow", Settings["BorderlessWindow"], RegistryValueKind.DWord);
-                Registry.SetValue(REGISTRY_KEY, "VerticalSync", Settings["VerticalSync"], RegistryValueKind.DWord);
-                Registry.SetValue(REGISTRY_KEY, "TripleBuffering", Settings["TripleBuffering"], RegistryValueKind.DWord);
-                Registry.SetValue(REGISTRY_KEY, "NoAutoUpdate", Settings["NoAutoUpdate"], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, SettingKeys.GameOptionsVersion, OptionsVersion, RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, SettingKeys.Renderer, Settings[SettingKeys.Renderer], RegistryValueKind.String);
+                Registry.SetValue(RegistryKey, SettingKeys.Antialiasing, Settings[SettingKeys.Antialiasing], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, SettingKeys.AnisotropicFiltering, Settings[SettingKeys.AnisotropicFiltering], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, SettingKeys.VideoWidth, Settings[SettingKeys.VideoWidth], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, SettingKeys.VideoHeight, Settings[SettingKeys.VideoHeight], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, SettingKeys.VideoDepth, Settings[SettingKeys.VideoDepth], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, SettingKeys.Windowed, Settings[SettingKeys.Windowed], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, SettingKeys.BorderlessWindow, Settings[SettingKeys.BorderlessWindow], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, SettingKeys.VerticalSync, Settings[SettingKeys.VerticalSync], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, SettingKeys.TripleBuffering, Settings[SettingKeys.TripleBuffering], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, SettingKeys.NoAutoUpdate, Settings[SettingKeys.NoAutoUpdate], RegistryValueKind.DWord);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format("Could not save game settings to registry!\n\nReason: {0}", ex.Message));
+                MessageBox.Show(
+                    text: string.Format(Resources.ErrorSettingsSave, ex.Message),
+                    caption: Resources.Error,
+                    buttons: MessageBoxButtons.OK,
+                    icon: MessageBoxIcon.Error);
             }
         }
     }
