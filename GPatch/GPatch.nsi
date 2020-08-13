@@ -1,11 +1,10 @@
-Unicode True
 SetCompressor /SOLID lzma
 
 !define PRODUCT_NAME "Giants: Citizen Kabuto"
 !define PRODUCT_VERSION "1.498"
 
 ; MUI 1.67 compatible ------
-!include "MUI2.nsh"
+!include "MUI.nsh"
 !include "DotNetChecker.nsh"
 
 ; MUI Settings
@@ -42,7 +41,7 @@ SetCompressor /SOLID lzma
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "Output\GPatch1_498_177_0.exe"
+OutFile "Output\GPatch1_498_178_0.exe"
 InstallDir "$PROGRAMFILES\Giants\"
 InstallDirRegKey HKCU "SOFTWARE\PlanetMoon\Giants" "DestDir"
 ShowInstDetails hide
@@ -89,6 +88,33 @@ Section
   Delete $INSTDIR\bin\mappack1.gzp
   Delete $INSTDIR\bin\A-GRM1.gzp
   
+  ; Remove multiplayer map files that moved to the .gck format
+  Delete $INSTDIR\bin\w_M_3WAY_L1.abx
+  Delete $INSTDIR\bin\w_M_3WAY_L1.bin
+  Delete $INSTDIR\bin\w_M_3WAY_L2.abx
+  Delete $INSTDIR\bin\w_M_3WAY_L2.bin
+  Delete $INSTDIR\bin\w_M_3WAY_L3.abx
+  Delete $INSTDIR\bin\w_M_3WAY_L3.bin
+  Delete $INSTDIR\bin\w_M_3WAY_Lw1.abx
+  Delete $INSTDIR\bin\w_M_3WAY_Lw1.bin
+  Delete $INSTDIR\bin\w_M_Mecc_L1.abx
+  Delete $INSTDIR\bin\w_M_Mecc_L1.bin
+  Delete $INSTDIR\bin\w_M_Mecc_L2.abx
+  Delete $INSTDIR\bin\w_M_Mecc_L2.bin
+  Delete $INSTDIR\bin\w_M_Mecc_L3.abx
+  Delete $INSTDIR\bin\w_M_Mecc_L3.bin
+  Delete $INSTDIR\bin\w_M_Mecc_L6.abx
+  Delete $INSTDIR\bin\w_M_Mecc_L6.bin
+  Delete $INSTDIR\bin\w_M_Mecc_Lw1.abx
+  Delete $INSTDIR\bin\w_M_Mecc_Lw1.bin
+  Delete $INSTDIR\bin\w_M_Reaper_L1.abx
+  Delete $INSTDIR\bin\w_M_Reaper_L1.bin
+  Delete $INSTDIR\bin\w_M_Reaper_L2.abx
+  Delete $INSTDIR\bin\w_M_Reaper_L2.bin
+  Delete $INSTDIR\bin\w_M_Reaper_L3.abx
+  Delete $INSTDIR\bin\w_M_Reaper_L3.bin
+  Delete $INSTDIR\bin\w_M_Reaper_Lw1.abx
+  Delete $INSTDIR\bin\w_M_Reaper_Lw1.bin
   
 SectionEnd
 
