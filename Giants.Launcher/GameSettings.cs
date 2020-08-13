@@ -7,7 +7,7 @@ using Microsoft.Win32;
 
 namespace Giants.Launcher
 {
-    static class GameSettings
+    public static class GameSettings
     {
         // Constants
         private const string RegistryKey = @"HKEY_CURRENT_USER\Software\PlanetMoon\Giants";
@@ -16,8 +16,8 @@ namespace Giants.Launcher
         private static readonly Dictionary<string, object> Settings = new Dictionary<string, object>();
 
         // List of renderers compatible with the user's system.
-        public static List<RendererInterop.Capabilities> CompatibleRenderers;
-
+        public static List<RendererInfo> CompatibleRenderers { get; set; } = new List<RendererInfo>();
+            
         public static T Get<T>(string settingName)
         {
             return (T)Get(settingName);
@@ -54,10 +54,10 @@ namespace Giants.Launcher
             Settings[SettingKeys.NoAutoUpdate] = 0;
 
             // Get a list of renderers compatible with the user's system
-            if (CompatibleRenderers == null)
+            if (!CompatibleRenderers.Any())
             {
                 CompatibleRenderers = RendererInterop.GetCompatibleRenderers(gamePath);
-                if (CompatibleRenderers.Count == 0)
+                if (!CompatibleRenderers.Any())
                 {
                     MessageBox.Show(
                         text: Resources.ErrorNoRenderers,

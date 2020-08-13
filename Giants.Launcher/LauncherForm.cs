@@ -234,7 +234,7 @@ namespace Giants.Launcher
 			UpdateInfo info = (UpdateInfo)e.UserState;
 
             this.txtProgress.Visible = true;
-            this.txtProgress.Text = string.Format(Resources.DownloadProgress, e.ProgressPercentage, (info.FileSize / 1024) / 1024);
+            this.txtProgress.Text = string.Format(Resources.DownloadProgress, e.ProgressPercentage, info.FileSize / 1024 / 1024);
 		}
 	}
 }

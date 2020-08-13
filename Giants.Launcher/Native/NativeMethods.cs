@@ -29,9 +29,6 @@ namespace Giants.Launcher
         [DllImport("user32.dll")]
         public static extern bool EnumDisplaySettings(
               string deviceName, int modeNum, ref DEVMODE devMode);
-        const int ENUM_CURRENT_SETTINGS = -1;
-
-        const int ENUM_REGISTRY_SETTINGS = -2;
 
         [StructLayout(LayoutKind.Sequential)]
         public struct DEVMODE

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Giants.Launcher
@@ -26,10 +27,14 @@ namespace Giants.Launcher
 		private void SetOptions()
 		{
             this.cmbRenderer.Items.Clear();
-            this.cmbRenderer.Items.AddRange(GameSettings.CompatibleRenderers.ToArray());
+            this.cmbRenderer.Items.AddRange(
+				GameSettings.CompatibleRenderers
+					.Disambiguate()
+					.ToList()
+					.ToArray());
 
-			RendererInterop.Capabilities renderer = GameSettings.CompatibleRenderers.Find(
-				r => StringComparer.OrdinalIgnoreCase.Compare(Path.GetFileName(r.FilePath), GameSettings.Get<string>("Renderer")) == 0);
+			RendererInfo renderer = GameSettings.CompatibleRenderers.Find(
+				r => StringComparer.OrdinalIgnoreCase.Compare(Path.GetFileName(r.FilePath), GameSettings.Get<string>(SettingKeys.Renderer)) == 0);
 
 			if (renderer != null)
 			{
@@ -41,22 +46,22 @@ namespace Giants.Launcher
                 this.cmbRenderer.SelectedItem = renderer;
 			}
 
-			var Resolutions = (List<ScreenResolution>)this.cmbResolution.DataSource;
-            this.cmbResolution.SelectedItem = Resolutions.Find(r => r.Width == (int)GameSettings.Get("VideoWidth") && r.Height == (int)GameSettings.Get("VideoHeight"));
+			var resolutions = (List<ScreenResolution>)this.cmbResolution.DataSource;
+            this.cmbResolution.SelectedItem = resolutions.Find(r => r.Width == GameSettings.Get<int>(SettingKeys.VideoWidth) && r.Height == GameSettings.Get<int>(SettingKeys.VideoHeight));
 			if (this.cmbResolution.SelectedItem == null)
                 this.cmbResolution.SelectedIndex = 0;
 
 			var AntialiasingOptions = (List<KeyValuePair<string, int>>)this.cmbAntialiasing.DataSource;
-            this.cmbAntialiasing.SelectedItem = AntialiasingOptions.Find(o => o.Value == (int)GameSettings.Get("Antialiasing"));
+            this.cmbAntialiasing.SelectedItem = AntialiasingOptions.Find(o => o.Value == GameSettings.Get<int>(SettingKeys.Antialiasing));
 			if (this.cmbAntialiasing.SelectedItem == null)
                 this.cmbAntialiasing.SelectedIndex = 0;
 
 			var AnisotropyOptions = (List<KeyValuePair<string, int>>)this.cmbAnisotropy.DataSource;
-            this.cmbAnisotropy.SelectedItem = AnisotropyOptions.Find(o => o.Value == (int)GameSettings.Get("AnisotropicFiltering"));
+            this.cmbAnisotropy.SelectedItem = AnisotropyOptions.Find(o => o.Value == GameSettings.Get<int>(SettingKeys.AnisotropicFiltering));
 			if (this.cmbAnisotropy.SelectedItem == null)
                 this.cmbAnisotropy.SelectedIndex = 0;
 
-            this.chkUpdates.Checked = ((int)GameSettings.Get("NoAutoUpdate") == 1 ? false : true);
+            this.chkUpdates.Checked = GameSettings.Get<int>(SettingKeys.NoAutoUpdate) != 1;
 		}
 
 		private void PopulateAntialiasing()
@@ -64,22 +69,22 @@ namespace Giants.Launcher
 			var antialiasingOptions = new List<KeyValuePair<string, int>>();
 			antialiasingOptions.Add(new KeyValuePair<string, int>(Resources.OptionNone, 0));
 
-			var renderer = (RendererInterop.Capabilities)this.cmbRenderer.SelectedItem;
+			var renderer = (RendererInfo)this.cmbRenderer.SelectedItem;
 			if (renderer != null)
 			{
-				if (renderer.Flags.HasFlag(RendererInterop.Capabilities.RendererFlag.MSAA2x))
+				if (renderer.Flags.HasFlag(RendererInfo.RendererFlag.MSAA2x))
 				{
 					antialiasingOptions.Add(new KeyValuePair<string, int>(string.Format(Resources.OptionSamples, 2), 2));
 				}
-				if (renderer.Flags.HasFlag(RendererInterop.Capabilities.RendererFlag.MSAA4x))
+				if (renderer.Flags.HasFlag(RendererInfo.RendererFlag.MSAA4x))
 				{
 					antialiasingOptions.Add(new KeyValuePair<string, int>(string.Format(Resources.OptionSamples, 4), 4));
 				}
-				if (renderer.Flags.HasFlag(RendererInterop.Capabilities.RendererFlag.MSAA8x))
+				if (renderer.Flags.HasFlag(RendererInfo.RendererFlag.MSAA8x))
 				{
 					antialiasingOptions.Add(new KeyValuePair<string, int>(string.Format(Resources.OptionSamples, 8), 8));
 				}
-				if (renderer.Flags.HasFlag(RendererInterop.Capabilities.RendererFlag.MSAA16x))
+				if (renderer.Flags.HasFlag(RendererInfo.RendererFlag.MSAA16x))
 				{
 					antialiasingOptions.Add(new KeyValuePair<string, int>(string.Format(Resources.OptionSamples, 16), 16));
 				}
@@ -110,18 +115,17 @@ namespace Giants.Launcher
 
 		private void PopulateAnisotropy()
 		{
-			List<KeyValuePair<string, int>> AnisotropyOptions = new List<KeyValuePair<string, int>>();
+			var anisotropyOptions = new List<KeyValuePair<string, int>>();
+			anisotropyOptions.Add(new KeyValuePair<string, int>(Resources.OptionNone, 0));
 
-			AnisotropyOptions.Add(new KeyValuePair<string, int>(Resources.OptionNone, 0));
-
-			var renderer = (RendererInterop.Capabilities)this.cmbRenderer.SelectedItem;
+			var renderer = (RendererInfo)this.cmbRenderer.SelectedItem;
 			if (renderer != null)
 			{
 				for (int i = 2; i <= renderer.MaxAnisotropy; i++)
 				{
 					if (!this.IsPowerOfTwo(i)) continue;
 
-					AnisotropyOptions.Add(new KeyValuePair<string,int>(string.Format(Resources.OptionSamples, i), i));
+					anisotropyOptions.Add(new KeyValuePair<string,int>(string.Format(Resources.OptionSamples, i), i));
 				}
 			}
 
@@ -132,7 +136,7 @@ namespace Giants.Launcher
 				currentValue = (int)this.cmbAnisotropy.SelectedValue;
 			}
 
-            this.cmbAnisotropy.DataSource = AnisotropyOptions;
+            this.cmbAnisotropy.DataSource = anisotropyOptions;
             this.cmbAnisotropy.DisplayMember = "Key";
             this.cmbAnisotropy.ValueMember = "Value";
 
@@ -168,10 +172,10 @@ namespace Giants.Launcher
             this.PopulateAntialiasing();
             this.PopulateAnisotropy();
 
-			bool windowed = ((int)GameSettings.Get("Windowed") == 1 ? true : false);
+			bool windowed = GameSettings.Get<int>(SettingKeys.Windowed) == 1;
 			if (windowed)
 			{
-				bool borderless = (int)GameSettings.Get("BorderlessWindow") == 1 ? true : false;
+				bool borderless = GameSettings.Get<int>(SettingKeys.BorderlessWindow) == 1;
 				if (borderless)
                     this.cmbMode.SelectedIndex = 2;
 				else
@@ -180,55 +184,55 @@ namespace Giants.Launcher
 			else
                 this.cmbMode.SelectedIndex = 0;
 
-			var renderer = (RendererInterop.Capabilities)this.cmbRenderer.SelectedItem;
+			var renderer = (RendererInfo)this.cmbRenderer.SelectedItem;
 
-			if ((renderer.Flags & RendererInterop.Capabilities.RendererFlag.VSync) != RendererInterop.Capabilities.RendererFlag.VSync)
+			if ((renderer.Flags & RendererInfo.RendererFlag.VSync) != RendererInfo.RendererFlag.VSync)
 			{
                 this.chkVSync.Checked = false;
                 this.chkVSync.Enabled = false;
 			}
 			else
 			{
-                this.chkVSync.Checked = ((int)GameSettings.Get("VerticalSync") == 1 ? true : false);
+                this.chkVSync.Checked = GameSettings.Get<int>(SettingKeys.VerticalSync) == 1;
                 this.chkVSync.Enabled = true;
 			}
 
-			if ((renderer.Flags & RendererInterop.Capabilities.RendererFlag.TripleBuffer) != RendererInterop.Capabilities.RendererFlag.TripleBuffer)
+			if ((renderer.Flags & RendererInfo.RendererFlag.TripleBuffer) != RendererInfo.RendererFlag.TripleBuffer)
 			{
                 this.chkTripleBuffering.Checked = false;
                 this.chkTripleBuffering.Enabled = false;
 			}
 			else
 			{
-                this.chkTripleBuffering.Checked = ((int)GameSettings.Get("TripleBuffering") == 1 ? true : false);
+                this.chkTripleBuffering.Checked = GameSettings.Get<int>(SettingKeys.TripleBuffering) == 1;
                 this.chkTripleBuffering.Enabled = true;
 			}
 		}
 
 		private void btnOK_Click(object sender, EventArgs e)
 		{
-			var renderer = this.cmbRenderer.SelectedItem as RendererInterop.Capabilities;
+			var renderer = this.cmbRenderer.SelectedItem as RendererInfo;
 			if (renderer != null)
 			{
-				GameSettings.Modify("Renderer", renderer.FileName);
+				GameSettings.Modify(SettingKeys.Renderer, renderer.FileName);
 			}
 
 			var resolution = (ScreenResolution)this.cmbResolution.SelectedItem;
 			if (resolution != null)
 			{
-				GameSettings.Modify("VideoWidth", resolution.Width);
-				GameSettings.Modify("VideoHeight", resolution.Height);
+				GameSettings.Modify(SettingKeys.VideoWidth, resolution.Width);
+				GameSettings.Modify(SettingKeys.VideoHeight, resolution.Height);
 			}
 
-			GameSettings.Modify("Antialiasing", this.cmbAntialiasing.SelectedValue);
-			GameSettings.Modify("AnisotropicFiltering", this.cmbAnisotropy.SelectedValue);
-			bool windowed = ((WindowType)this.cmbMode.SelectedIndex == WindowType.Windowed || (WindowType)this.cmbMode.SelectedIndex == WindowType.Borderless);
-			GameSettings.Modify("Windowed", (windowed  == true ? 1 : 0));
+			GameSettings.Modify(SettingKeys.Antialiasing, this.cmbAntialiasing.SelectedValue);
+			GameSettings.Modify(SettingKeys.AnisotropicFiltering, this.cmbAnisotropy.SelectedValue);
+			bool windowed = (WindowType)this.cmbMode.SelectedIndex == WindowType.Windowed || (WindowType)this.cmbMode.SelectedIndex == WindowType.Borderless;
+			GameSettings.Modify(SettingKeys.Windowed, windowed  == true ? 1 : 0);
 			bool borderless = (WindowType)this.cmbMode.SelectedIndex == WindowType.Borderless;
-			GameSettings.Modify("BorderlessWindow", borderless == true ? 1 : 0);
-			GameSettings.Modify("VerticalSync", (this.chkVSync.Checked == true ? 1 : 0));
-			GameSettings.Modify("TripleBuffering", (this.chkTripleBuffering.Checked == true ? 1 : 0));
-			GameSettings.Modify("NoAutoUpdate", (this.chkUpdates.Checked == false ? 1 : 0));
+			GameSettings.Modify(SettingKeys.BorderlessWindow, borderless == true ? 1 : 0);
+			GameSettings.Modify(SettingKeys.VerticalSync, this.chkVSync.Checked == true ? 1 : 0);
+			GameSettings.Modify(SettingKeys.TripleBuffering, this.chkTripleBuffering.Checked == true ? 1 : 0);
+			GameSettings.Modify(SettingKeys.NoAutoUpdate, this.chkUpdates.Checked == false ? 1 : 0);
 
 			GameSettings.Save();
 

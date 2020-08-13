@@ -37,7 +37,6 @@ namespace Giants.Launcher
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
-
                 Form form;
                 try
                 {

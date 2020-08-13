@@ -77,7 +77,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationNames.cs" />
-    <Compile Include="Native\Capabilities.cs" />
+    <Compile Include="Renderer\RendererInfo.cs" />
+    <Compile Include="Renderer\RenderInfoExtensions.cs" />
     <Compile Include="SettingKeys.cs" />
     <Compile Include="Updater\ApplicationType.cs" />
     <Compile Include="VersionHelper.cs" />

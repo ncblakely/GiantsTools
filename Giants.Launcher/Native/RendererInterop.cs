@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace Giants.Launcher
 {
-    partial class RendererInterop
+    public class RendererInterop
     {
 #pragma warning disable 649
         public struct GFXCapabilityInfo
@@ -46,11 +46,11 @@ namespace Giants.Launcher
         }
 
 
-        public static List<Capabilities> GetCompatibleRenderers(string gamePath)
+        public static List<RendererInfo> GetCompatibleRenderers(string gamePath)
         {
             var dir = new DirectoryInfo(
                 Path.GetDirectoryName(gamePath));
-            var capabilities = new List<Capabilities>();
+            var capabilities = new List<RendererInfo>();
 
             // Search current directory for compatible renderers:
             foreach (FileInfo file in dir.GetFiles("gg_*.dll"))
@@ -62,7 +62,7 @@ namespace Giants.Launcher
                     string path = Path.Combine(file.DirectoryName, file.Name);
                     if (GetRendererCapabilities(path, ref interopCaps))
                     {
-                        Capabilities caps = new Capabilities(path, ref interopCaps);
+                        RendererInfo caps = new RendererInfo(path, ref interopCaps);
                         capabilities.Add(caps);
                     }
                 }
