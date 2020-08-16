@@ -1,6 +1,7 @@
 ﻿namespace Giants.Services
 {
     using Giants.Services.Core;
+    using Giants.Services.Services;
     using Giants.Services.Store;
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
@@ -16,6 +17,7 @@
             services.AddSingleton<IMemoryCache, MemoryCache>();
             services.AddSingleton<IUpdaterStore, CosmosDbUpdaterStore>();
             services.AddSingleton<IUpdaterService, UpdaterService>();
+            services.AddSingleton<IDiscordService, DiscordService>();
 
             services.AddHostedService<InitializerService>();
             services.AddHostedService<ServerRegistryCleanupService>();

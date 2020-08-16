@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class ServerInfo : DataContract.ServerInfo, IIdentifiable
+    public class ServerInfo : DataContract.V1.ServerInfo, IIdentifiable
     {
         public string id => this.HostIpAddress;
 

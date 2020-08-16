@@ -2,7 +2,7 @@
 
 namespace Giants.Services
 {
-    public class VersionInfo : DataContract.VersionInfo, IIdentifiable
+    public class VersionInfo : DataContract.V1.VersionInfo, IIdentifiable
     {
         public string id => GenerateId(this.AppName);
 

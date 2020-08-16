@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Giants.DataContract
+namespace Giants.DataContract.V1
 {
     public class PlayerInfo
     {

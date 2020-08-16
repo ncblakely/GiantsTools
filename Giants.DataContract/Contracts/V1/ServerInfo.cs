@@ -1,4 +1,4 @@
-﻿namespace Giants.DataContract
+﻿namespace Giants.DataContract.V1
 {
     using System;
     using System.Collections.Generic;

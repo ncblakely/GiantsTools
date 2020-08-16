@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using AutoMapper;
-using Giants.DataContract;
 using Giants.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,11 +21,11 @@ namespace Giants.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<DataContract.VersionInfo> GetVersionInfo(string appName)
+        public async Task<DataContract.V1.VersionInfo> GetVersionInfo(string appName)
         {
             Services.VersionInfo versionInfo = await this.updaterService.GetVersionInfo(appName);
 
-            return mapper.Map<DataContract.VersionInfo>(versionInfo);
+            return mapper.Map<DataContract.V1.VersionInfo>(versionInfo);
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
-using Giants.DataContract;
+using Giants.DataContract.V1;
 using Giants.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -44,7 +44,7 @@ namespace Giants.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<DataContract.ServerInfoWithHostAddress>> GetServers()
+        public async Task<IEnumerable<ServerInfoWithHostAddress>> GetServers()
         {
             IEnumerable<Services.ServerInfo> serverInfo = await this.serverRegistryService.GetAllServers();
 
@@ -65,7 +65,7 @@ namespace Giants.Web.Controllers
         }
 
         [HttpPost]
-        public async Task AddServer([FromBody]DataContract.ServerInfo serverInfo)
+        public async Task AddServer([FromBody] DataContract.V1.ServerInfo serverInfo)
         {
             ArgumentUtility.CheckForNull(serverInfo, nameof(serverInfo));
 
