@@ -68,19 +68,19 @@
         }
       }
     },
-    "/api/Discord": {
+    "/api/Community": {
       "get": {
         "tags": [
-          "Discord"
+          "Community"
         ],
-        "operationId": "Discord_GetDiscordStatus",
+        "operationId": "Community_GetDiscordStatus",
         "responses": {
           "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DiscordStatus"
+                  "$ref": "#/components/schemas/CommunityStatus"
                 }
               }
             }
@@ -281,11 +281,15 @@
           }
         }
       },
-      "DiscordStatus": {
+      "CommunityStatus": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "discordUri": {
+          "communityAppName": {
+            "type": "string",
+            "nullable": true
+          },
+          "communityAppUri": {
             "type": "string",
             "nullable": true
           }

@@ -1,6 +1,6 @@
 ﻿namespace Giants.Services
 {
-    public interface IDiscordService
+    public interface ICommunityService
     {
         string GetDiscordUri();
     }

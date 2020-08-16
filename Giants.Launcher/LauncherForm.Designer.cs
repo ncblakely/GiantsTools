@@ -34,7 +34,7 @@
             this.btnPlay = new Giants.Launcher.ImageButton();
             this.updateProgressBar = new System.Windows.Forms.ProgressBar();
             this.txtProgress = new System.Windows.Forms.Label();
-            this.DiscordLabel = new System.Windows.Forms.LinkLabel();
+            this.CommunityLabel = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.btnExit)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnOptions)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnPlay)).BeginInit();
@@ -108,19 +108,21 @@
             this.txtProgress.Text = "ProgressText";
             this.txtProgress.Visible = false;
             // 
-            // DiscordLabel
+            // CommunityLabel
             // 
-            this.DiscordLabel.AutoSize = true;
-            this.DiscordLabel.BackColor = System.Drawing.Color.Transparent;
-            this.DiscordLabel.LinkColor = System.Drawing.Color.Aquamarine;
-            this.DiscordLabel.Location = new System.Drawing.Point(12, 9);
-            this.DiscordLabel.Name = "DiscordLabel";
-            this.DiscordLabel.Size = new System.Drawing.Size(69, 13);
-            this.DiscordLabel.TabIndex = 12;
-            this.DiscordLabel.TabStop = true;
-            this.DiscordLabel.Text = "DiscordLabel";
-            this.DiscordLabel.Visible = false;
-            this.DiscordLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.DiscordLabel_LinkClicked);
+            this.CommunityLabel.ActiveLinkColor = System.Drawing.Color.DodgerBlue;
+            this.CommunityLabel.AutoSize = true;
+            this.CommunityLabel.BackColor = System.Drawing.Color.Transparent;
+            this.CommunityLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CommunityLabel.LinkColor = System.Drawing.Color.DodgerBlue;
+            this.CommunityLabel.Location = new System.Drawing.Point(12, 9);
+            this.CommunityLabel.Name = "CommunityLabel";
+            this.CommunityLabel.Size = new System.Drawing.Size(112, 17);
+            this.CommunityLabel.TabIndex = 12;
+            this.CommunityLabel.TabStop = true;
+            this.CommunityLabel.Text = "CommunityLabel";
+            this.CommunityLabel.Visible = false;
+            this.CommunityLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.DiscordLabel_LinkClicked);
             // 
             // LauncherForm
             // 
@@ -131,7 +133,7 @@
             this.CancelButton = this.btnExit;
             this.ClientSize = new System.Drawing.Size(800, 500);
             this.ControlBox = false;
-            this.Controls.Add(this.DiscordLabel);
+            this.Controls.Add(this.CommunityLabel);
             this.Controls.Add(this.txtProgress);
             this.Controls.Add(this.updateProgressBar);
             this.Controls.Add(this.btnExit);
@@ -161,7 +163,7 @@
         private ImageButton btnExit;
         private System.Windows.Forms.ProgressBar updateProgressBar;
         private System.Windows.Forms.Label txtProgress;
-        private System.Windows.Forms.LinkLabel DiscordLabel;
+        private System.Windows.Forms.LinkLabel CommunityLabel;
     }
 }
 

@@ -342,13 +342,13 @@ namespace Giants.WebApi.Clients
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.7.0.0 (NJsonSchema v10.1.24.0 (Newtonsoft.Json v11.0.0.0))")]
-    public partial class DiscordClient 
+    public partial class CommunityClient 
     {
         private string _baseUrl = "https://localhost:44304";
         private System.Net.Http.HttpClient _httpClient;
         private System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings;
     
-        public DiscordClient(System.Net.Http.HttpClient httpClient)
+        public CommunityClient(System.Net.Http.HttpClient httpClient)
         {
             _httpClient = httpClient; 
             _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings);
@@ -375,17 +375,17 @@ namespace Giants.WebApi.Clients
         partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
     
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<DiscordStatus> GetDiscordStatusAsync()
+        public System.Threading.Tasks.Task<CommunityStatus> GetDiscordStatusAsync()
         {
             return GetDiscordStatusAsync(System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<DiscordStatus> GetDiscordStatusAsync(System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<CommunityStatus> GetDiscordStatusAsync(System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Discord");
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/api/Community");
     
             var client_ = _httpClient;
             try
@@ -415,7 +415,7 @@ namespace Giants.WebApi.Clients
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<DiscordStatus>(response_, headers_).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<CommunityStatus>(response_, headers_).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -857,10 +857,13 @@ namespace Giants.WebApi.Clients
     }
     
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.24.0 (Newtonsoft.Json v11.0.0.0)")]
-    public partial class DiscordStatus 
+    public partial class CommunityStatus 
     {
-        [Newtonsoft.Json.JsonProperty("discordUri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public string DiscordUri { get; set; }
+        [Newtonsoft.Json.JsonProperty("communityAppName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string CommunityAppName { get; set; }
+    
+        [Newtonsoft.Json.JsonProperty("communityAppUri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string CommunityAppUri { get; set; }
     
     
     }

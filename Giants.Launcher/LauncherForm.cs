@@ -24,16 +24,18 @@ namespace Giants.Launcher
 
 		private readonly HttpClient httpClient;
         private readonly VersionClient versionHttpClient;
-        private readonly DiscordClient discordHttpClient;
+        private readonly CommunityClient communityHttpClient;
 
         private string commandLine = String.Empty;
 		private string gamePath = null;
 		private Updater updater;
-        private string discordUri;
+        private string communityAppUri;
 
         public LauncherForm()
         {
 			this.InitializeComponent();
+			this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+			this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
 
 			// Set window title
 			this.Text = GameName;
@@ -42,8 +44,8 @@ namespace Giants.Launcher
 			this.versionHttpClient = new VersionClient(this.httpClient);
 			this.versionHttpClient.BaseUrl = BaseUrl; 
 
-			this.discordHttpClient = new DiscordClient(this.httpClient);
-			this.discordHttpClient.BaseUrl = BaseUrl;
+			this.communityHttpClient = new CommunityClient(this.httpClient);
+			this.communityHttpClient.BaseUrl = BaseUrl;
 		}
 
         private void btnExit_Click(object sender, EventArgs e)
@@ -138,11 +140,11 @@ namespace Giants.Launcher
         {
 			try
 			{
-				var status = await this.discordHttpClient.GetDiscordStatusAsync();
+				var status = await this.communityHttpClient.GetDiscordStatusAsync();
 				
-				this.discordUri = status.DiscordUri;
-				this.DiscordLabel.Text = Resources.DiscordLabel;
-				this.DiscordLabel.Visible = true;
+				this.communityAppUri = status.CommunityAppUri;
+				this.CommunityLabel.Text = string.Format(Resources.CommunityLabel, status.CommunityAppName);
+				this.CommunityLabel.Visible = true;
 			}
 			catch (Exception)
             {
@@ -273,19 +275,19 @@ namespace Giants.Launcher
 
         private void DiscordLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-			if (string.IsNullOrEmpty(this.discordUri))
+			if (string.IsNullOrEmpty(this.communityAppUri))
             {
 				return;
             }
 
-			var uri = new Uri(this.discordUri);
+			var uri = new Uri(this.communityAppUri);
 			if (uri.Scheme != "https")
             {
 				// For security, reject any non-HTTPS or local file system URIs
 				return;
             }
 
-			Process.Start(this.discordUri);
+			Process.Start(this.communityAppUri);
         }
     }
 }

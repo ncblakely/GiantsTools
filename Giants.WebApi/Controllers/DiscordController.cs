@@ -6,22 +6,23 @@
 
     [ApiController]
     [Route("api/[controller]")]
-    public class DiscordController : ControllerBase
+    public class CommunityController : ControllerBase
     {
-        private readonly IDiscordService discordService;
+        private readonly ICommunityService discordService;
 
-        public DiscordController(
-            IDiscordService discordService)
+        public CommunityController(
+            ICommunityService communityService)
         {
-            this.discordService = discordService;
+            this.discordService = communityService;
         }
 
         [HttpGet]
-        public DiscordStatus GetDiscordStatus()
+        public CommunityStatus GetDiscordStatus()
         {
-            return new DiscordStatus
+            return new CommunityStatus
             {
-                DiscordUri = this.discordService.GetDiscordUri()
+                CommunityAppName = "Discord",
+                CommunityAppUri = this.discordService.GetDiscordUri()
             };
         }
     }

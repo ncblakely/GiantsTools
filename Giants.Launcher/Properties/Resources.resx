@@ -199,7 +199,7 @@
   <data name="OptionSamples" xml:space="preserve">
     <value>{0} Samples</value>
   </data>
-  <data name="DiscordLabel" xml:space="preserve">
-    <value>Join the community on Discord!</value>
+  <data name="CommunityLabel" xml:space="preserve">
+    <value>Join the community on {0}!</value>
   </data>
 </root>

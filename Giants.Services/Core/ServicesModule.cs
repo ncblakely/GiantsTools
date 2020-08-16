@@ -17,7 +17,7 @@
             services.AddSingleton<IMemoryCache, MemoryCache>();
             services.AddSingleton<IUpdaterStore, CosmosDbUpdaterStore>();
             services.AddSingleton<IUpdaterService, UpdaterService>();
-            services.AddSingleton<IDiscordService, DiscordService>();
+            services.AddSingleton<ICommunityService, CommunityService>();
 
             services.AddHostedService<InitializerService>();
             services.AddHostedService<ServerRegistryCleanupService>();

@@ -80,11 +80,11 @@ namespace Giants.Launcher {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join the community on Discord!.
+        ///   Looks up a localized string similar to Join the community on {0}!.
         /// </summary>
-        internal static string DiscordLabel {
+        internal static string CommunityLabel {
             get {
-                return ResourceManager.GetString("DiscordLabel", resourceCulture);
+                return ResourceManager.GetString("CommunityLabel", resourceCulture);
             }
         }
         

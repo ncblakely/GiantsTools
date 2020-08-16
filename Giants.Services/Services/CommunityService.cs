@@ -2,11 +2,11 @@
 {
     using Microsoft.Extensions.Configuration;
 
-    public class DiscordService : IDiscordService
+    public class CommunityService : ICommunityService
     {
         private readonly IConfiguration configuration;
 
-        public DiscordService(IConfiguration configuration)
+        public CommunityService(IConfiguration configuration)
         {
             this.configuration = configuration;
         }
