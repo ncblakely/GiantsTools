@@ -20,14 +20,20 @@ namespace Giants.Launcher
 
 		private void OptionsForm_Load(object sender, EventArgs e)
 		{
-            this.PopulateResolution();
+			// Must come first as other options depend on it
+			this.PopulateRenderers();
+
+			this.PopulateResolution();
+			this.PopulateAnisotropy();
+			this.PopulateAntialiasing();
+
             this.SetOptions();
 		}
 
-		private void SetOptions()
-		{
-            this.cmbRenderer.Items.Clear();
-            this.cmbRenderer.Items.AddRange(
+		private void PopulateRenderers()
+        {
+			this.cmbRenderer.Items.Clear();
+			this.cmbRenderer.Items.AddRange(
 				GameSettings.CompatibleRenderers
 					.Disambiguate()
 					.ToList()
@@ -38,26 +44,29 @@ namespace Giants.Launcher
 
 			if (renderer != null)
 			{
-                this.cmbRenderer.SelectedItem = renderer;
+				this.cmbRenderer.SelectedItem = renderer;
 			}
 			else
 			{
 				renderer = GameSettings.CompatibleRenderers.Find(r => r.Name == "DirectX 7");
-                this.cmbRenderer.SelectedItem = renderer;
+				this.cmbRenderer.SelectedItem = renderer;
 			}
+		}
 
+		private void SetOptions()
+		{
 			var resolutions = (List<ScreenResolution>)this.cmbResolution.DataSource;
             this.cmbResolution.SelectedItem = resolutions.Find(r => r.Width == GameSettings.Get<int>(SettingKeys.VideoWidth) && r.Height == GameSettings.Get<int>(SettingKeys.VideoHeight));
 			if (this.cmbResolution.SelectedItem == null)
                 this.cmbResolution.SelectedIndex = 0;
 
-			var AntialiasingOptions = (List<KeyValuePair<string, int>>)this.cmbAntialiasing.DataSource;
-            this.cmbAntialiasing.SelectedItem = AntialiasingOptions.Find(o => o.Value == GameSettings.Get<int>(SettingKeys.Antialiasing));
+			var antialiasingOptions = (List<KeyValuePair<string, int>>)this.cmbAntialiasing.DataSource;
+            this.cmbAntialiasing.SelectedItem = antialiasingOptions.Find(o => o.Value == GameSettings.Get<int>(SettingKeys.Antialiasing));
 			if (this.cmbAntialiasing.SelectedItem == null)
                 this.cmbAntialiasing.SelectedIndex = 0;
 
-			var AnisotropyOptions = (List<KeyValuePair<string, int>>)this.cmbAnisotropy.DataSource;
-            this.cmbAnisotropy.SelectedItem = AnisotropyOptions.Find(o => o.Value == GameSettings.Get<int>(SettingKeys.AnisotropicFiltering));
+			var anisotropyOptions = (List<KeyValuePair<string, int>>)this.cmbAnisotropy.DataSource;
+            this.cmbAnisotropy.SelectedItem = anisotropyOptions.Find(o => o.Value == GameSettings.Get<int>(SettingKeys.AnisotropicFiltering));
 			if (this.cmbAnisotropy.SelectedItem == null)
                 this.cmbAnisotropy.SelectedIndex = 0;
 
@@ -169,9 +178,6 @@ namespace Giants.Launcher
 
 		private void cmbRenderer_SelectedIndexChanged(object sender, EventArgs e)
 		{
-            this.PopulateAntialiasing();
-            this.PopulateAnisotropy();
-
 			bool windowed = GameSettings.Get<int>(SettingKeys.Windowed) == 1;
 			if (windowed)
 			{
