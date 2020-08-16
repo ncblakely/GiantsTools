@@ -38,6 +38,7 @@
 
         public async Task<IEnumerable<ServerInfo>> GetServerInfos(
             Expression<Func<ServerInfo, bool>> whereExpression = null,
+            bool includeExpired = false,
             string partitionKey = null)
         {
             ConcurrentDictionary<string, ServerInfo> serverInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, this.PopulateCache);
@@ -51,12 +52,18 @@
                 serverInfoQuery = serverInfoQuery.Where(whereExpression);
             }
 
-            return serverInfoQuery.Where(c => c.LastHeartbeat > this.dateTimeProvider.UtcNow - this.timeoutPeriod)
+            if (!includeExpired)
+            {
+                serverInfoQuery = serverInfoQuery.Where(c => c.LastHeartbeat > this.dateTimeProvider.UtcNow - this.timeoutPeriod);
+            }
+
+            return serverInfoQuery
                 .ToList();
         }
 
         public async Task<IEnumerable<TSelect>> GetServerInfos<TSelect>(
             Expression<Func<ServerInfo, TSelect>> selectExpression,
+            bool includeExpired = false,
             Expression<Func<ServerInfo, bool>> whereExpression = null,
             string partitionKey = null)
         {
@@ -71,7 +78,12 @@
                 serverInfoQuery = serverInfoQuery.Where(whereExpression);
             }
 
-            return serverInfoQuery.Where(c => c.LastHeartbeat > this.dateTimeProvider.UtcNow - this.timeoutPeriod)
+            if (!includeExpired)
+            {
+                serverInfoQuery = serverInfoQuery.Where(c => c.LastHeartbeat > this.dateTimeProvider.UtcNow - this.timeoutPeriod);
+            }
+
+            return serverInfoQuery
                 .Select(selectExpression)
                 .ToList();
         }

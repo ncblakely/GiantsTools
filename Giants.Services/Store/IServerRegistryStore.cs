@@ -15,10 +15,11 @@
 
         Task<ServerInfo> GetServerInfo(string ipAddress);
 
-        Task<IEnumerable<ServerInfo>> GetServerInfos(Expression<Func<ServerInfo, bool>> whereExpression = null, string partitionKey = null);
+        Task<IEnumerable<ServerInfo>> GetServerInfos(Expression<Func<ServerInfo, bool>> whereExpression = null, bool includeExpired = false, string partitionKey = null);
 
         Task<IEnumerable<TSelect>> GetServerInfos<TSelect>(
             Expression<Func<ServerInfo, TSelect>> selectExpression,
+            bool includeExpired = false,
             Expression<Func<ServerInfo, bool>> whereExpression = null,
             string partitionKey = null);
 

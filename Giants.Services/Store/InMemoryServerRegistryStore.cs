@@ -36,7 +36,10 @@
             return Task.CompletedTask;
         }
 
-        public Task<IEnumerable<ServerInfo>> GetServerInfos(Expression<Func<ServerInfo, bool>> whereExpression = null, string partitionKey = null)
+        public Task<IEnumerable<ServerInfo>> GetServerInfos(
+            Expression<Func<ServerInfo, bool>> whereExpression = null, 
+            bool includeExpired = false, 
+            string partitionKey = null)
         {
             IQueryable<ServerInfo> serverInfoQuery = this.servers.Values.AsQueryable();
 
@@ -48,7 +51,11 @@
             return Task.FromResult(serverInfoQuery.AsEnumerable());
         }
 
-        public Task<IEnumerable<TSelect>> GetServerInfos<TSelect>(Expression<Func<ServerInfo, TSelect>> selectExpression, Expression<Func<ServerInfo, bool>> whereExpression = null, string partitionKey = null)
+        public Task<IEnumerable<TSelect>> GetServerInfos<TSelect>(
+            Expression<Func<ServerInfo, TSelect>> selectExpression, 
+            bool includeExpired = false, 
+            Expression <Func<ServerInfo, bool>> whereExpression = null, 
+            string partitionKey = null)
         {
             IQueryable<ServerInfo> serverInfoQuery = this.servers.Values.AsQueryable();
 

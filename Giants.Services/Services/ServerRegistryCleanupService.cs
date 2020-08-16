@@ -62,7 +62,9 @@
         {
             List<string> expiredServers = (await this
                 .serverRegistryStore
-                .GetServerInfos(whereExpression: s => s.LastHeartbeat < (this.dateTimeProvider.UtcNow - this.timeoutPeriod)))
+                .GetServerInfos(
+                    whereExpression: s => s.LastHeartbeat < (this.dateTimeProvider.UtcNow - this.timeoutPeriod),
+                    includeExpired: true))
                 .Select(s => s.id)
                 .ToList();
 
