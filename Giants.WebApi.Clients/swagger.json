@@ -11,37 +11,6 @@
     }
   ],
   "paths": {
-    "/api/Version": {
-      "get": {
-        "tags": [
-          "Version"
-        ],
-        "operationId": "Version_GetVersionInfo",
-        "parameters": [
-          {
-            "name": "appName",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VersionInfo"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Servers": {
       "delete": {
         "tags": [
@@ -98,61 +67,61 @@
           }
         }
       }
+    },
+    "/api/Discord": {
+      "get": {
+        "tags": [
+          "Discord"
+        ],
+        "operationId": "Discord_GetDiscordStatus",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscordStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Version": {
+      "get": {
+        "tags": [
+          "Version"
+        ],
+        "operationId": "Version_GetVersionInfo",
+        "parameters": [
+          {
+            "name": "appName",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionInfo"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
-      "VersionInfo": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "appName",
-          "version",
-          "installerUri"
-        ],
-        "properties": {
-          "appName": {
-            "type": "string",
-            "minLength": 1
-          },
-          "version": {
-            "$ref": "#/components/schemas/AppVersion"
-          },
-          "installerUri": {
-            "type": "string",
-            "format": "uri",
-            "minLength": 1
-          }
-        }
-      },
-      "AppVersion": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "build",
-          "major",
-          "minor",
-          "revision"
-        ],
-        "properties": {
-          "build": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "major": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "minor": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "revision": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "ServerInfoWithHostAddress": {
         "allOf": [
           {
@@ -251,6 +220,34 @@
           }
         }
       },
+      "AppVersion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "build",
+          "major",
+          "minor",
+          "revision"
+        ],
+        "properties": {
+          "build": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "major": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minor": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "PlayerInfo": {
         "type": "object",
         "additionalProperties": false,
@@ -280,6 +277,39 @@
           },
           "teamName": {
             "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "DiscordStatus": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "discordUri": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VersionInfo": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "appName",
+          "version",
+          "installerUri"
+        ],
+        "properties": {
+          "appName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "version": {
+            "$ref": "#/components/schemas/AppVersion"
+          },
+          "installerUri": {
+            "type": "string",
+            "format": "uri",
             "minLength": 1
           }
         }

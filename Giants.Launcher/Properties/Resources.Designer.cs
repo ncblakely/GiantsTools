@@ -80,6 +80,15 @@ namespace Giants.Launcher {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Join the community on Discord!.
+        /// </summary>
+        internal static string DiscordLabel {
+            get {
+                return ResourceManager.GetString("DiscordLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Downloading - {0}% of {1} MB.
         /// </summary>
         internal static string DownloadProgress {

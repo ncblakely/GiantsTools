@@ -16,25 +16,34 @@ namespace Giants.Launcher
     public partial class LauncherForm : Form
     {
         // Constant settings
-        private const string GAME_NAME = "Giants: Citizen Kabuto";
-        private const string GAME_PATH = "GiantsMain.exe";
-		private const string REGISTRY_KEY = @"HKEY_CURRENT_USER\Software\PlanetMoon\Giants";
-		private const string REGISTRY_VALUE = "DestDir";
-        private readonly VersionClient httpClient;
+        private const string GameName = "Giants: Citizen Kabuto";
+        private const string GamePath = "GiantsMain.exe";
+		private const string RegistryKey = @"HKEY_CURRENT_USER\Software\PlanetMoon\Giants";
+		private const string RegistryValue = "DestDir";
+		private const string BaseUrl = "https://giants.azurewebsites.net"; // TODO: Read from file
+
+		private readonly HttpClient httpClient;
+        private readonly VersionClient versionHttpClient;
+        private readonly DiscordClient discordHttpClient;
 
         private string commandLine = String.Empty;
 		private string gamePath = null;
 		private Updater updater;
+        private string discordUri;
 
         public LauncherForm()
         {
 			this.InitializeComponent();
 
 			// Set window title
-			this.Text = GAME_NAME;
+			this.Text = GameName;
 
-			this.httpClient = new VersionClient(new HttpClient());
-			this.httpClient.BaseUrl = "https://giants.azurewebsites.net"; // TODO: Read from file
+			this.httpClient = new HttpClient();
+			this.versionHttpClient = new VersionClient(this.httpClient);
+			this.versionHttpClient.BaseUrl = BaseUrl; 
+
+			this.discordHttpClient = new DiscordClient(this.httpClient);
+			this.discordHttpClient.BaseUrl = BaseUrl;
 		}
 
         private void btnExit_Click(object sender, EventArgs e)
@@ -73,7 +82,7 @@ namespace Giants.Launcher
 
         private void btnOptions_Click(object sender, EventArgs e)
         {
-            OptionsForm form = new OptionsForm(GAME_NAME + " Options", this.gamePath);
+            OptionsForm form = new OptionsForm(GameName + " Options", this.gamePath);
 
 			form.ShowDialog();
         }
@@ -82,16 +91,16 @@ namespace Giants.Launcher
         {
             // Find the game executable, first looking for it relative to our current directory and then
             // using the registry path if that fails.
-            this.gamePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\" + GAME_PATH;
+            this.gamePath = Path.GetDirectoryName(Application.ExecutablePath) + "\\" + GamePath;
             if (!File.Exists(this.gamePath))
             {
-                this.gamePath = (string)Registry.GetValue(REGISTRY_KEY, REGISTRY_VALUE, null);
+                this.gamePath = (string)Registry.GetValue(RegistryKey, RegistryValue, null);
                 if (this.gamePath != null)
-                    this.gamePath = Path.Combine(this.gamePath, GAME_PATH);
+                    this.gamePath = Path.Combine(this.gamePath, GamePath);
 
                 if (this.gamePath == null || !File.Exists(this.gamePath))
                 {
-                    string message = string.Format(Resources.AppNotFound, GAME_NAME);
+                    string message = string.Format(Resources.AppNotFound, GameName);
                     MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Application.Exit();
 					return;
@@ -102,43 +111,68 @@ namespace Giants.Launcher
 			GameSettings.Load(this.gamePath);
 
 			if (GameSettings.Get<int>("NoAutoUpdate") == 0)
-			{
-				Version gameVersion = VersionHelper.GetGameVersion(this.gamePath);
-				if (gameVersion == null)
-				{
-					string message = string.Format(Resources.AppNotFound, GAME_NAME);
-					MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-					Application.Exit();
-				}
+            {
+                Version gameVersion = VersionHelper.GetGameVersion(this.gamePath);
+                if (gameVersion == null)
+                {
+                    string message = string.Format(Resources.AppNotFound, GameName);
+                    MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Application.Exit();
+                }
 
-				var appVersions = new Dictionary<ApplicationType, Version>()
-				{
-					[ApplicationType.Game] = gameVersion,
-					[ApplicationType.Launcher] = VersionHelper.GetLauncherVersion()
-				};
+                var appVersions = new Dictionary<ApplicationType, Version>()
+                {
+                    [ApplicationType.Game] = gameVersion,
+                    [ApplicationType.Launcher] = VersionHelper.GetLauncherVersion()
+                };
 
-				// Check for updates
-				this.updater = new Updater(
-				appVersions: appVersions,
-                updateCompletedCallback: this.LauncherForm_DownloadCompletedCallback,
-                updateProgressCallback: this.LauncherForm_DownloadProgressCallback);
+                // Check for updates
+                Task updateTask = this.CheckForUpdates(appVersions);
+				Task discordTask = this.CheckDiscordStatus();
 
-				Task<VersionInfo> gameVersionInfo = this.GetVersionInfo(ApplicationNames.Giants);
-				Task<VersionInfo> launcherVersionInfo = this.GetVersionInfo(ApplicationNames.GiantsLauncher);
-
-				await Task.WhenAll(gameVersionInfo, launcherVersionInfo);
-
-				await this.updater.UpdateApplication(ApplicationType.Game, gameVersionInfo.Result);
-				await this.updater.UpdateApplication(ApplicationType.Launcher, launcherVersionInfo.Result);
-			}
+				await Task.WhenAll(updateTask, discordTask);
+            }
         }
 
-		private async Task<VersionInfo> GetVersionInfo(string appName)
+		private async Task CheckDiscordStatus()
+        {
+			try
+			{
+				var status = await this.discordHttpClient.GetDiscordStatusAsync();
+				
+				this.discordUri = status.DiscordUri;
+				this.DiscordLabel.Text = Resources.DiscordLabel;
+				this.DiscordLabel.Visible = true;
+			}
+			catch (Exception)
+            {
+				// Ignore
+            }
+        }
+
+
+		private async Task CheckForUpdates(Dictionary<ApplicationType, Version> appVersions)
+        {
+            this.updater = new Updater(
+            appVersions: appVersions,
+            updateCompletedCallback: this.LauncherForm_DownloadCompletedCallback,
+            updateProgressCallback: this.LauncherForm_DownloadProgressCallback);
+
+            Task<VersionInfo> gameVersionInfo = this.GetVersionInfo(ApplicationNames.Giants);
+            Task<VersionInfo> launcherVersionInfo = this.GetVersionInfo(ApplicationNames.GiantsLauncher);
+
+            await Task.WhenAll(gameVersionInfo, launcherVersionInfo);
+
+            await this.updater.UpdateApplication(ApplicationType.Game, gameVersionInfo.Result);
+            await this.updater.UpdateApplication(ApplicationType.Launcher, launcherVersionInfo.Result);
+        }
+
+        private async Task<VersionInfo> GetVersionInfo(string appName)
         {
 			VersionInfo versionInfo;
 			try
 			{
-				versionInfo = await this.httpClient.GetVersionInfoAsync(appName);
+				versionInfo = await this.versionHttpClient.GetVersionInfoAsync(appName);
 				return versionInfo;
 			}
 			catch (ApiException ex)
@@ -236,5 +270,22 @@ namespace Giants.Launcher
             this.txtProgress.Visible = true;
             this.txtProgress.Text = string.Format(Resources.DownloadProgress, e.ProgressPercentage, info.FileSize / 1024 / 1024);
 		}
-	}
+
+        private void DiscordLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+			if (string.IsNullOrEmpty(this.discordUri))
+            {
+				return;
+            }
+
+			var uri = new Uri(this.discordUri);
+			if (uri.Scheme != "https")
+            {
+				// For security, reject any non-HTTPS or local file system URIs
+				return;
+            }
+
+			Process.Start(this.discordUri);
+        }
+    }
 }
