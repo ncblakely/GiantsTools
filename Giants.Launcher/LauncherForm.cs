@@ -86,6 +86,7 @@ namespace Giants.Launcher
         {
             OptionsForm form = new OptionsForm(GameName + " Options", this.gamePath);
 
+			form.StartPosition = FormStartPosition.CenterParent;
 			form.ShowDialog();
         }
 

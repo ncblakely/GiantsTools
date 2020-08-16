@@ -38,6 +38,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.cmbMode = new System.Windows.Forms.ComboBox();
             this.chkTripleBuffering = new System.Windows.Forms.CheckBox();
             this.chkVSync = new System.Windows.Forms.CheckBox();
             this.btnOK = new System.Windows.Forms.Button();
@@ -45,7 +46,6 @@
             this.btnResetDefaults = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.chkUpdates = new System.Windows.Forms.CheckBox();
-            this.cmbMode = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -153,6 +153,19 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Mode";
             // 
+            // cmbMode
+            // 
+            this.cmbMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbMode.FormattingEnabled = true;
+            this.cmbMode.Items.AddRange(new object[] {
+            "Fullscreen",
+            "Windowed",
+            "Borderless"});
+            this.cmbMode.Location = new System.Drawing.Point(12, 19);
+            this.cmbMode.Name = "cmbMode";
+            this.cmbMode.Size = new System.Drawing.Size(88, 21);
+            this.cmbMode.TabIndex = 3;
+            // 
             // chkTripleBuffering
             // 
             this.chkTripleBuffering.AutoSize = true;
@@ -224,24 +237,12 @@
             this.chkUpdates.Text = "Check for Updates";
             this.chkUpdates.UseVisualStyleBackColor = true;
             // 
-            // cmbMode
-            // 
-            this.cmbMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbMode.FormattingEnabled = true;
-            this.cmbMode.Items.AddRange(new object[] {
-            "Fullscreen",
-            "Windowed",
-            "Borderless"});
-            this.cmbMode.Location = new System.Drawing.Point(12, 19);
-            this.cmbMode.Name = "cmbMode";
-            this.cmbMode.Size = new System.Drawing.Size(88, 21);
-            this.cmbMode.TabIndex = 3;
-            // 
             // OptionsForm
             // 
             this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(406, 273);
             this.ControlBox = false;
