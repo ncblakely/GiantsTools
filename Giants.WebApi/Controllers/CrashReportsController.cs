@@ -8,6 +8,8 @@
     using Giants.Services.Services;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Logging;
 
     [ApiController]
     [Route("api/[controller]")]
@@ -15,15 +17,20 @@
     {
         private readonly ICrashReportService crashReportService;
         private readonly IHttpContextAccessor httpContextAccessor;
-
+        private readonly ILogger<CrashReportsController> logger;
+        private readonly IConfiguration configuration;
         private const long MaximumSizeInBytes = 5242880; // 5MB
 
         public CrashReportsController(
             ICrashReportService crashReportService,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            ILogger<CrashReportsController> logger,
+            IConfiguration configuration)
         {
             this.crashReportService = crashReportService;
             this.httpContextAccessor = httpContextAccessor;
+            this.logger = logger;
+            this.configuration = configuration;
         }
 
         [HttpPost]
@@ -35,6 +42,18 @@
             using (var stream = file.OpenReadStream())
             {
                 await this.crashReportService.ProcessReport(file.FileName, this.GetRequestIpAddress(), stream).ConfigureAwait(false);
+            }
+
+            bool sentryEnabled = Convert.ToBoolean(this.configuration["SentryEnabled"]);
+            if (!sentryEnabled)
+            {
+                this.logger.LogInformation("Skipping Sentry upload; disabled.");
+                return;
+            }
+
+            using (var stream = file.OpenReadStream())
+            { 
+                await this.crashReportService.UploadMinidumpToSentry(file.FileName, stream).ConfigureAwait(false);
             }
         }
 

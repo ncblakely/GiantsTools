@@ -1,5 +1,7 @@
 ﻿namespace Giants.Services
 {
+    using System;
+    using System.Net.Http.Headers;
     using Giants.Services.Core;
     using Giants.Services.Services;
     using Giants.Services.Store;
@@ -22,6 +24,14 @@
 
             services.AddHostedService<InitializerService>();
             services.AddHostedService<ServerRegistryCleanupService>();
+
+            services.AddHttpClient("Sentry", c =>
+            {
+                c.BaseAddress = new Uri(configuration["SentryBaseUri"]);
+
+                string sentryAuthenticationToken = configuration["SentryAuthenticationToken"];
+                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sentryAuthenticationToken);
+            });
         }
     }
 }
