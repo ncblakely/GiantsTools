@@ -18,6 +18,7 @@
             services.AddSingleton<IUpdaterStore, CosmosDbUpdaterStore>();
             services.AddSingleton<IUpdaterService, UpdaterService>();
             services.AddSingleton<ICommunityService, CommunityService>();
+            services.AddSingleton<ICrashReportService, CrashReportService>();
 
             services.AddHostedService<InitializerService>();
             services.AddHostedService<ServerRegistryCleanupService>();
