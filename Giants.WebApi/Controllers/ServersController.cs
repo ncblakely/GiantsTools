@@ -59,7 +59,7 @@ namespace Giants.Web.Controllers
                 .ToList();
 
             string requestIpAddress = this.GetRequestIpAddress();
-            logger.LogInformation("Returning {Count} servers to {IPAddress}", mappedServers.Count, requestIpAddress);
+            this.logger.LogInformation("Returning {Count} servers to {IPAddress}", mappedServers.Count, requestIpAddress);
 
             return mappedServers;
         }
@@ -73,7 +73,7 @@ namespace Giants.Web.Controllers
 
             this.logger.LogInformation("Request to add server from {IPAddress}", requestIpAddress);
 
-            var serverInfoEntity = mapper.Map<Services.ServerInfo>(serverInfo);
+            var serverInfoEntity = this.mapper.Map<Services.ServerInfo>(serverInfo);
             serverInfoEntity.HostIpAddress = requestIpAddress.ToString();
             serverInfoEntity.LastHeartbeat = DateTime.UtcNow;
 

@@ -23,16 +23,16 @@ namespace Giants.DataContract.V1
         public override bool Equals(object obj)
         {
             return obj is PlayerInfo info &&
-                   Index == info.Index &&
-                   Name == info.Name &&
-                   Frags == info.Frags &&
-                   Deaths == info.Deaths &&
-                   TeamName == info.TeamName;
+                   this.Index == info.Index &&
+                   this.Name == info.Name &&
+                   this.Frags == info.Frags &&
+                   this.Deaths == info.Deaths &&
+                   this.TeamName == info.TeamName;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Index, Name, Frags, Deaths, TeamName);
+            return HashCode.Combine(this.Index, this.Name, this.Frags, this.Deaths, this.TeamName);
         }
     }
 }

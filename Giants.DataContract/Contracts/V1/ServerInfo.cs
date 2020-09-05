@@ -54,37 +54,37 @@
         public override bool Equals(object obj)
         {
             return obj is ServerInfo info &&
-                   GameName == info.GameName &&
-                   EqualityComparer<AppVersion>.Default.Equals(Version, info.Version) &&
-                   SessionName == info.SessionName &&
-                   Port == info.Port &&
-                   MapName == info.MapName &&
-                   GameType == info.GameType &&
-                   NumPlayers == info.NumPlayers &&
-                   GameState == info.GameState &&
-                   TimeLimit == info.TimeLimit &&
-                   FragLimit == info.FragLimit &&
-                   TeamFragLimit == info.TeamFragLimit &&
-                   FirstBaseComplete == info.FirstBaseComplete &&
-                   PlayerInfo.SequenceEqual(info.PlayerInfo);
+                   this.GameName == info.GameName &&
+                   EqualityComparer<AppVersion>.Default.Equals(this.Version, info.Version) &&
+                   this.SessionName == info.SessionName &&
+                   this.Port == info.Port &&
+                   this.MapName == info.MapName &&
+                   this.GameType == info.GameType &&
+                   this.NumPlayers == info.NumPlayers &&
+                   this.GameState == info.GameState &&
+                   this.TimeLimit == info.TimeLimit &&
+                   this.FragLimit == info.FragLimit &&
+                   this.TeamFragLimit == info.TeamFragLimit &&
+                   this.FirstBaseComplete == info.FirstBaseComplete &&
+                   this.PlayerInfo.SequenceEqual(info.PlayerInfo);
         }
 
         public override int GetHashCode()
         {
             HashCode hash = new HashCode();
-            hash.Add(GameName);
-            hash.Add(Version);
-            hash.Add(SessionName);
-            hash.Add(Port);
-            hash.Add(MapName);
-            hash.Add(GameType);
-            hash.Add(NumPlayers);
-            hash.Add(GameState);
-            hash.Add(TimeLimit);
-            hash.Add(FragLimit);
-            hash.Add(TeamFragLimit);
-            hash.Add(FirstBaseComplete);
-            hash.Add(PlayerInfo);
+            hash.Add(this.GameName);
+            hash.Add(this.Version);
+            hash.Add(this.SessionName);
+            hash.Add(this.Port);
+            hash.Add(this.MapName);
+            hash.Add(this.GameType);
+            hash.Add(this.NumPlayers);
+            hash.Add(this.GameState);
+            hash.Add(this.TimeLimit);
+            hash.Add(this.FragLimit);
+            hash.Add(this.TeamFragLimit);
+            hash.Add(this.FirstBaseComplete);
+            hash.Add(this.PlayerInfo);
             return hash.ToHashCode();
         }
     }

@@ -25,7 +25,7 @@ namespace Giants.WebApi.Controllers
         {
             Services.VersionInfo versionInfo = await this.updaterService.GetVersionInfo(appName);
 
-            return mapper.Map<DataContract.V1.VersionInfo>(versionInfo);
+            return this.mapper.Map<DataContract.V1.VersionInfo>(versionInfo);
         }
     }
 }

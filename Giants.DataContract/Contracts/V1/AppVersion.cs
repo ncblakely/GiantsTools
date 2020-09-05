@@ -20,15 +20,15 @@
         public override bool Equals(object obj)
         {
             return obj is AppVersion info &&
-                   Build == info.Build &&
-                   Major == info.Major &&
-                   Minor == info.Minor &&
-                   Revision == info.Revision;
+                   this.Build == info.Build &&
+                   this.Major == info.Major &&
+                   this.Minor == info.Minor &&
+                   this.Revision == info.Revision;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Build, Major, Minor, Revision);
+            return HashCode.Combine(this.Build, this.Major, this.Minor, this.Revision);
         }
 
         public Version ToVersion()

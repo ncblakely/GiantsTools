@@ -14,7 +14,7 @@ namespace Giants.Web
     {
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            this.Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
@@ -29,7 +29,7 @@ namespace Giants.Web
             services.AddHttpContextAccessor();
             services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
             
-            ServicesModule.RegisterServices(services, Configuration);
+            ServicesModule.RegisterServices(services, this.Configuration);
 
             IMapper mapper = Services.Mapper.GetMapper();
             services.AddSingleton(mapper);

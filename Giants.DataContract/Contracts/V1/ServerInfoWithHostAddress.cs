@@ -12,14 +12,14 @@
         {
             return obj is ServerInfoWithHostAddress address &&
                    base.Equals(obj) &&
-                   HostIpAddress == address.HostIpAddress;
+                   this.HostIpAddress == address.HostIpAddress;
         }
 
         public override int GetHashCode()
         {
             HashCode hash = new HashCode();
             hash.Add(base.GetHashCode());
-            hash.Add(HostIpAddress);
+            hash.Add(this.HostIpAddress);
             return hash.ToHashCode();
         }
     }
