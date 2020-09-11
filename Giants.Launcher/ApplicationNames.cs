@@ -4,6 +4,8 @@
     {
         public const string Giants = nameof(Giants);
 
+        public const string GiantsBeta = nameof(GiantsBeta);
+
         public const string GiantsLauncher = nameof(GiantsLauncher);
     }
 }

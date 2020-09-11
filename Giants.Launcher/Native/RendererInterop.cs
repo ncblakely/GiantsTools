@@ -16,6 +16,7 @@ namespace Giants.Launcher
             public int priority;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
             public string rendererName;
+            public int interfaceVersion;
         };
 #pragma warning restore 649
 
@@ -60,7 +61,7 @@ namespace Giants.Launcher
                     // Make interop call to native renderer DLLs to get capability info
                     var interopCaps = new RendererInterop.GFXCapabilityInfo();
                     string path = Path.Combine(file.DirectoryName, file.Name);
-                    if (GetRendererCapabilities(path, ref interopCaps))
+                    if (GetRendererCapabilities(path, ref interopCaps) && interopCaps.priority >= 0)
                     {
                         RendererInfo caps = new RendererInfo(path, ref interopCaps);
                         capabilities.Add(caps);

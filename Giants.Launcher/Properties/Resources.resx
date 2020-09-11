@@ -155,13 +155,13 @@
     <value>Could not locate an installation of {0}. The launcher will now exit.</value>
   </data>
   <data name="UpdateAvailableText" xml:space="preserve">
-    <value>An update is available: version {0}. Download it?</value>
+    <value>An update is available to version {0}. Download it?</value>
   </data>
   <data name="UpdateAvailableTitle" xml:space="preserve">
     <value>Update Available</value>
   </data>
   <data name="UpdateDownloadFailedText" xml:space="preserve">
-    <value>Failed to download update. Please visit www.giantswd.org and download the update manually. The error was: {0}</value>
+    <value>Failed to download update. Please visit www.giantswd.org and download the update manually.\nThe error was: {0}</value>
   </data>
   <data name="UpdateDownloadFailedTitle" xml:space="preserve">
     <value>Update Failed</value>

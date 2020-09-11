@@ -42,7 +42,7 @@ SetCompressor /SOLID lzma
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "Output\GPatch1_498_206_0.exe"
+OutFile "Output\GPatch1_498_209_0.exe"
 InstallDir "$PROGRAMFILES\Giants\"
 InstallDirRegKey HKCU "SOFTWARE\PlanetMoon\Giants" "DestDir"
 ShowInstDetails hide
@@ -54,6 +54,9 @@ Section
   SetDetailsView hide
   SectionIn RO
   SetOverwrite on
+  
+  nsExec::Exec "taskkill /F /IM Giants.exe"
+  nsExec::Exec "taskkill /F /IM GiantsMain.exe"
   
   ; Install DX redist for DX9 renderer
   SetOutPath "$INSTDIR\Redist"
@@ -76,6 +79,7 @@ Section
   Delete $INSTDIR\gg_dx7r.dll
   Delete $INSTDIR\gg_dx8r.dll
   Delete $INSTDIR\gg_dx9r.dll  
+  Delete $INSTDIR\gg_null.dll  
   Delete $INSTDIR\Giants.exe
   Delete $INSTDIR\BugTrap.dll
   Delete $INSTDIR\GiantsMain.exe

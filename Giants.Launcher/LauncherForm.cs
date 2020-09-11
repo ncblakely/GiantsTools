@@ -40,13 +40,20 @@ namespace Giants.Launcher
 			// Set window title
 			this.Text = GameName;
 
-			this.httpClient = new HttpClient();
-			this.versionHttpClient = new VersionClient(this.httpClient);
-			this.versionHttpClient.BaseUrl = BaseUrl; 
-
-			this.communityHttpClient = new CommunityClient(this.httpClient);
-			this.communityHttpClient.BaseUrl = BaseUrl;
-		}
+			this.httpClient = new HttpClient(
+				new HttpClientHandler() 
+				{ 
+					UseProxy = false
+				});
+            this.versionHttpClient = new VersionClient(this.httpClient)
+            {
+                BaseUrl = BaseUrl
+            };
+            this.communityHttpClient = new CommunityClient(this.httpClient)
+            {
+                BaseUrl = BaseUrl
+            };
+        }
 
         private void btnExit_Click(object sender, EventArgs e)
         {
@@ -153,7 +160,6 @@ namespace Giants.Launcher
             }
         }
 
-
 		private async Task CheckForUpdates(Dictionary<ApplicationType, Version> appVersions)
         {
             this.updater = new Updater(
@@ -202,7 +208,6 @@ namespace Giants.Launcher
 				NativeMethods.ReleaseCapture();
 				NativeMethods.SendMessage(this.Handle, NativeMethods.WM_NCLBUTTONDOWN, NativeMethods.HT_CAPTION, 0);
 			}
-
 		}
 
 		private void LauncherForm_Shown(object sender, EventArgs e)

@@ -34,8 +34,10 @@ namespace Giants.Launcher
                     this.StartApplicationUpdate(applicationType, versionInfo);
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                string errorMsg = string.Format(Resources.UpdateDownloadFailedText, e.Message);
+                MessageBox.Show(errorMsg, Resources.UpdateDownloadFailedTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             return Task.CompletedTask;
@@ -66,7 +68,7 @@ namespace Giants.Launcher
                                 string.Format(Resources.UpdateAvailableText, this.ToVersion(versionInfo.Version).ToString()) :
                                 string.Format(Resources.LauncherUpdateAvailableText, this.ToVersion(versionInfo.Version).ToString());
 
-            if (MessageBox.Show(updateMsg, Resources.UpdateAvailableTitle, MessageBoxButtons.YesNo) == DialogResult.No)
+            if (MessageBox.Show(updateMsg, Resources.UpdateAvailableTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.No)
             {
                 return; // User declined update
             }

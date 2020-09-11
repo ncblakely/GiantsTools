@@ -1,5 +1,6 @@
 xcopy "%GIANTS_PATH%\gg_dx7r.dll" "Files\" /Y
 xcopy "%GIANTS_PATH%\gg_dx9r.dll" "Files\" /Y
+xcopy "%GIANTS_PATH%\gg_null.dll" "Files\" /Y
 xcopy "%GIANTS_PATH%\dedicated.exe" "Files\" /Y
 xcopy "%GIANTS_PATH%\Giants.exe" "Files\" /Y
 xcopy "%GIANTS_PATH%\GiantsMain.exe" "Files\" /Y

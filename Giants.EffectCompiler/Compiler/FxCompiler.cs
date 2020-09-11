@@ -137,6 +137,8 @@
                         Offset = checked((int)binaryWriter.BaseStream.Position)
                     };
 
+                    logger.Info($"Compiling {tokens[1]}");
+
                     tableOfContentsSize += contentEntry.Name.Length + 1 + sizeof(int);
                     tableOfContents.Add(contentEntry);
 

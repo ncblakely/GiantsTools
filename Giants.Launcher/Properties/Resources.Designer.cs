@@ -287,7 +287,7 @@ namespace Giants.Launcher {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An update is available: version {0}. Download it?.
+        ///   Looks up a localized string similar to An update is available to version {0}. Download it?.
         /// </summary>
         internal static string UpdateAvailableText {
             get {
@@ -305,7 +305,7 @@ namespace Giants.Launcher {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to download update. Please visit www.giantswd.org and download the update manually. The error was: {0}.
+        ///   Looks up a localized string similar to Failed to download update. Please visit www.giantswd.org and download the update manually.\nThe error was: {0}.
         /// </summary>
         internal static string UpdateDownloadFailedText {
             get {
