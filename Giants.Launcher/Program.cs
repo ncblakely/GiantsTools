@@ -30,7 +30,6 @@ namespace Giants.Launcher
                     }
 
                     Application.Exit();
-
                     return;
                 }
 
@@ -55,7 +54,6 @@ namespace Giants.Launcher
                 }
 
                 Application.Run(form);
-
             }
         }
     }

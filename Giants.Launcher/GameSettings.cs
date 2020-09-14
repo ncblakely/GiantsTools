@@ -43,15 +43,15 @@ namespace Giants.Launcher
         public static void SetDefaults(string gamePath)
         {
             // Set default settings:
-            Settings[SettingKeys.Renderer] = "gg_dx7r.dll";
-            Settings[SettingKeys.Antialiasing] = 0;
-            Settings[SettingKeys.AnisotropicFiltering] = 0;
-            Settings[SettingKeys.VideoDepth] = 32;
-            Settings[SettingKeys.Windowed] = 0;
-            Settings[SettingKeys.BorderlessWindow] = 0;
-            Settings[SettingKeys.VerticalSync] = 1;
-            Settings[SettingKeys.TripleBuffering] = 1;
-            Settings[SettingKeys.NoAutoUpdate] = 0;
+            Settings[RegistryKeys.Renderer] = "gg_dx7r.dll";
+            Settings[RegistryKeys.Antialiasing] = 0;
+            Settings[RegistryKeys.AnisotropicFiltering] = 0;
+            Settings[RegistryKeys.VideoDepth] = 32;
+            Settings[RegistryKeys.Windowed] = 0;
+            Settings[RegistryKeys.BorderlessWindow] = 0;
+            Settings[RegistryKeys.VerticalSync] = 1;
+            Settings[RegistryKeys.TripleBuffering] = 1;
+            Settings[RegistryKeys.NoAutoUpdate] = 0;
 
             // Get a list of renderers compatible with the user's system
             if (!CompatibleRenderers.Any())
@@ -70,33 +70,33 @@ namespace Giants.Launcher
             // Select the highest priority renderer
             if (CompatibleRenderers.Any())
             {
-                Settings[SettingKeys.Renderer] = Path.GetFileName(CompatibleRenderers.Max().FilePath);
+                Settings[RegistryKeys.Renderer] = Path.GetFileName(CompatibleRenderers.Max().FilePath);
             }
 
             // Set the current desktop resolution, leaving bit depth at the default 32:
-            Settings[SettingKeys.VideoWidth] = Screen.PrimaryScreen.Bounds.Width;
-            Settings[SettingKeys.VideoHeight] = Screen.PrimaryScreen.Bounds.Height;
+            Settings[RegistryKeys.VideoWidth] = Screen.PrimaryScreen.Bounds.Width;
+            Settings[RegistryKeys.VideoHeight] = Screen.PrimaryScreen.Bounds.Height;
         }
 
         public static void Load(string gamePath)
         {
             SetDefaults(gamePath);
 
-            if ((int)Registry.GetValue(RegistryKey, SettingKeys.GameOptionsVersion, 0) == OptionsVersion)
+            if ((int)Registry.GetValue(RegistryKey, RegistryKeys.GameOptionsVersion, 0) == OptionsVersion)
             {
                 try
                 {
-                    Settings[SettingKeys.Renderer] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.Renderer, SettingKeys.Renderer, typeof(string));
-                    Settings[SettingKeys.Antialiasing] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.Antialiasing, Settings[SettingKeys.Antialiasing], typeof(int));
-                    Settings[SettingKeys.AnisotropicFiltering] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.AnisotropicFiltering, Settings[SettingKeys.AnisotropicFiltering], typeof(int));
-                    Settings[SettingKeys.VideoWidth] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.VideoWidth, Settings[SettingKeys.VideoWidth], typeof(int));
-                    Settings[SettingKeys.VideoHeight] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.VideoHeight, Settings[SettingKeys.VideoHeight], typeof(int));
-                    Settings[SettingKeys.VideoDepth] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.VideoDepth, Settings[SettingKeys.VideoDepth], typeof(int));
-                    Settings[SettingKeys.Windowed] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.Windowed, Settings[SettingKeys.Windowed], typeof(int));
-                    Settings[SettingKeys.BorderlessWindow] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.BorderlessWindow, Settings[SettingKeys.BorderlessWindow], typeof(int));
-                    Settings[SettingKeys.VerticalSync] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.VerticalSync, Settings[SettingKeys.VerticalSync], typeof(int));
-                    Settings[SettingKeys.TripleBuffering] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.TripleBuffering, Settings[SettingKeys.TripleBuffering], typeof(int));
-                    Settings[SettingKeys.NoAutoUpdate] = RegistryExtensions.GetValue(RegistryKey, SettingKeys.NoAutoUpdate, Settings[SettingKeys.NoAutoUpdate], typeof(int));
+                    Settings[RegistryKeys.Renderer] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.Renderer, RegistryKeys.Renderer, typeof(string));
+                    Settings[RegistryKeys.Antialiasing] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.Antialiasing, Settings[RegistryKeys.Antialiasing], typeof(int));
+                    Settings[RegistryKeys.AnisotropicFiltering] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.AnisotropicFiltering, Settings[RegistryKeys.AnisotropicFiltering], typeof(int));
+                    Settings[RegistryKeys.VideoWidth] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VideoWidth, Settings[RegistryKeys.VideoWidth], typeof(int));
+                    Settings[RegistryKeys.VideoHeight] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VideoHeight, Settings[RegistryKeys.VideoHeight], typeof(int));
+                    Settings[RegistryKeys.VideoDepth] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VideoDepth, Settings[RegistryKeys.VideoDepth], typeof(int));
+                    Settings[RegistryKeys.Windowed] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.Windowed, Settings[RegistryKeys.Windowed], typeof(int));
+                    Settings[RegistryKeys.BorderlessWindow] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.BorderlessWindow, Settings[RegistryKeys.BorderlessWindow], typeof(int));
+                    Settings[RegistryKeys.VerticalSync] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VerticalSync, Settings[RegistryKeys.VerticalSync], typeof(int));
+                    Settings[RegistryKeys.TripleBuffering] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.TripleBuffering, Settings[RegistryKeys.TripleBuffering], typeof(int));
+                    Settings[RegistryKeys.NoAutoUpdate] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.NoAutoUpdate, Settings[RegistryKeys.NoAutoUpdate], typeof(int));
                 }
                 catch (Exception ex)
                 {
@@ -113,18 +113,18 @@ namespace Giants.Launcher
         {
             try
             {
-                Registry.SetValue(RegistryKey, SettingKeys.GameOptionsVersion, OptionsVersion, RegistryValueKind.DWord);
-                Registry.SetValue(RegistryKey, SettingKeys.Renderer, Settings[SettingKeys.Renderer], RegistryValueKind.String);
-                Registry.SetValue(RegistryKey, SettingKeys.Antialiasing, Settings[SettingKeys.Antialiasing], RegistryValueKind.DWord);
-                Registry.SetValue(RegistryKey, SettingKeys.AnisotropicFiltering, Settings[SettingKeys.AnisotropicFiltering], RegistryValueKind.DWord);
-                Registry.SetValue(RegistryKey, SettingKeys.VideoWidth, Settings[SettingKeys.VideoWidth], RegistryValueKind.DWord);
-                Registry.SetValue(RegistryKey, SettingKeys.VideoHeight, Settings[SettingKeys.VideoHeight], RegistryValueKind.DWord);
-                Registry.SetValue(RegistryKey, SettingKeys.VideoDepth, Settings[SettingKeys.VideoDepth], RegistryValueKind.DWord);
-                Registry.SetValue(RegistryKey, SettingKeys.Windowed, Settings[SettingKeys.Windowed], RegistryValueKind.DWord);
-                Registry.SetValue(RegistryKey, SettingKeys.BorderlessWindow, Settings[SettingKeys.BorderlessWindow], RegistryValueKind.DWord);
-                Registry.SetValue(RegistryKey, SettingKeys.VerticalSync, Settings[SettingKeys.VerticalSync], RegistryValueKind.DWord);
-                Registry.SetValue(RegistryKey, SettingKeys.TripleBuffering, Settings[SettingKeys.TripleBuffering], RegistryValueKind.DWord);
-                Registry.SetValue(RegistryKey, SettingKeys.NoAutoUpdate, Settings[SettingKeys.NoAutoUpdate], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, RegistryKeys.GameOptionsVersion, OptionsVersion, RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, RegistryKeys.Renderer, Settings[RegistryKeys.Renderer], RegistryValueKind.String);
+                Registry.SetValue(RegistryKey, RegistryKeys.Antialiasing, Settings[RegistryKeys.Antialiasing], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, RegistryKeys.AnisotropicFiltering, Settings[RegistryKeys.AnisotropicFiltering], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, RegistryKeys.VideoWidth, Settings[RegistryKeys.VideoWidth], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, RegistryKeys.VideoHeight, Settings[RegistryKeys.VideoHeight], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, RegistryKeys.VideoDepth, Settings[RegistryKeys.VideoDepth], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, RegistryKeys.Windowed, Settings[RegistryKeys.Windowed], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, RegistryKeys.BorderlessWindow, Settings[RegistryKeys.BorderlessWindow], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, RegistryKeys.VerticalSync, Settings[RegistryKeys.VerticalSync], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, RegistryKeys.TripleBuffering, Settings[RegistryKeys.TripleBuffering], RegistryValueKind.DWord);
+                Registry.SetValue(RegistryKey, RegistryKeys.NoAutoUpdate, Settings[RegistryKeys.NoAutoUpdate], RegistryValueKind.DWord);
             }
             catch (Exception ex)
             {

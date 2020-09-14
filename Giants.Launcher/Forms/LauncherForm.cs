@@ -26,9 +26,10 @@ namespace Giants.Launcher
         private readonly VersionClient versionHttpClient;
         private readonly CommunityClient communityHttpClient;
 
-        private string commandLine = String.Empty;
+        private string commandLine;
 		private string gamePath = null;
 		private Updater updater;
+		private Config config;
         private string communityAppUri;
 
         public LauncherForm()
@@ -40,6 +41,12 @@ namespace Giants.Launcher
 			// Set window title
 			this.Text = GameName;
 
+			// Read newer file-based game settings
+			this.config = new Config();
+			this.config.Read();
+
+			string baseUrl = this.config.GetString(ConfigSections.Network, ConfigKeys.MasterServerHostName);
+
 			this.httpClient = new HttpClient(
 				new HttpClientHandler() 
 				{ 
@@ -47,12 +54,12 @@ namespace Giants.Launcher
 				});
             this.versionHttpClient = new VersionClient(this.httpClient)
             {
-                BaseUrl = BaseUrl
-            };
+                BaseUrl = baseUrl
+			};
             this.communityHttpClient = new CommunityClient(this.httpClient)
             {
-                BaseUrl = BaseUrl
-            };
+                BaseUrl = baseUrl
+			};
         }
 
         private void btnExit_Click(object sender, EventArgs e)

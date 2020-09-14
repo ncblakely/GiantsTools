@@ -1,6 +1,6 @@
 ﻿namespace Giants.Launcher
 {
-    public class SettingKeys
+    public static class RegistryKeys
     {
         public const string Antialiasing = "Antialiasing";
         public const string AnisotropicFiltering = "AnisotropicFiltering";

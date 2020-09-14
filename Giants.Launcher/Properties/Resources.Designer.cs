@@ -107,6 +107,15 @@ namespace Giants.Launcher {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Settings file {0} was not found..
+        /// </summary>
+        internal static string ErrorNoConfigFile {
+            get {
+                return ResourceManager.GetString("ErrorNoConfigFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not locate any renderers compatible with your system. The most compatible renderer has been selected, but you may experience difficulty running the game..
         /// </summary>
         internal static string ErrorNoRenderers {
