@@ -19,7 +19,7 @@
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly ILogger<CrashReportsController> logger;
         private readonly IConfiguration configuration;
-        private const long MaximumSizeInBytes = 5242880; // 5MB
+        private const long MaximumSizeInBytes = 10485760; // 10MB
 
         public CrashReportsController(
             ICrashReportService crashReportService,
