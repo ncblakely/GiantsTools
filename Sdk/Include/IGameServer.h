@@ -4,18 +4,18 @@
 #include <functional>
 #include <memory>
 #include <IComponent.h>
+#include <IEventSource.h>
 
 #include "GameServerEvents.h"
 #include "NetCommon.h"
 
 // {B2D67EE7-8063-488F-B3B9-E7DA675CB752}
-DEFINE_GUID(IID_IGameServer,
-	0xb2d67ee7, 0x8063, 0x488f, 0xb3, 0xb9, 0xe7, 0xda, 0x67, 0x5c, 0xb7, 0x52);
+inline const GUID IID_IGameServer = { 0xb2d67ee7, 0x8063, 0x488f, 0xb3, 0xb9, 0xe7, 0xda, 0x67, 0x5c, 0xb7, 0x52 };
 
 /// <summary>
 /// Defines an API for communicating with the game server.
 /// </summary>
-struct IGameServer : IComponent
+struct IGameServer : IComponent, IEventSource<GameServerEventType, GameServerEvent>
 {
 	virtual ~IGameServer() = default;
 
@@ -32,10 +32,6 @@ struct IGameServer : IComponent
 	virtual void STDMETHODCALLTYPE ChangeGameOption(GameOption option) = 0;
 
 	virtual NetGameDetails STDMETHODCALLTYPE GetGameDetails() = 0;
-
-	virtual UUID STDMETHODCALLTYPE Listen(GameServerEventType event, std::function<void(const GameServerEvent&)> function) noexcept = 0;
-
-	virtual void STDMETHODCALLTYPE Unlisten(GameServerEventType event, UUID uuid) noexcept = 0;
 };
 
 struct DECLSPEC_UUID("{B2D67EE7-8063-488F-B3B9-E7DA675CB752}") IGameServer;
