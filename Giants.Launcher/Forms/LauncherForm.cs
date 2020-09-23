@@ -20,7 +20,6 @@ namespace Giants.Launcher
         private const string GamePath = "GiantsMain.exe";
 		private const string RegistryKey = @"HKEY_CURRENT_USER\Software\PlanetMoon\Giants";
 		private const string RegistryValue = "DestDir";
-		private const string BaseUrl = "https://giants.azurewebsites.net"; // TODO: Read from file
 
 		private readonly HttpClient httpClient;
         private readonly VersionClient versionHttpClient;

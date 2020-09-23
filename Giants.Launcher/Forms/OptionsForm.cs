@@ -213,6 +213,9 @@ namespace Giants.Launcher
                 this.chkTripleBuffering.Checked = GameSettings.Get<int>(RegistryKeys.TripleBuffering) == 1;
                 this.chkTripleBuffering.Enabled = true;
 			}
+
+			this.PopulateAntialiasing();
+			this.PopulateAnisotropy();
 		}
 
 		private void btnOK_Click(object sender, EventArgs e)
