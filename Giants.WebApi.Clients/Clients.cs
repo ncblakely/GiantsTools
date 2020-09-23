@@ -790,6 +790,9 @@ namespace Giants.WebApi.Clients
     
         [Newtonsoft.Json.JsonProperty("numPlayers", Required = Newtonsoft.Json.Required.Always)]
         public int NumPlayers { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("maxPlayers", Required = Newtonsoft.Json.Required.Always)]
+        public int MaxPlayers { get; set; }
     
         [Newtonsoft.Json.JsonProperty("gameState", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]

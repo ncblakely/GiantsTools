@@ -33,6 +33,9 @@
         public int NumPlayers { get; set; }
 
         [Required]
+        public int MaxPlayers { get; set; }
+
+        [Required]
         [StringLength(100)]
         public string GameState { get; set; }
 
@@ -61,6 +64,7 @@
                    this.MapName == info.MapName &&
                    this.GameType == info.GameType &&
                    this.NumPlayers == info.NumPlayers &&
+                   this.MaxPlayers == info.MaxPlayers &&
                    this.GameState == info.GameState &&
                    this.TimeLimit == info.TimeLimit &&
                    this.FragLimit == info.FragLimit &&
@@ -79,6 +83,7 @@
             hash.Add(this.MapName);
             hash.Add(this.GameType);
             hash.Add(this.NumPlayers);
+            hash.Add(this.MaxPlayers);
             hash.Add(this.GameState);
             hash.Add(this.TimeLimit);
             hash.Add(this.FragLimit);

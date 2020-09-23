@@ -22,6 +22,7 @@ struct ServerInfoResponse
 		mapName = serverInfoResponse["mapName"];
 		gameType = serverInfoResponse["gameType"];
 		numPlayers = serverInfoResponse["numPlayers"];
+		maxPlayers = serverInfoResponse["maxPlayers"];
 		gameState = serverInfoResponse["gameState"];
 		timeLimit = serverInfoResponse["timeLimit"];
 		fragLimit = serverInfoResponse["fragLimit"];
@@ -42,6 +43,7 @@ struct ServerInfoResponse
 	std::string mapName;
 	std::string gameType;
 	int numPlayers = 0;
+	int maxPlayers = 0;
 	std::string gameState;
 	int timeLimit = 0;
 	int fragLimit = 0;
