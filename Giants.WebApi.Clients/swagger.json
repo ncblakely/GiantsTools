@@ -192,6 +192,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "maxPlayers": {
+            "type": "integer",
+            "format": "int32"
+          },
           "gameState": {
             "type": "string",
             "maxLength": 100,
