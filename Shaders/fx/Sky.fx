@@ -29,9 +29,6 @@ void RenderSceneVS(
     out float2 oTexCoord0 : TEXCOORD0 )
 {
 	oPosition = mul(iPosition, g_mWorldViewProjection);
-	//oPosition = mul(iPosition, g_World);
-	//oPosition = mul(oPosition, g_View);
-	//oPosition = mul(oPosition, g_Projection);
     oColor0 = float4(1, 1, 1, 1);
     oTexCoord0 = iTexCoord0;
 }
@@ -40,12 +37,7 @@ float4 RenderScenePS(
 	float4 iColor : COLOR,
 	float2 iTexCoord0 : TEXCOORD0) : COLOR0
 { 
-	//return float4(1, 1, 1, 1);
 	return tex2D(g_SkyTextureSampler, iTexCoord0);
-	//oColor0 = tex2D(TextureDiffuse0Sampler, iTexCoord0);
-	//float intensity = dot(oColor0.rgb, float3(0.3, 0.59, 0.11));
-	//float p = smoothstep(intensityThreshold, 1.f, intensity);
-	//oColor0 = oColor0 * p * colorMultiplier;
 }
 
 technique RenderWithPixelShader
