@@ -2,6 +2,7 @@ using AutoMapper;
 using Giants.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,11 @@ namespace Giants.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddApiVersioning(config => 
+            {
+                config.DefaultApiVersion = new ApiVersion(1, 0);
+                config.AssumeDefaultVersionWhenUnspecified = true;
+            });
 
             services.AddOpenApiDocument();
 

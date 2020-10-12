@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 namespace Giants.Web.Controllers
 {
     [ApiController]
+    [ApiVersion("1.0")]
     [Route("api/[controller]")]
     public class ServersController : ControllerBase
     {

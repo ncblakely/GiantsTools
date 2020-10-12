@@ -5,6 +5,7 @@
     using Microsoft.AspNetCore.Mvc;
 
     [ApiController]
+    [ApiVersion("1.0")]
     [Route("api/[controller]")]
     public class CommunityController : ControllerBase
     {

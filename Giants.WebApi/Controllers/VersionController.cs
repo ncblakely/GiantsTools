@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Giants.WebApi.Controllers
 {
     [ApiController]
+    [ApiVersion("1.0")]
     [Route("api/[controller]")]
     public class VersionController : ControllerBase
     {

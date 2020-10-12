@@ -12,6 +12,7 @@
     using Microsoft.Extensions.Logging;
 
     [ApiController]
+    [ApiVersion("1.0")]
     [Route("api/[controller]")]
     public class CrashReportsController : ControllerBase
     {
