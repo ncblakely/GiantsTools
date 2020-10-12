@@ -31,9 +31,7 @@
             this.cmbRenderer = new System.Windows.Forms.ComboBox();
             this.cmbResolution = new System.Windows.Forms.ComboBox();
             this.cmbAntialiasing = new System.Windows.Forms.ComboBox();
-            this.cmbAnisotropy = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -79,40 +77,20 @@
             this.cmbAntialiasing.Size = new System.Drawing.Size(252, 21);
             this.cmbAntialiasing.TabIndex = 2;
             // 
-            // cmbAnisotropy
-            // 
-            this.cmbAnisotropy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbAnisotropy.FormattingEnabled = true;
-            this.cmbAnisotropy.Location = new System.Drawing.Point(124, 112);
-            this.cmbAnisotropy.Name = "cmbAnisotropy";
-            this.cmbAnisotropy.Size = new System.Drawing.Size(252, 21);
-            this.cmbAnisotropy.TabIndex = 3;
-            // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Controls.Add(this.cmbAnisotropy);
             this.groupBox1.Controls.Add(this.cmbRenderer);
             this.groupBox1.Controls.Add(this.cmbResolution);
             this.groupBox1.Controls.Add(this.cmbAntialiasing);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(382, 150);
+            this.groupBox1.Size = new System.Drawing.Size(382, 116);
             this.groupBox1.TabIndex = 4;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Graphics Settings";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(17, 115);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(101, 13);
-            this.label4.TabIndex = 7;
-            this.label4.Text = "Anisotropic Filtering:";
             // 
             // label3
             // 
@@ -146,7 +124,7 @@
             this.groupBox2.Controls.Add(this.cmbMode);
             this.groupBox2.Controls.Add(this.chkTripleBuffering);
             this.groupBox2.Controls.Add(this.chkVSync);
-            this.groupBox2.Location = new System.Drawing.Point(12, 168);
+            this.groupBox2.Location = new System.Drawing.Point(12, 138);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(118, 93);
             this.groupBox2.TabIndex = 5;
@@ -188,7 +166,7 @@
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(238, 238);
+            this.btnOK.Location = new System.Drawing.Point(238, 208);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 6;
@@ -199,7 +177,7 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(319, 238);
+            this.btnCancel.Location = new System.Drawing.Point(319, 208);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 7;
@@ -209,7 +187,7 @@
             // 
             // btnResetDefaults
             // 
-            this.btnResetDefaults.Location = new System.Drawing.Point(300, 168);
+            this.btnResetDefaults.Location = new System.Drawing.Point(300, 138);
             this.btnResetDefaults.Name = "btnResetDefaults";
             this.btnResetDefaults.Size = new System.Drawing.Size(94, 23);
             this.btnResetDefaults.TabIndex = 8;
@@ -220,7 +198,7 @@
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.chkUpdates);
-            this.groupBox3.Location = new System.Drawing.Point(136, 168);
+            this.groupBox3.Location = new System.Drawing.Point(136, 138);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(127, 49);
             this.groupBox3.TabIndex = 6;
@@ -244,7 +222,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(406, 273);
+            this.ClientSize = new System.Drawing.Size(406, 239);
             this.ControlBox = false;
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.btnResetDefaults);
@@ -276,9 +254,7 @@
         private System.Windows.Forms.ComboBox cmbRenderer;
         private System.Windows.Forms.ComboBox cmbResolution;
         private System.Windows.Forms.ComboBox cmbAntialiasing;
-        private System.Windows.Forms.ComboBox cmbAnisotropy;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;

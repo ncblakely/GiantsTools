@@ -65,11 +65,6 @@ namespace Giants.Launcher
 			if (this.cmbAntialiasing.SelectedItem == null)
                 this.cmbAntialiasing.SelectedIndex = 0;
 
-			var anisotropyOptions = (List<KeyValuePair<string, int>>)this.cmbAnisotropy.DataSource;
-            this.cmbAnisotropy.SelectedItem = anisotropyOptions.Find(o => o.Value == GameSettings.Get<int>(RegistryKeys.AnisotropicFiltering));
-			if (this.cmbAnisotropy.SelectedItem == null)
-                this.cmbAnisotropy.SelectedIndex = 0;
-
             this.chkUpdates.Checked = GameSettings.Get<int>(RegistryKeys.NoAutoUpdate) != 1;
 		}
 
@@ -137,23 +132,6 @@ namespace Giants.Launcher
 					anisotropyOptions.Add(new KeyValuePair<string,int>(string.Format(Resources.OptionSamples, i), i));
 				}
 			}
-
-			// Try to keep current selection when repopulating
-			int? currentValue = null;
-			if (this.cmbAnisotropy.SelectedValue != null)
-			{
-				currentValue = (int)this.cmbAnisotropy.SelectedValue;
-			}
-
-            this.cmbAnisotropy.DataSource = anisotropyOptions;
-            this.cmbAnisotropy.DisplayMember = "Key";
-            this.cmbAnisotropy.ValueMember = "Value";
-
-			if (currentValue != null)
-                this.cmbAnisotropy.SelectedValue = currentValue;
-
-			if (this.cmbAnisotropy.SelectedValue == null)
-                this.cmbAnisotropy.SelectedIndex = 0;
 		}
 
 		private void PopulateResolution()
@@ -234,7 +212,6 @@ namespace Giants.Launcher
 			}
 
 			GameSettings.Modify(RegistryKeys.Antialiasing, this.cmbAntialiasing.SelectedValue);
-			GameSettings.Modify(RegistryKeys.AnisotropicFiltering, this.cmbAnisotropy.SelectedValue);
 			bool windowed = (WindowType)this.cmbMode.SelectedIndex == WindowType.Windowed || (WindowType)this.cmbMode.SelectedIndex == WindowType.Borderless;
 			GameSettings.Modify(RegistryKeys.Windowed, windowed  == true ? 1 : 0);
 			bool borderless = (WindowType)this.cmbMode.SelectedIndex == WindowType.Borderless;
