@@ -25,14 +25,29 @@ namespace Giants.Launcher
             this.updateProgressCallback = updateProgressCallback;
         }
 
+        public bool IsUpdateRequired(ApplicationType applicationType, VersionInfo versionInfo)
+        {
+            if (this.ToVersion(versionInfo.Version) > this.appVersions[applicationType])
+            {
+                // Display update prompt
+                string updateMsg = applicationType == ApplicationType.Game ?
+                                    string.Format(Resources.UpdateAvailableText, this.ToVersion(versionInfo.Version).ToString()) :
+                                    string.Format(Resources.LauncherUpdateAvailableText, this.ToVersion(versionInfo.Version).ToString());
+
+                if (MessageBox.Show(updateMsg, Resources.UpdateAvailableTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public Task UpdateApplication(ApplicationType applicationType, VersionInfo versionInfo)
         {
             try
             {
-                if (this.ToVersion(versionInfo.Version) > this.appVersions[applicationType])
-                {
-                    this.StartApplicationUpdate(applicationType, versionInfo);
-                }
+                this.StartApplicationUpdate(applicationType, versionInfo);
             }
             catch (Exception e)
             {
@@ -63,16 +78,6 @@ namespace Giants.Launcher
 
         private void StartApplicationUpdate(ApplicationType applicationType, VersionInfo versionInfo)
         {
-            // Display update prompt
-            string updateMsg = applicationType == ApplicationType.Game ?
-                                string.Format(Resources.UpdateAvailableText, this.ToVersion(versionInfo.Version).ToString()) :
-                                string.Format(Resources.LauncherUpdateAvailableText, this.ToVersion(versionInfo.Version).ToString());
-
-            if (MessageBox.Show(updateMsg, Resources.UpdateAvailableTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.No)
-            {
-                return; // User declined update
-            }
-
             string patchFileName = Path.GetFileName(versionInfo.InstallerUri.AbsoluteUri);
             string localPath = Path.Combine(Path.GetTempPath(), patchFileName);
 

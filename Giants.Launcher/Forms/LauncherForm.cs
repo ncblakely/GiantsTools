@@ -178,8 +178,17 @@ namespace Giants.Launcher
 
             await Task.WhenAll(gameVersionInfo, launcherVersionInfo);
 
-            await this.updater.UpdateApplication(ApplicationType.Game, gameVersionInfo.Result);
-            await this.updater.UpdateApplication(ApplicationType.Launcher, launcherVersionInfo.Result);
+			if (this.updater.IsUpdateRequired(ApplicationType.Game, gameVersionInfo.Result))
+			{
+				this.btnPlay.Enabled = false;
+				await this.updater.UpdateApplication(ApplicationType.Game, gameVersionInfo.Result);
+			}
+
+			if (this.updater.IsUpdateRequired(ApplicationType.Launcher, launcherVersionInfo.Result))
+			{
+				this.btnPlay.Enabled = false;
+				await this.updater.UpdateApplication(ApplicationType.Launcher, launcherVersionInfo.Result);
+			}
         }
 
         private async Task<VersionInfo> GetVersionInfo(string appName)
@@ -229,6 +238,8 @@ namespace Giants.Launcher
 
 		private void LauncherForm_DownloadCompletedCallback(object sender, AsyncCompletedEventArgs e)
 		{
+			this.btnPlay.Enabled = true;
+
 			if (e.Cancelled)
 			{
 				return;
