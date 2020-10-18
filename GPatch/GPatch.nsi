@@ -42,7 +42,7 @@ SetCompressor /SOLID lzma
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "Output\GPatch1_498_222_0.exe"
+OutFile "Output\GPatch1_498_224_0.exe"
 InstallDir "$PROGRAMFILES\Giants\"
 InstallDirRegKey HKCU "SOFTWARE\PlanetMoon\Giants" "DestDir"
 ShowInstDetails hide
@@ -69,7 +69,8 @@ Section
   
   ExecWait "$INSTDIR\Redist\VC_redist.x86.exe /install /passive /norestart" $0
   ${If} $0 != 0
-	MessageBox MB_OK "Setup failed to install the Visual C++ Runtime. Please visit www.microsoft.com and download the latest version of the Visual C++ redistributable."
+  ${AndIf} $0 != 1638 ;0x666 - Newer version installed
+	MessageBox MB_OK "Setup failed to install the Visual C++ Runtime. Please visit www.microsoft.com and download the latest version of the Visual C++ 2019 redistributable."
   ${EndIf}
 
   RMDir /r "$INSTDIR\Redist" ; Delete temporary files
@@ -96,8 +97,6 @@ Section
   Delete $INSTDIR\bin\worldlist5.bin
   Delete $INSTDIR\bin\mappack1.gzp
   Delete $INSTDIR\bin\A-GRM1.gzp
-  Delete $INSTDIR\bin\GData.gbt
-  Delete $INSTDIR\bin\GData.h
   
 SectionEnd
 
