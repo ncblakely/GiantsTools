@@ -1,5 +1,5 @@
 Unicode True
-SetCompressor /SOLID lzma
+SetCompressor /SOLID zlib ; LZMA compresses about 20% better but is more likely to trigger AV false positives
 
 !define PRODUCT_NAME "Giants: Citizen Kabuto"
 !define PRODUCT_VERSION "1.498"
@@ -42,7 +42,7 @@ SetCompressor /SOLID lzma
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "Output\GPatch1_498_224_0.exe"
+OutFile "Output\GPatch1_498_224_1.exe"
 InstallDir "$PROGRAMFILES\Giants\"
 InstallDirRegKey HKCU "SOFTWARE\PlanetMoon\Giants" "DestDir"
 ShowInstDetails hide
@@ -67,7 +67,7 @@ Section
 	MessageBox MB_OK "Setup failed to update DirectX ($0). Please visit www.microsoft.com and download the latest version of the DirectX end user redistributable."
   ${EndIf}
   
-  ExecWait "$INSTDIR\Redist\VC_redist.x86.exe /install /passive /norestart" $0
+  ExecWait "$INSTDIR\Redist\VC_redist.x86.exe /install /quiet /norestart /log $\"$Temp\GPatch_VCRedist.txt$\"" $0
   ${If} $0 != 0
   ${AndIf} $0 != 1638 ;0x666 - Newer version installed
 	MessageBox MB_OK "Setup failed to install the Visual C++ Runtime. Please visit www.microsoft.com and download the latest version of the Visual C++ 2019 redistributable."

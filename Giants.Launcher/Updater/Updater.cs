@@ -27,7 +27,7 @@ namespace Giants.Launcher
 
         public bool IsUpdateRequired(ApplicationType applicationType, VersionInfo versionInfo)
         {
-            if (this.ToVersion(versionInfo.Version) > this.appVersions[applicationType])
+            if (versionInfo != null && this.ToVersion(versionInfo.Version) > this.appVersions[applicationType])
             {
                 // Display update prompt
                 string updateMsg = applicationType == ApplicationType.Game ?

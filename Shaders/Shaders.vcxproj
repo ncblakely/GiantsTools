@@ -9,14 +9,6 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x64">
-      <Configuration>Release</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -33,16 +25,6 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -54,12 +36,6 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -69,6 +45,9 @@
       <EntryPointName />
       <AdditionalOptions>/Gec %(AdditionalOptions)</AdditionalOptions>
     </FxCompile>
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)fxo\*.fxo" "$(GIANTS_PATH)\Bin\Shaders"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <FxCompile>
@@ -77,6 +56,9 @@
       <EntryPointName />
       <AdditionalOptions>/Gec %(AdditionalOptions)</AdditionalOptions>
     </FxCompile>
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)fxo\*.fxo" "$(GIANTS_PATH)\Bin\Shaders"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <CustomBuild Include="fx\LandBump.fx">
@@ -88,8 +70,8 @@
     </CustomBuild>
     <CustomBuild Include="fx\Ocean.fx">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo /Fc fxo\%(Filename).txt</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo /Fc fxo\%(Filename).txt</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxo\%(Filename).fxo</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxo\%(Filename).fxo</Outputs>
     </CustomBuild>
@@ -111,6 +93,26 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="fx\FFP.fx">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxo\%(Filename).fxo</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxo\%(Filename).fxo</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="fx\FixedFuncEMU.fx">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxo\%(Filename).fxo</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxo\%(Filename).fxo</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
