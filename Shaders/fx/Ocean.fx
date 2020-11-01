@@ -32,7 +32,7 @@ float4 MainPS(const PS_INPUT input) : COLOR0
 // C26: {minfog, maxfog, 1.0f / (maxfog - minfog), 1.0}
 
 float4 const44 : register(c44);
-matrix<float, 4, 4> matWorld : WorldViewProjectionTranspose : register(c2);
+matrix<float, 4, 4> matWorld : OceanWorldViewProjection : register(c2);
 float4 fog : register (c26);
 texture tex0;
 texture tex1;

@@ -100,7 +100,6 @@ VS_OUTPUT_BUMP LandBumpVS(
 	Output.LandBumpDiffuse = vDiffuse2 * .5f;
 	Output.LandBumpDiffuse.a = 1.0f;
 
-	//Output.LandDiffuse
 	Output.LandDiffuse.rgb = vDiffuse;
 	Output.LandDiffuse.a = 1.0f;
 
