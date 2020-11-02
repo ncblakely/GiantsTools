@@ -16,13 +16,6 @@
 
 //this file contains light, fog, and texture types
 // (originally a include, inserted here)
-#define NUM_LIGHTS               5
-
-#define LIGHT_TYPE_NONE          0
-#define LIGHT_TYPE_POINT         1
-#define LIGHT_TYPE_SPOT          2
-#define LIGHT_TYPE_DIRECTIONAL   3
-#define LIGHT_NUM_TYPES          4
 
 #define FOG_TYPE_NONE            0
 #define FOG_TYPE_EXP             1
@@ -40,7 +33,7 @@
 #define TEXGEN_TYPE_CAMERASPACEREFLECTIONVECTOR   3
 #define TEXGEN_NUM_TYPES                          4
 
-
+#define MAX_DIRECTIONAL_LIGHTS 3
 
 // Structs and variables with default values
 
@@ -57,14 +50,11 @@ int iTexGenType = TEXGEN_TYPE_NONE;
 
 int g_NumLights;
 
-struct DirectionalLight
-{
-    float4 Diffuse;
-    float4 Specular;
-    float4 Ambient;
-    float3 Position;
-    float3 Direction;
-};
+float4 DirectionalLightAmbient[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightAmbient;
+float4 DirectionalLightDiffuse[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightDiffuse;
+float3 DirectionalLightDirection[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightDirection;
+bool DirectionalLightEnabled[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightEnabled;
+float4 DirectionalLightSpecular[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightSpecular;
 
 struct Material
 {
@@ -75,34 +65,12 @@ struct Material
     float Power;
 };
 
-DirectionalLight DirectionalLights[2] : DirectionalLights =
-{
-    {
-        float4(0.398, 0.391, 0.523, 0.764),
-        float4(0.398, 0.391, 0.523, 0.764),
-        float4(0.398, 0.391, 0.523, 0.764),
-        float3(-1141, -182, 133),
-        float3(0.93, 0.35, 0)
-    },
-    {
-        float4(0.434, 0.402, 0.398, 0.712),
-        float4(0.434, 0.402, 0.398, 0.712),
-        float4(0.434, 0.402, 0.398, 0.712),
-        float3(-1138, -168, 133),
-        float3(-0.75, -0.165, -0.633)
-    },
-};
-
 Material g_Material : Material;
 
 //transformation matrices
 float4x4 matWorldViewProjection : WorldViewProjection;
 float4x4 matWorldView      : WorldView;
-float4x4 matView           : View;
 float4x4 matWorld          : World;
-float4x4 matProjection : Projection;
-float4x4 matWorldViewIT : WorldViewInverseTranspose;
-float4x4 matViewIT : ViewInverseTranspose;
 
 //function output structures
 struct VS_OUTPUT
@@ -120,31 +88,65 @@ struct COLOR_PAIR
    float4 ColorSpec     : COLOR1;
 };
 
-
-//-----------------------------------------------------------------------------
-// Name: DoDirLight()
-// Desc: Directional light computation
-//-----------------------------------------------------------------------------
-COLOR_PAIR DoDirLight(float3 N, float3 V, int i)
+float4 CalculateAmbientLight()
 {
-   COLOR_PAIR Out;
-   float3 L = mul((float3x3)matViewIT, -normalize(DirectionalLights[i].Direction));
-   float NdotL = dot(N, L);
-   Out.Color = 0;// DirectionalLights[i].Ambient;
-   Out.ColorSpec = 0;
-   if(NdotL > 0.f)
-   {
-      //compute diffuse color
-      Out.Color += NdotL * DirectionalLights[i].Diffuse;
+    float4 ambient = 0;
+    for (int i = 0; i < MAX_DIRECTIONAL_LIGHTS; i++)
+    {
+        if (DirectionalLightEnabled[i])
+        {
+            ambient += DirectionalLightAmbient[i];
+        }
+    }
 
-      //add specular component
-      if(g_Material.Power > 0)
-      {
-         float3 H = normalize(L + V);   //half vector
-         Out.ColorSpec = pow(max(0, dot(H, N)), g_Material.Power) * DirectionalLights[i].Specular;
-      }
-   }
-   return Out;
+    return g_Material.Ambient * ambient;
+}
+
+COLOR_PAIR DoDirectionalLight(float3 N, int i)
+{
+    COLOR_PAIR Out;
+    float NdotL = dot(N, -DirectionalLightDirection[i]);
+    Out.Color = 0; // g_Material.Ambient* DirectionalLights[i].Ambient;
+    Out.ColorSpec = 0;
+    if (NdotL > 0.f)
+    {
+        //compute diffuse color
+        Out.Color += max(0, NdotL * DirectionalLightDiffuse[i]); //+ (g_Material.Ambient * DirectionalLightAmbient[i]);
+
+       //add specular component
+       //if(g_Material.Power > 0)
+       //{
+       //   float3 H = normalize(L + V);   //half vector
+       //   Out.ColorSpec = pow(max(0, dot(H, N)), g_Material.Power) * DirectionalLights[i].Specular;
+       //}
+    }
+    return Out;
+}
+
+COLOR_PAIR ComputeLighting(float3 N)
+{
+    COLOR_PAIR finalResult = (COLOR_PAIR)0;
+
+    for (int i = 0; i < MAX_DIRECTIONAL_LIGHTS; i++)
+    {
+        COLOR_PAIR lightResult = (COLOR_PAIR)0;
+        if (DirectionalLightEnabled[i])
+        {
+            lightResult = DoDirectionalLight(N, i);
+        }
+
+        finalResult.Color += lightResult.Color;
+        finalResult.ColorSpec += lightResult.ColorSpec;
+    }
+
+    float4 ambient = g_Material.Ambient * CalculateAmbientLight();
+    float4 diffuse = g_Material.Diffuse * finalResult.Color;
+    float4 specular = g_Material.Specular * finalResult.ColorSpec;
+
+    finalResult.Color = saturate(ambient + diffuse);
+    finalResult.ColorSpec = saturate(specular);
+
+    return finalResult;
 }
 
 //-----------------------------------------------------------------------------
@@ -197,12 +199,9 @@ VS_OUTPUT vs_main (float4 vPosition  : POSITION0,
    VS_OUTPUT Out = (VS_OUTPUT) 0;
 
    vNormal = normalize(vNormal);
-
    Out.Pos = mul(vPosition, matWorldViewProjection);
 
-   float3 P = mul(matWorldView, vPosition);           //position in view space
-   float3 N = mul((float3x3)matWorldViewIT, vNormal); //normal in view space
-   float3 V = -normalize(P);                          //viewer
+   //float3 V = -normalize(P);                          //viewer
 
    //automatic texture coordinate generation
    Out.Tex0.xy = tc;
@@ -212,16 +211,10 @@ VS_OUTPUT vs_main (float4 vPosition  : POSITION0,
    Out.Tex0.xy += tc * (iTexGenType == TEXGEN_TYPE_NONE);*/
 
    //light computation
-   Out.Color = g_Material.Ambient;
-   Out.ColorSpec = 0;
 
    //directional lights
-   for(int i = 0; i < 2; i++)
-   {
-      COLOR_PAIR ColOut = DoDirLight(N, V, i);
-      Out.Color += ColOut.Color;
-      Out.ColorSpec += ColOut.ColorSpec;
-   }
+   float3 N = mul(vNormal, (float3x3)matWorld);
+   COLOR_PAIR lighting = ComputeLighting(N);
 
    ////point lights
    //for(int i = 0; i < iLightPointNum; i++)
@@ -231,23 +224,12 @@ VS_OUTPUT vs_main (float4 vPosition  : POSITION0,
    //   Out.ColorSpec += ColOut.ColorSpec;
    //}
 
-   ////spot lights
-   //for(int i = 0; i < iLightSpotNum; i++)
-   //{
-   //   COLOR_PAIR ColOut = DoSpotLight(vPosition, N, V, i+iLightSpotIni);
-   //   Out.Color += ColOut.Color;
-   //   Out.ColorSpec += ColOut.ColorSpec;
-   //}
-
    //apply material color
-   Out.Color *= g_Material.Diffuse;
-   Out.ColorSpec *= g_Material.Specular;
-
-   // saturate
-   Out.Color = min(1, Out.Color);
-   Out.ColorSpec = min(1, Out.ColorSpec);
+   Out.Color = lighting.Color;
+   Out.ColorSpec = lighting.ColorSpec;
 
    //apply fog
+   float3 P = mul(matWorldView, vPosition);           //position in view space
    float d;
    if(bFogRange)
       d = length(P);

@@ -13,12 +13,12 @@ float4x4 g_TexGenTransform0 : TexGenTransform0;
 float4x4 g_TexGenTransform1 : TexGenTransform1;
 float4x4 g_ShoreGen : TexGenTransform2;
 
-float4 g_LightDiffuseColors[MAX_LIGHTS] : EffectLightColors;
-float3 g_LightPositions[MAX_LIGHTS] : EffectLightPositions;
-float g_LightRangeSquared[MAX_LIGHTS] : EffectLightRanges;
+float4 g_LightDiffuseColors[MAX_LIGHTS] : PointLightDiffuse;
+float3 g_LightPositions[MAX_LIGHTS] : PointLightPosition;
+float g_LightRangeSquared[MAX_LIGHTS] : PointLightRange;
+bool g_LightEnabled[MAX_LIGHTS] : PointLightEnabled;
 
 float4 g_TextureFactor : TextureFactor;
-int g_NumLights = 0;
 
 //////////////////////////////////////////////////////
 
@@ -125,20 +125,23 @@ float4 LandBumpPS(VS_OUTPUT_BUMP input) : COLOR0
 	normalMap = saturate((float4)dot((float3)normal, (float3)normalcol)).xyz; 
 	float3 finalColor = 2.0 * (normalMap * (tex2D(g_LandTextureSampler, input.LandTextureUV)) + input.LandBumpDiffuse);
 
-	for (int i = 0; i < g_NumLights; i++)
+	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
-		// Get light direction for this fragment
-		float3 lightDir = normalize(input.WorldPos - g_LightPositions[i]); // per pixel diffuse lighting
+		if (g_LightEnabled[i])
+		{
+			// Get light direction for this fragment
+			float3 lightDir = normalize(input.WorldPos - g_LightPositions[i]); // per pixel diffuse lighting
 
-		// Note: Non-uniform scaling not supported
-		float diffuseLighting = saturate(dot(input.Normal, -lightDir));
+			// Note: Non-uniform scaling not supported
+			float diffuseLighting = saturate(dot(input.Normal, -lightDir));
 
-		// Introduce fall-off of light intensity
-		diffuseLighting *= (g_LightRangeSquared[i] / dot(g_LightPositions[i] - input.WorldPos, g_LightPositions[i] - input.WorldPos));
+			// Introduce fall-off of light intensity
+			diffuseLighting *= (g_LightRangeSquared[i] / dot(g_LightPositions[i] - input.WorldPos, g_LightPositions[i] - input.WorldPos));
 
-		float4 diffuseColor = diffuseLighting * g_LightDiffuseColors[i];
+			float4 diffuseColor = diffuseLighting * g_LightDiffuseColors[i];
 
-		finalColor += diffuseColor;
+			finalColor += diffuseColor;
+		}
 	}
 
 	return float4(finalColor, 1);
@@ -193,20 +196,23 @@ float4 LandscapePS(VS_OUTPUT input) : COLOR0
 { 
 	float4 finalColor = 0;
 
-	for (int i = 0; i < g_NumLights; i++)
+	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
-		// Get light direction for this fragment
-		float3 lightDir = normalize(input.WorldPos - g_LightPositions[i]); // per pixel diffuse lighting
+		if (g_LightEnabled[i])
+		{
+			// Get light direction for this fragment
+			float3 lightDir = normalize(input.WorldPos - g_LightPositions[i]); // per pixel diffuse lighting
 
-		// Note: Non-uniform scaling not supported
-		float diffuseLighting = saturate(dot(input.Normal, -lightDir));
+			// Note: Non-uniform scaling not supported
+			float diffuseLighting = saturate(dot(input.Normal, -lightDir));
 
-		// Introduce fall-off of light intensity
-		diffuseLighting *= (g_LightRangeSquared[i] / dot(g_LightPositions[i] - input.WorldPos, g_LightPositions[i] - input.WorldPos));
+			// Introduce fall-off of light intensity
+			diffuseLighting *= (g_LightRangeSquared[i] / dot(g_LightPositions[i] - input.WorldPos, g_LightPositions[i] - input.WorldPos));
 
-		float4 diffuseColor = diffuseLighting * g_LightDiffuseColors[i];
+			float4 diffuseColor = diffuseLighting * g_LightDiffuseColors[i];
 
-		finalColor += diffuseColor;
+			finalColor += diffuseColor;
+		}
 	}
 
 	float3 texel = tex2D(g_LandTextureSampler, input.TextureUV);

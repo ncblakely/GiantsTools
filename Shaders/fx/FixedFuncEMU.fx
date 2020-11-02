@@ -126,7 +126,9 @@ struct ColorsOutput
     float4 Specular;
 };
 
-// camerPos = WorldView
+// cameraPos = WorldView
+// worldNormal = inputNormal * World
+// worldPos = inputPos * World
 ColorsOutput CalcLighting( float3 worldNormal, float3 worldPos, float3 cameraPos )
 {
     ColorsOutput output = (ColorsOutput)0.0;
