@@ -4,7 +4,7 @@
 // Land bumpmapping and lighting shader.
 //--------------------------------------------------------------------------------------
 
-#define MAX_LIGHTS 4
+#include "Constants.fxh"
 
 float4x4 g_mWorldViewProjection : WorldViewProjection;
 float4x4 g_World : World;

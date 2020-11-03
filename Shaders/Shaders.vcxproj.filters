@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="fx\LandBump.fx" />
+    <CustomBuild Include="fx\Ocean.fx" />
+    <CustomBuild Include="fx\Sky.fx" />
+    <CustomBuild Include="fx\Water.fx" />
+    <CustomBuild Include="fx\Object.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Include">
+      <UniqueIdentifier>{026956f1-0f27-4b3d-80ab-f81eafce58f5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="fx\Constants.fxh">
+      <Filter>Include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fx\Lighting.fxh">
+      <Filter>Include</Filter>
+    </None>
+  </ItemGroup>
+</Project>
