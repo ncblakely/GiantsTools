@@ -48,13 +48,12 @@ bool bFogRange : register(b4) = true;
 int iTexType = TEX_TYPE_NONE;
 int iTexGenType = TEXGEN_TYPE_NONE;
 
-int g_NumLights;
-
 float4 DirectionalLightAmbient[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightAmbient;
 float4 DirectionalLightDiffuse[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightDiffuse;
 float3 DirectionalLightDirection[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightDirection;
 bool DirectionalLightEnabled[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightEnabled;
 float4 DirectionalLightSpecular[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightSpecular;
+float3 g_CameraPosition : CameraPosition;
 
 struct Material
 {
@@ -71,6 +70,7 @@ Material g_Material : Material;
 float4x4 matWorldViewProjection : WorldViewProjection;
 float4x4 matWorldView      : WorldView;
 float4x4 matWorld          : World;
+float4x4 matView : View;
 
 //function output structures
 struct VS_OUTPUT
@@ -99,31 +99,33 @@ float4 CalculateAmbientLight()
         }
     }
 
-    return g_Material.Ambient * ambient;
+    return ambient;
 }
 
-COLOR_PAIR DoDirectionalLight(float3 N, int i)
+COLOR_PAIR DoDirectionalLight(float3 worldPos, float3 N, int i)
 {
-    COLOR_PAIR Out;
+    COLOR_PAIR Out = (COLOR_PAIR)0;
     float NdotL = dot(N, -DirectionalLightDirection[i]);
-    Out.Color = 0; // g_Material.Ambient* DirectionalLights[i].Ambient;
-    Out.ColorSpec = 0;
     if (NdotL > 0.f)
     {
         //compute diffuse color
-        Out.Color += max(0, NdotL * DirectionalLightDiffuse[i]); //+ (g_Material.Ambient * DirectionalLightAmbient[i]);
+        Out.Color += max(0, NdotL * DirectionalLightDiffuse[i]);
 
-       //add specular component
-       //if(g_Material.Power > 0)
-       //{
-       //   float3 H = normalize(L + V);   //half vector
-       //   Out.ColorSpec = pow(max(0, dot(H, N)), g_Material.Power) * DirectionalLights[i].Specular;
-       //}
+        if (g_Material.Power > 0)
+        {
+            float3 toEye = g_CameraPosition.xyz - worldPos;
+            toEye = normalize(toEye);
+            float3 halfway = normalize(toEye + -DirectionalLightDirection[i]);
+            float NDotH = saturate(dot(halfway, N));
+
+            float4 spec = DirectionalLightSpecular[i];
+            Out.ColorSpec += spec * pow(NDotH, g_Material.Power);
+        }
     }
     return Out;
 }
 
-COLOR_PAIR ComputeLighting(float3 N)
+COLOR_PAIR ComputeLighting(float3 worldPos, float3 N)
 {
     COLOR_PAIR finalResult = (COLOR_PAIR)0;
 
@@ -132,7 +134,7 @@ COLOR_PAIR ComputeLighting(float3 N)
         COLOR_PAIR lightResult = (COLOR_PAIR)0;
         if (DirectionalLightEnabled[i])
         {
-            lightResult = DoDirectionalLight(N, i);
+            lightResult = DoDirectionalLight(worldPos, N, i);
         }
 
         finalResult.Color += lightResult.Color;
@@ -201,8 +203,6 @@ VS_OUTPUT vs_main (float4 vPosition  : POSITION0,
    vNormal = normalize(vNormal);
    Out.Pos = mul(vPosition, matWorldViewProjection);
 
-   //float3 V = -normalize(P);                          //viewer
-
    //automatic texture coordinate generation
    Out.Tex0.xy = tc;
    /*Out.Tex0 = float4((2.f * dot(V,N) * N - V) * (iTexGenType == TEXGEN_TYPE_CAMERASPACEREFLECTIONVECTOR)
@@ -213,8 +213,9 @@ VS_OUTPUT vs_main (float4 vPosition  : POSITION0,
    //light computation
 
    //directional lights
+   float4 worldPos  = mul(vPosition, matWorld);           //position in view space
    float3 N = mul(vNormal, (float3x3)matWorld);
-   COLOR_PAIR lighting = ComputeLighting(N);
+   COLOR_PAIR lighting = ComputeLighting(worldPos, N);
 
    ////point lights
    //for(int i = 0; i < iLightPointNum; i++)
@@ -229,7 +230,7 @@ VS_OUTPUT vs_main (float4 vPosition  : POSITION0,
    Out.ColorSpec = lighting.ColorSpec;
 
    //apply fog
-   float3 P = mul(matWorldView, vPosition);           //position in view space
+   float4 P = mul(matWorldView, vPosition);           //position in view space
    float d;
    if(bFogRange)
       d = length(P);
@@ -251,9 +252,6 @@ technique basic_with_shader
 {
    pass P0
    {
-      SPECULARENABLE = (g_Material.Power > 0);
-      FOGENABLE = (iFogType != FOG_TYPE_NONE);
-      FOGCOLOR = (vFogColor);
       VertexShader = compile vs_2_0 vs_main();
    }
 }
