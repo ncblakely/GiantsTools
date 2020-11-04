@@ -7,5 +7,7 @@
         public const string GiantsBeta = nameof(GiantsBeta);
 
         public const string GiantsLauncher = nameof(GiantsLauncher);
+
+        public const string GiantsLauncherBeta = nameof(GiantsLauncherBeta);
     }
 }
