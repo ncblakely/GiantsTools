@@ -173,8 +173,10 @@ namespace Giants.Launcher
             updateCompletedCallback: this.LauncherForm_DownloadCompletedCallback,
             updateProgressCallback: this.LauncherForm_DownloadProgressCallback);
 
-            Task<VersionInfo> gameVersionInfo = this.GetVersionInfo(ApplicationNames.Giants);
-            Task<VersionInfo> launcherVersionInfo = this.GetVersionInfo(ApplicationNames.GiantsLauncher);
+            Task<VersionInfo> gameVersionInfo = this.GetVersionInfo(
+				GetApplicationName(ApplicationType.Game));
+            Task<VersionInfo> launcherVersionInfo = this.GetVersionInfo(
+				GetApplicationName(ApplicationType.Launcher));
 
             await Task.WhenAll(gameVersionInfo, launcherVersionInfo);
 
@@ -189,6 +191,27 @@ namespace Giants.Launcher
 				this.btnPlay.Enabled = false;
 				await this.updater.UpdateApplication(ApplicationType.Launcher, launcherVersionInfo.Result);
 			}
+        }
+
+		private static string GetApplicationName(ApplicationType applicationType)
+        {
+			switch (applicationType)
+            {
+				case ApplicationType.Game:
+#if BETA
+					return ApplicationNames.GiantsBeta;
+#else
+					return ApplicationNames.Giants;
+#endif
+				case ApplicationType.Launcher:
+#if BETA
+					return ApplicationNames.GiantsLauncherBeta;
+#else
+					return ApplicationNames.GiantsLauncher;
+#endif
+            }
+
+			throw new ArgumentOutOfRangeException();
         }
 
         private async Task<VersionInfo> GetVersionInfo(string appName)

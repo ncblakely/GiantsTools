@@ -2,7 +2,7 @@ Unicode True
 SetCompressor /SOLID zlib ; LZMA compresses about 20% better but is more likely to trigger AV false positives
 
 !define PRODUCT_NAME "Giants: Citizen Kabuto"
-!define PRODUCT_VERSION "1.498"
+!define PRODUCT_VERSION "1.499"
 
 ; MUI 1.67 compatible ------
 !include "MUI2.nsh"
@@ -42,7 +42,7 @@ SetCompressor /SOLID zlib ; LZMA compresses about 20% better but is more likely 
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "Output\GPatch1_498_224_1.exe"
+OutFile "Output\GPatch1_499_0_0.exe"
 InstallDir "$PROGRAMFILES\Giants\"
 InstallDirRegKey HKCU "SOFTWARE\PlanetMoon\Giants" "DestDir"
 ShowInstDetails hide

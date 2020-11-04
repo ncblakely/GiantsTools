@@ -11,7 +11,7 @@ namespace Giants.Launcher
     {
         // Constants
         private const string RegistryKey = @"HKEY_CURRENT_USER\Software\PlanetMoon\Giants";
-        private const int OptionsVersion = 3;
+        private const int OptionsVersion = 4;
 
         private static readonly Dictionary<string, object> Settings = new Dictionary<string, object>();
 

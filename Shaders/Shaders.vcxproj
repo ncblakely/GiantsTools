@@ -95,15 +95,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="fx\FFP.fx">
-      <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxo\%(Filename).fxo</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxo\%(Filename).fxo</Outputs>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
     <FxCompile Include="fx\FixedFuncEMU.fx">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>

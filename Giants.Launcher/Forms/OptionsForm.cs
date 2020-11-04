@@ -38,19 +38,6 @@ namespace Giants.Launcher
 					.Disambiguate()
 					.ToList()
 					.ToArray());
-
-			RendererInfo renderer = GameSettings.CompatibleRenderers.Find(
-				r => StringComparer.OrdinalIgnoreCase.Compare(Path.GetFileName(r.FilePath), GameSettings.Get<string>(RegistryKeys.Renderer)) == 0);
-
-			if (renderer != null)
-			{
-				this.cmbRenderer.SelectedItem = renderer;
-			}
-			else
-			{
-				renderer = GameSettings.CompatibleRenderers.Find(r => r.Name == "DirectX 7");
-				this.cmbRenderer.SelectedItem = renderer;
-			}
 		}
 
 		private void SetOptions()
@@ -66,6 +53,19 @@ namespace Giants.Launcher
                 this.cmbAntialiasing.SelectedIndex = 0;
 
             this.chkUpdates.Checked = GameSettings.Get<int>(RegistryKeys.NoAutoUpdate) != 1;
+
+			RendererInfo renderer = GameSettings.CompatibleRenderers.Find(
+				r => StringComparer.OrdinalIgnoreCase.Compare(Path.GetFileName(r.FilePath), GameSettings.Get<string>(RegistryKeys.Renderer)) == 0);
+
+			if (renderer != null)
+			{
+				this.cmbRenderer.SelectedItem = renderer;
+			}
+			else
+			{
+				renderer = GameSettings.CompatibleRenderers.Find(r => r.FileName == "gg_dx7r.dll");
+				this.cmbRenderer.SelectedItem = renderer;
+			}
 		}
 
 		private void PopulateAntialiasing()
