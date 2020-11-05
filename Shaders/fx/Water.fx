@@ -9,7 +9,7 @@ float4x4 g_WorldViewProjection : WorldViewProjection;
 float4 g_TextureFactor : TextureFactor;
 //float4 g_Fog : Fog;
 
-texture2D g_WaterTexture;
+texture2D g_WaterTexture : Texture0;
 sampler2D g_WaterTextureSampler = 
 sampler_state
 {

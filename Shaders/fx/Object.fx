@@ -2,11 +2,27 @@
 #include "../fxh/Lighting.fxh"
 
 // Lighting state
-float4 g_DirectionalLightAmbient[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightAmbient;
+float4 g_DirectionalAmbientLightSum : DirectionalLightAmbientSum;
 float4 g_DirectionalLightDiffuse[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightDiffuse;
 float3 g_DirectionalLightDirection[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightDirection;
-bool g_DirectionalLightEnabled[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightEnabled;
 float4 g_DirectionalLightSpecular[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightSpecular;
+int g_numDirectionalLights : DirectionalLightCount;
+
+// Texturing and blending
+TextureBlendStage g_blendStages[MAX_BLEND_STAGES] : BlendStages;
+int g_numBlendStages : BlendStageCount;
+float4 g_textureFactor : TextureFactor;
+
+texture g_ObjTexture : Texture0;
+
+sampler g_ObjTextureSampler =
+sampler_state
+{
+    Texture = <g_ObjTexture>;
+    MipFilter = LINEAR;
+    MinFilter = LINEAR;
+    MagFilter = LINEAR;
+};
 
 // Camera
 float3 g_CameraPosition : CameraPosition;
@@ -18,27 +34,9 @@ Material g_Material : Material;
 float4x4 g_WorldViewProjection : WorldViewProjection;
 float4x4 g_World : World;
 
-struct VS_OUTPUT
-{
-   float4 Pos : POSITION;
-   float4 Diffuse : COLOR0;
-   float4 Specular : COLOR1;
-   float4 Tex0 : TEXCOORD0;
-};
-
-float4 CalculateAmbientLight()
-{
-    float4 ambient = 0;
-    for (int i = 0; i < MAX_DIRECTIONAL_LIGHTS; i++)
-    {
-        if (g_DirectionalLightEnabled[i])
-        {
-            ambient += g_DirectionalLightAmbient[i];
-        }
-    }
-
-    return ambient;
-}
+// =======================================================
+// Textured per pixel lighting
+//
 
 float4 CalculateDiffuse(float3 N, float3 L, float4 diffuseColor)
 {
@@ -71,13 +69,13 @@ Lighting DoDirectionalLight(float3 worldPos, float3 N, int i)
 {
     Lighting Out;
     Out.Diffuse = CalculateDiffuse(
-        N, 
-        -g_DirectionalLightDirection[i], 
+        N,
+        -g_DirectionalLightDirection[i],
         g_DirectionalLightDiffuse[i]);
     Out.Specular = CalculateSpecular(
-        worldPos, 
-        N, 
-        -g_DirectionalLightDirection[i], 
+        worldPos,
+        N,
+        -g_DirectionalLightDirection[i],
         g_DirectionalLightSpecular[i]);
     return Out;
 }
@@ -86,17 +84,14 @@ Lighting ComputeLighting(float3 worldPos, float3 N)
 {
     Lighting finalLighting = (Lighting)0;
 
-    for (int i = 0; i < MAX_DIRECTIONAL_LIGHTS; i++)
+    for (int i = 0; i < g_numDirectionalLights; i++)
     {
-        if (g_DirectionalLightEnabled[i])
-        {
-            Lighting lighting = DoDirectionalLight(worldPos, N, i);
-            finalLighting.Diffuse += lighting.Diffuse;
-            finalLighting.Specular += lighting.Specular;
-        }
+        Lighting lighting = DoDirectionalLight(worldPos, N, i);
+        finalLighting.Diffuse += lighting.Diffuse;
+        finalLighting.Specular += lighting.Specular;
     }
 
-    float4 ambient = g_Material.Ambient * CalculateAmbientLight();
+    float4 ambient = g_Material.Ambient * g_DirectionalAmbientLightSum;
     float4 diffuse = g_Material.Diffuse * finalLighting.Diffuse;
     float4 specular = g_Material.Specular * finalLighting.Specular;
 
@@ -106,87 +101,129 @@ Lighting ComputeLighting(float3 worldPos, float3 N)
     return finalLighting;
 }
 
-//-----------------------------------------------------------------------------
-// Name: DoPointLight()
-// Desc: Point light computation
-//-----------------------------------------------------------------------------
-//COLOR_PAIR DoPointLight(float4 vPosition, float3 N, float3 V, int i)
-//{
-//   float3 L = mul((float3x3)matViewIT, normalize((lights[i].vPos-(float3)mul(matWorld,vPosition))));
-//   COLOR_PAIR Out;
-//   float NdotL = dot(N, L);
-//   Out.Color = lights[i].vAmbient;
-//   Out.Specular = 0;
-//   float fAtten = 1.f;
-//   if(NdotL >= 0.f)
-//   {
-//      //compute diffuse color
-//      Out.Color += NdotL * lights[i].vDiffuse;
-//
-//      //add specular component
-//      if(bSpecular)
-//      {
-//         float3 H = normalize(L + V);   //half vector
-//         Out.Specular = pow(max(0, dot(H, N)), fMaterialPower) * lights[i].vSpecular;
-//      }
-//
-//      float LD = length(lights[i].vPos-(float3)mul(matWorld,vPosition));
-//      if(LD > lights[i].fRange)
-//      {
-//         fAtten = 0.f;
-//      }
-//      else
-//      {
-//         fAtten *= 1.f/(lights[i].vAttenuation.x + lights[i].vAttenuation.y*LD + lights[i].vAttenuation.z*LD*LD);
-//      }
-//      Out.Color *= fAtten;
-//      Out.Specular *= fAtten;
-//   }
-//   return Out;
-//}
-
-VS_OUTPUT VSMain (
-    float4 vPosition  : POSITION0, 
-    float3 vNormal    : NORMAL0, 
-    float2 tc         : TEXCOORD0)
+struct PixelLightingVSOutput
 {
-   VS_OUTPUT Out = (VS_OUTPUT)0;
+    float4 Pos : POSITION;
+    float2 Tex0 : TEXCOORD0;
+    float3 Normal : TEXCOORD1;
+    float3 WorldPos : TEXCOORD2;
+};
 
-   vNormal = normalize(vNormal);
-   Out.Pos = mul(vPosition, g_WorldViewProjection);
+PixelLightingVSOutput PixelLightingVS(
+    float4 vPosition : POSITION0,
+    float3 vNormal : NORMAL0,
+    float2 tc : TEXCOORD0)
+{
+    // Simple transform, pre-compute as much as we can for the pixel shader
+    PixelLightingVSOutput output;
 
-   //automatic texture coordinate generation
-   Out.Tex0.xy = tc;
-
-   //directional lights
-   float4 worldPos = mul(vPosition, g_World);           //position in view space
-   float3 normal = mul(vNormal, (float3x3)g_World);
-   Lighting lighting = ComputeLighting(worldPos, normal);
-
-   ////point lights
-   //for(int i = 0; i < iLightPointNum; i++)
-   //{
-   //   COLOR_PAIR ColOut = DoPointLight(vPosition, N, V, i+iLightPointIni);
-   //   Out.Color += ColOut.Color;
-   //   Out.Specular += ColOut.Specular;
-   //}
-
-   Out.Diffuse = lighting.Diffuse;
-   Out.Specular = lighting.Specular;
-
-   return Out;
+    output.Pos = mul(vPosition, g_WorldViewProjection);
+    output.Normal = mul(normalize(vNormal), (float3x3)g_World);
+    output.WorldPos = mul(vPosition, g_World);
+    output.Tex0 = tc;
+    return output;
 }
 
-float4 ps_main(VS_OUTPUT input) : COLOR0
+float4 GetColorArg(int colorArg, float4 textureColor, float4 diffuseColor)
 {
-    return input.Diffuse;
+    float4 result;
+    if (colorArg == D3DTA_TEXTURE) result = textureColor;
+    else if (colorArg == D3DTA_DIFFUSE) result = diffuseColor;
+    else if (colorArg == D3DTA_TFACTOR) result = g_textureFactor;
+    else result = float4(1.f, 1.f, 1.f, 1.f);
+
+    return result;
 }
 
-technique TexturedVertexLighting
+float4 Modulate(int stageIndex, float4 textureColor, float4 diffuseColor, float factor)
 {
-   pass P0
-   {
-      //PixelShader = compile ps_2_0 ps_main();
-      VertexShader = compile vs_2_0 VSMain();
-   }
+    float4 left = GetColorArg(g_blendStages[stageIndex].colorArg1, textureColor, diffuseColor); 
+    float4 right = GetColorArg(g_blendStages[stageIndex].colorArg2, textureColor, diffuseColor);
+
+    return (left * right) * factor;
+}
+
+float4 ProcessStages(float4 textureColor, float4 diffuseColor)
+{
+    float4 output = 0;
+    for (int i = 0; i < g_numBlendStages; i++)
+    {
+        if (g_blendStages[i].colorOp == D3DTOP_MODULATE4X)
+        {
+            output += Modulate(i, textureColor, diffuseColor, 4.0f);
+        }
+        else
+        {
+            output += Modulate(i, textureColor, diffuseColor, 1.0f);
+        }
+    }
+
+    return output;
+}
+
+struct PixelLightingPSOutput
+{
+    float4 Diffuse : COLOR0;
+    float4 Specular : COLOR1;
+};
+
+PixelLightingPSOutput PixelLightingPS(PixelLightingVSOutput input)
+{
+    float4 color = tex2D(g_ObjTextureSampler, input.Tex0);
+
+    Lighting lighting = ComputeLighting(input.WorldPos, input.Normal);
+
+    PixelLightingPSOutput output;
+    output.Diffuse = ProcessStages(color, lighting.Diffuse);
+    output.Specular = color * lighting.Specular;
+    return output;
+}
+
+technique PixelLighting
+{
+    pass P0
+    {
+        PixelShader = compile ps_3_0 PixelLightingPS();
+        VertexShader = compile vs_3_0 PixelLightingVS();
+    }
+}
+
+// =======================================================
+// Color per vertex
+//
+
+struct ColorPerVertexVSOutput
+{
+    float4 Pos : POSITION;
+    float2 Tex0 : TEXCOORD0;
+    float4 Color : COLOR0;
+};
+
+float4 ColorPerVertexPS(ColorPerVertexVSOutput input) : COLOR0
+{
+    float4 color = tex2D(g_ObjTextureSampler, input.Tex0); //* input.Color;
+    return color;
+}
+
+ColorPerVertexVSOutput ColorPerVertexVS(
+    float4 vPosition : POSITION0,
+    float2 tc : TEXCOORD0,
+    float4 color : COLOR0)
+{
+    // Simple transform, pre-compute as much as we can for the pixel shader
+    ColorPerVertexVSOutput output = (ColorPerVertexVSOutput)0;
+
+    output.Pos = mul(vPosition, g_WorldViewProjection);
+    output.Tex0 = tc;
+    output.Color = color;
+    return output;
+}
+
+technique ColorPerVertex
+{
+    pass P0
+    {
+        //PixelShader = compile ps_3_0 ColorPerVertexPS();
+        VertexShader = compile vs_3_0 ColorPerVertexVS();
+    }
 }

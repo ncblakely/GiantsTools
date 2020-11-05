@@ -34,8 +34,8 @@ float4 MainPS(const PS_INPUT input) : COLOR0
 float4 const44 : register(c44);
 matrix<float, 4, 4> matWorld : OceanWorldViewProjection : register(c2);
 float4 fog : register (c26);
-texture tex0;
-texture tex1;
+texture g_SeabedTexture : Texture0;
+texture g_EnvironmentTexture : Texture1;
 
 struct VS_OUTPUT
 {
@@ -87,8 +87,8 @@ technique t0
 {
 	pass p0
 	{
-		Texture[0] = <tex0>;	// Seabed texture
-		Texture[1] = <tex1>;	// Environment texture
+		Texture[0] = <g_SeabedTexture>;	// Seabed texture
+		Texture[1] = <g_EnvironmentTexture>;	// Environment texture
 		
 		// All of these constants are set by the game engine before drawing the shader
 		// Each constant register (c# in the asm code) has 4 floating point values

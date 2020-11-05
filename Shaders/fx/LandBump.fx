@@ -4,7 +4,7 @@
 // Land bumpmapping and lighting shader.
 //--------------------------------------------------------------------------------------
 
-#include "Constants.fxh"
+#include "../fxh/Constants.fxh"
 
 float4x4 g_mWorldViewProjection : WorldViewProjection;
 float4x4 g_World : World;
@@ -22,10 +22,10 @@ float4 g_TextureFactor : TextureFactor;
 
 //////////////////////////////////////////////////////
 
-texture g_LandTexture;
-texture g_LandBumpTexture;
-texture g_ShoreTexture;
-texture g_LandDetailTexture;
+texture g_LandTexture : Texture0;
+texture g_LandBumpTexture : Texture1;
+//texture g_LandDetailTexture : Texture2;
+//texture g_ShoreTexture : Texture3;
 
 //--------------------------------------------------------------------------------------
 // Texture samplers
@@ -48,23 +48,23 @@ sampler_state
     MagFilter	= LINEAR;
 };
 
-sampler g_LandDetailTextureSampler = 
-sampler_state
-{
-	Texture = <g_LandDetailTexture>;
-    MipFilter	= LINEAR;
-    MinFilter	= LINEAR;
-    MagFilter	= LINEAR;
-};
-
-sampler g_ShoreTextureSampler = 
-sampler_state
-{
-	Texture = <g_LandBumpTexture>;
-    MipFilter	= LINEAR;
-    MinFilter	= LINEAR;
-    MagFilter	= LINEAR;
-};
+//sampler g_LandDetailTextureSampler = 
+//sampler_state
+//{
+//	Texture = <g_LandDetailTexture>;
+//    MipFilter	= LINEAR;
+//    MinFilter	= LINEAR;
+//    MagFilter	= LINEAR;
+//};
+//
+//sampler g_ShoreTextureSampler = 
+//sampler_state
+//{
+//	Texture = <g_LandBumpTexture>;
+//    MipFilter	= LINEAR;
+//    MinFilter	= LINEAR;
+//    MagFilter	= LINEAR;
+//};
 
 //--------------------------------------------------------------------------------------
 // Vertex shader output structure

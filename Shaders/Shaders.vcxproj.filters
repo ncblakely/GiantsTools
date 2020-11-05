@@ -11,15 +11,21 @@
     <Filter Include="Include">
       <UniqueIdentifier>{026956f1-0f27-4b3d-80ab-f81eafce58f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pixel">
+      <UniqueIdentifier>{0ead58ec-1210-4df1-88c8-dfd73f6fb054}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="fx\Constants.fxh">
-      <Filter>Include</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="fx\Lighting.fxh">
+    <None Include="FFP_orig.fx" />
+    <None Include="fxh\Constants.fxh">
       <Filter>Include</Filter>
     </None>
+    <None Include="fxh\Lighting.fxh">
+      <Filter>Include</Filter>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="reference\FixedFuncEMU.fx" />
   </ItemGroup>
 </Project>

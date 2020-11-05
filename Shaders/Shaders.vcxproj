@@ -97,29 +97,25 @@
   <ItemGroup>
     <CustomBuild Include="fx\Object.fx">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxo\%(Filename).fxo</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxo\%(Filename).fxo</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="fx\FixedFuncEMU.fx">
-      <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxo\%(Filename).fxo</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxo\%(Filename).fxo</Outputs>
+    <None Include="FFP_orig.fx" />
+    <None Include="fxh\Constants.fxh" />
+    <None Include="fxh\Lighting.fxh" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="reference\FixedFuncEMU.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="FFP_orig.fx" />
-    <None Include="fx\Lighting.fxh" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="fx\Constants.fxh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
