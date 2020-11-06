@@ -41,10 +41,11 @@
             bool includeExpired = false,
             string partitionKey = null)
         {
-            ConcurrentDictionary<string, ServerInfo> serverInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, this.PopulateCache);
+            ConcurrentDictionary<string, IList<ServerInfo>> serverInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, this.PopulateCache);
 
             IQueryable<ServerInfo> serverInfoQuery = serverInfo
                 .Values
+                .SelectMany(s => s)
                 .AsQueryable();
 
             if (whereExpression != null)
@@ -67,10 +68,11 @@
             Expression<Func<ServerInfo, bool>> whereExpression = null,
             string partitionKey = null)
         {
-            ConcurrentDictionary<string, ServerInfo> serverInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, this.PopulateCache);
+            ConcurrentDictionary<string, IList<ServerInfo>> serverInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, this.PopulateCache);
 
             IQueryable<ServerInfo> serverInfoQuery = serverInfo
                 .Values
+                .SelectMany(s => s)
                 .AsQueryable();
 
             if (serverInfoQuery != null)
@@ -88,42 +90,20 @@
                 .ToList();
         }
 
-        public async Task<ServerInfo> GetServerInfo(string ipAddress)
-        {
-            ArgumentUtility.CheckStringForNullOrEmpty(ipAddress, nameof(ipAddress));
-
-            ConcurrentDictionary<string, ServerInfo> serverInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, this.PopulateCache);
-            if (serverInfo.ContainsKey(ipAddress))
-            {
-                try
-                { 
-                    return serverInfo[ipAddress];
-                }
-                catch (Exception e)
-                {
-                    this.logger.LogInformation("Cached server for {IPAddress} no longer found: {Exception}", ipAddress, e.ToString());
-                    // May have been removed from the cache by another thread. Ignore and query DB instead.
-                }
-            }
-
-            return await this.client.GetItemById<ServerInfo>(ipAddress);
-        }
-
         public async Task UpsertServerInfo(ServerInfo serverInfo)
         {
             ArgumentUtility.CheckForNull(serverInfo, nameof(serverInfo));
 
             // Check cache before we write to store
-            ConcurrentDictionary<string, ServerInfo> allServerInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, this.PopulateCache);
+            ConcurrentDictionary<string, IList<ServerInfo>> allServerInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, this.PopulateCache);
 
             if (allServerInfo.ContainsKey(serverInfo.HostIpAddress))
             {
-                ServerInfo existingServerInfo = allServerInfo[serverInfo.HostIpAddress];
+                ServerInfo existingServerInfo = FindExistingServerForHostIp(allServerInfo[serverInfo.HostIpAddress], serverInfo);
 
                 // DDOS protection: skip write to Cosmos if parameters have not changed,
                 // or it's not been long enough.
-                if (existingServerInfo.Equals(serverInfo) 
-                    && Math.Abs((existingServerInfo.LastHeartbeat - serverInfo.LastHeartbeat).TotalMinutes) < ServerRefreshIntervalInMinutes)
+                if (existingServerInfo != null && Math.Abs((existingServerInfo.LastHeartbeat - serverInfo.LastHeartbeat).TotalMinutes) < ServerRefreshIntervalInMinutes)
                 {
                     this.logger.LogInformation("State for {IPAddress} is unchanged. Skipping write to store.", serverInfo.HostIpAddress);
                     return;
@@ -142,11 +122,11 @@
 
             if (allServerInfo.ContainsKey(serverInfo.HostIpAddress))
             {
-                allServerInfo[serverInfo.HostIpAddress] = serverInfo;
+                allServerInfo[serverInfo.HostIpAddress].Add(serverInfo);
             }
             else
             {
-                allServerInfo.TryAdd(serverInfo.HostIpAddress, serverInfo);
+                allServerInfo.TryAdd(serverInfo.HostIpAddress, new List<ServerInfo>() { serverInfo });
             }
         }
 
@@ -155,8 +135,21 @@
             await this.client.DeleteItem<ServerInfo>(id, partitionKey);
 
             // Remove from cache
-            ConcurrentDictionary<string, ServerInfo> allServerInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, this.PopulateCache);
-            allServerInfo.TryRemove(id, out ServerInfo _);
+            ConcurrentDictionary<string, IList<ServerInfo>> allServerInfo = await this.memoryCache.GetOrCreateAsync(CacheKeys.ServerInfo, this.PopulateCache);
+            if (allServerInfo.ContainsKey(id))
+            {
+                var serverInfoCopy = allServerInfo[id].Where(s => s.id != id).ToList();
+                if (!serverInfoCopy.Any())
+                {
+                    // No remaining servers, remove the key
+                    allServerInfo.TryRemove(id, out IList<ServerInfo> _);
+                }
+                else
+                {
+                    // Shallow-copy and replace to keep thread safety guarantee
+                    allServerInfo[id] = serverInfoCopy;
+                }
+            }
         }
 
         public async Task DeleteServers(IEnumerable<string> ids, string partitionKey = null)
@@ -182,15 +175,39 @@
             await this.client.Initialize();
         }
 
-        private async Task<ConcurrentDictionary<string, ServerInfo>> PopulateCache(ICacheEntry entry)
+        private async Task<ConcurrentDictionary<string, IList<ServerInfo>>> PopulateCache(ICacheEntry entry)
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1);
 
-            IDictionary<string, ServerInfo> serverInfo = 
-                (await this.client.GetItems<ServerInfo>())
-                .ToDictionary(x => x.HostIpAddress, y => y);
+            var allServerInfo = (await this.client.GetItems<ServerInfo>());
+            var serverInfoDictionary = new ConcurrentDictionary<string, IList<ServerInfo>>();
 
-            return new ConcurrentDictionary<string, ServerInfo>(serverInfo);
+            foreach (var serverInfo in allServerInfo)
+            {
+                if (!serverInfoDictionary.ContainsKey(serverInfo.HostIpAddress))
+                {
+                    serverInfoDictionary[serverInfo.HostIpAddress] = new List<ServerInfo>() { serverInfo };
+                }
+                else
+                {
+                    serverInfoDictionary[serverInfo.HostIpAddress].Add(serverInfo);
+                }
+            }
+
+            return serverInfoDictionary;
+        }
+
+        private static ServerInfo FindExistingServerForHostIp(IList<ServerInfo> serverInfoForHostIp, ServerInfo candidateServerInfo)
+        {
+            foreach (var existingServerInfo in serverInfoForHostIp)
+            {
+                if (existingServerInfo.Equals(candidateServerInfo))
+                {
+                    return existingServerInfo;
+                }
+            }
+
+            return null;
         }
     }
 }

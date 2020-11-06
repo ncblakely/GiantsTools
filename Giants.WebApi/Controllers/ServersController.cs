@@ -14,6 +14,7 @@ namespace Giants.Web.Controllers
 {
     [ApiController]
     [ApiVersion("1.0")]
+    [ApiVersion("1.1")]
     [Route("api/[controller]")]
     public class ServersController : ControllerBase
     {
@@ -42,6 +43,17 @@ namespace Giants.Web.Controllers
             this.logger.LogInformation("Deleting server from {IPAddress}", requestIpAddress);
 
             await this.serverRegistryService.DeleteServer(requestIpAddress);
+        }
+
+        [HttpDelete]
+        [MapToApiVersion("1.1")]
+        public async Task DeleteServer(string gameName, int port)
+        {
+            string requestIpAddress = this.GetRequestIpAddress();
+
+            this.logger.LogInformation("Deleting server from {IPAddress}", requestIpAddress);
+
+            await this.serverRegistryService.DeleteServer(requestIpAddress, gameName, port);
         }
 
         [HttpGet]

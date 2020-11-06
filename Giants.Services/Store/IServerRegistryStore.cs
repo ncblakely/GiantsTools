@@ -13,8 +13,6 @@
 
         Task DeleteServers(IEnumerable<string> ids, string partitionKey = null);
 
-        Task<ServerInfo> GetServerInfo(string ipAddress);
-
         Task<IEnumerable<ServerInfo>> GetServerInfos(Expression<Func<ServerInfo, bool>> whereExpression = null, bool includeExpired = false, string partitionKey = null);
 
         Task<IEnumerable<TSelect>> GetServerInfos<TSelect>(
