@@ -5,15 +5,12 @@
 // the original fixed-function water rendering behavior.
 //--------------------------------------------------------------------------------------
 
-float4x4 g_WorldViewProjection : WorldViewProjection;
-float4 g_TextureFactor : TextureFactor;
-//float4 g_Fog : Fog;
+#include "../fxh/SystemVariables.fxh"
 
-texture2D g_WaterTexture : Texture0;
 sampler2D g_WaterTextureSampler = 
 sampler_state
 {
-	Texture = <g_WaterTexture>;
+	Texture = <g_texture0>;
 };
 
 struct VS_OUTPUT
@@ -21,7 +18,6 @@ struct VS_OUTPUT
 	float4 Position   : POSITION;   // vertex position 
 	float2 TextureUV  : TEXCOORD0;  // vertex texture coords 
 	float4 Color	  : COLOR0;
-	//float Fog		  : FOG;
 };
 
 VS_OUTPUT RenderSceneVS(float4 inPos : POSITION, 
@@ -46,8 +42,8 @@ VS_OUTPUT RenderSceneVS(float4 inPos : POSITION,
 float4 RenderScenePS(VS_OUTPUT input) : COLOR0
 { 
 	float4 texel = tex2D(g_WaterTextureSampler, input.TextureUV);
-	float4 result = saturate(texel +  (1 - texel) * g_TextureFactor); // equivalent to saturate((texel + g_TextureFactor) - (texel * g_TextureFactor));
-	result.a = input.Color.a * g_TextureFactor.a;
+	float4 result = saturate(texel +  (1 - texel) * g_textureFactor); // equivalent to saturate((texel + g_TextureFactor) - (texel * g_TextureFactor));
+	result.a = input.Color.a * g_textureFactor.a;
 
 	return result;
 }

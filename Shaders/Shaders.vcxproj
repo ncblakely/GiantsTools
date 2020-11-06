@@ -63,59 +63,63 @@
   <ItemGroup>
     <CustomBuild Include="fx\LandBump.fx">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxo\%(Filename).fxo</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxo\%(Filename).fxo</Outputs>
     </CustomBuild>
     <CustomBuild Include="fx\Ocean.fx">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo /Fc fxo\%(Filename).txt</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo /Fc fxo\%(Filename).txt</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxo\%(Filename).fxo</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxo\%(Filename).fxo</Outputs>
     </CustomBuild>
-    <CustomBuild Include="fx\Sky.fx">
+    <None Include="fx\Sky.fx">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </EntryPointName>
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxo\%(Filename).fxo</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxo\%(Filename).fxo</Outputs>
-    </CustomBuild>
+    </None>
     <CustomBuild Include="fx\Water.fx">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</AdditionalIncludeDirectories>
       <FileType>Document</FileType>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxo\%(Filename).fxo</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxo\%(Filename).fxo</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="fx\Object.fx">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Zi /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(JUN10SDKUTILPATH)\fxc.exe" /O1 /LD /Tfx_2_0 %(FullPath) /Fo fxo\%(Filename).fxo</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">fxo\%(Filename).fxo</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">fxo\%(Filename).fxo</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="FFP_orig.fx" />
     <None Include="fxh\Constants.fxh" />
     <None Include="fxh\Lighting.fxh" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="reference\FFP_orig.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="reference\FixedFuncEMU.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="fxh\SystemVariables.fxh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

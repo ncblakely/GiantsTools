@@ -4,28 +4,11 @@
 // Land bumpmapping and lighting shader.
 //--------------------------------------------------------------------------------------
 
-#include "../fxh/Constants.fxh"
+#include "../fxh/SystemVariables.fxh"
 
-float4x4 g_mWorldViewProjection : WorldViewProjection;
-float4x4 g_World : World;
-
-float4x4 g_TexGenTransform0 : TexGenTransform0;
-float4x4 g_TexGenTransform1 : TexGenTransform1;
-float4x4 g_ShoreGen : TexGenTransform2;
-
-float4 g_LightDiffuseColors[MAX_LIGHTS] : PointLightDiffuse;
-float3 g_LightPositions[MAX_LIGHTS] : PointLightPosition;
-float g_LightRangeSquared[MAX_LIGHTS] : PointLightRange;
-bool g_LightEnabled[MAX_LIGHTS] : PointLightEnabled;
-
-float4 g_TextureFactor : TextureFactor;
+//float4x4 g_texGenMatrix2 : TexGenTransform2; // Shore texgen
 
 //////////////////////////////////////////////////////
-
-texture g_LandTexture : Texture0;
-texture g_LandBumpTexture : Texture1;
-//texture g_LandDetailTexture : Texture2;
-//texture g_ShoreTexture : Texture3;
 
 //--------------------------------------------------------------------------------------
 // Texture samplers
@@ -33,7 +16,7 @@ texture g_LandBumpTexture : Texture1;
 sampler g_LandTextureSampler = 
 sampler_state
 {
-	Texture = <g_LandTexture>;
+	Texture = <g_texture0>;
     MipFilter	= LINEAR;
     MinFilter	= LINEAR;
     MagFilter	= LINEAR;
@@ -42,7 +25,7 @@ sampler_state
 sampler g_LandBumpTextureSampler = 
 sampler_state
 {
-	Texture = <g_LandBumpTexture>;
+	Texture = <g_texture1>;
     MipFilter	= LINEAR;
     MinFilter	= LINEAR;
     MagFilter	= LINEAR;
@@ -78,7 +61,7 @@ struct VS_OUTPUT_BUMP
 	float2 LandTextureUV  : TEXCOORD1;
 	float3 WorldPos : TEXCOORD2;
 	float3 Normal : TEXCOORD3;
-	float3 ShoreTextureUV : TEXCOORD4;
+	//float3 ShoreTextureUV : TEXCOORD4;
 };
 
 float4 bx2(float4 x)
@@ -95,7 +78,7 @@ VS_OUTPUT_BUMP LandBumpVS(
 	VS_OUTPUT_BUMP Output;
 
 	// Transform the position from object space to homogeneous projection space
-	Output.Position = mul(vPos, g_mWorldViewProjection);
+	Output.Position = mul(vPos, g_WorldViewProjection);
 
 	Output.LandBumpDiffuse = vDiffuse2 * .5f;
 	Output.LandBumpDiffuse.a = 1.0f;
@@ -106,9 +89,9 @@ VS_OUTPUT_BUMP LandBumpVS(
 	Output.WorldPos = mul(vPos, g_World);
 
 	// Set dynamically generated tex coords
-	Output.LandBumpTextureUV = mul(vPos, g_TexGenTransform0);
-	Output.LandTextureUV = mul(vPos, g_TexGenTransform1);
-	Output.ShoreTextureUV = mul(vPos, g_ShoreGen);
+	Output.LandBumpTextureUV = mul(vPos, g_texGenMatrix0);
+	Output.LandTextureUV = mul(vPos, g_texGenMatrix1);
+	//Output.ShoreTextureUV = mul(vPos, g_texGenMatrix2);
 	
 	// Transform the normal from object space to world space    
 	Output.Normal = normalize(mul(vNormal, (float3x3)g_World)); // normal (world space)
@@ -125,23 +108,20 @@ float4 LandBumpPS(VS_OUTPUT_BUMP input) : COLOR0
 	normalMap = saturate((float4)dot((float3)normal, (float3)normalcol)).xyz; 
 	float3 finalColor = 2.0 * (normalMap * (tex2D(g_LandTextureSampler, input.LandTextureUV)) + input.LandBumpDiffuse);
 
-	for (int i = 0; i < MAX_LIGHTS; i++)
+	for (int i = 0; i < g_numPointLights; i++)
 	{
-		if (g_LightEnabled[i])
-		{
-			// Get light direction for this fragment
-			float3 lightDir = normalize(input.WorldPos - g_LightPositions[i]); // per pixel diffuse lighting
+		// Get light direction for this fragment
+		float3 lightDir = normalize(input.WorldPos - g_PointLightPosition[i]); // per pixel diffuse lighting
 
-			// Note: Non-uniform scaling not supported
-			float diffuseLighting = saturate(dot(input.Normal, -lightDir));
+		// Note: Non-uniform scaling not supported
+		float diffuseLighting = saturate(dot(input.Normal, -lightDir));
 
-			// Introduce fall-off of light intensity
-			diffuseLighting *= (g_LightRangeSquared[i] / dot(g_LightPositions[i] - input.WorldPos, g_LightPositions[i] - input.WorldPos));
+		// Introduce fall-off of light intensity
+		diffuseLighting *= (g_PointLightRangeSquared[i] / dot(g_PointLightPosition[i] - input.WorldPos, g_PointLightPosition[i] - input.WorldPos));
 
-			float4 diffuseColor = diffuseLighting * g_LightDiffuseColors[i];
+		float4 diffuseColor = diffuseLighting * g_PointLightDiffuse[i];
 
-			finalColor += diffuseColor;
-		}
+		finalColor += diffuseColor;
 	}
 
 	return float4(finalColor, 1);
@@ -176,7 +156,7 @@ VS_OUTPUT LandscapeVS(
 	VS_OUTPUT Output;
 
 	// Transform the position from object space to homogeneous projection space
-	Output.Position = mul(vPos, g_mWorldViewProjection);
+	Output.Position = mul(vPos, g_WorldViewProjection);
 
 	// Transform the normal from object space to world space    
 	Output.Normal = normalize(mul(vNormal, (float3x3)g_World)); // normal (world space)
@@ -187,7 +167,7 @@ VS_OUTPUT LandscapeVS(
 	Output.WorldPos = mul(vPos, g_World);
 
 	// Set dynamically generated tex coords
-	Output.TextureUV = mul(vPos, g_TexGenTransform0);
+	Output.TextureUV = mul(vPos, g_texGenMatrix0);
 
 	return Output;    
 }
@@ -196,23 +176,20 @@ float4 LandscapePS(VS_OUTPUT input) : COLOR0
 { 
 	float4 finalColor = 0;
 
-	for (int i = 0; i < MAX_LIGHTS; i++)
+	for (int i = 0; i < g_numPointLights; i++)
 	{
-		if (g_LightEnabled[i])
-		{
-			// Get light direction for this fragment
-			float3 lightDir = normalize(input.WorldPos - g_LightPositions[i]); // per pixel diffuse lighting
+		// Get light direction for this fragment
+		float3 lightDir = normalize(input.WorldPos - g_PointLightPosition[i]); // per pixel diffuse lighting
 
-			// Note: Non-uniform scaling not supported
-			float diffuseLighting = saturate(dot(input.Normal, -lightDir));
+		// Note: Non-uniform scaling not supported
+		float diffuseLighting = saturate(dot(input.Normal, -lightDir));
 
-			// Introduce fall-off of light intensity
-			diffuseLighting *= (g_LightRangeSquared[i] / dot(g_LightPositions[i] - input.WorldPos, g_LightPositions[i] - input.WorldPos));
+		// Introduce fall-off of light intensity
+		diffuseLighting *= (g_PointLightRangeSquared[i] / dot(g_PointLightPosition[i] - input.WorldPos, g_PointLightPosition[i] - input.WorldPos));
 
-			float4 diffuseColor = diffuseLighting * g_LightDiffuseColors[i];
+		float4 diffuseColor = diffuseLighting * g_PointLightDiffuse[i];
 
-			finalColor += diffuseColor;
-		}
+		finalColor += diffuseColor;
 	}
 
 	float3 texel = tex2D(g_LandTextureSampler, input.TextureUV);

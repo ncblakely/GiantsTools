@@ -3,7 +3,6 @@
   <ItemGroup>
     <CustomBuild Include="fx\LandBump.fx" />
     <CustomBuild Include="fx\Ocean.fx" />
-    <CustomBuild Include="fx\Sky.fx" />
     <CustomBuild Include="fx\Water.fx" />
     <CustomBuild Include="fx\Object.fx" />
   </ItemGroup>
@@ -16,7 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="FFP_orig.fx" />
     <None Include="fxh\Constants.fxh">
       <Filter>Include</Filter>
     </None>
@@ -24,8 +22,15 @@
       <Filter>Include</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="fx\Sky.fx" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="reference\FixedFuncEMU.fx" />
+    <FxCompile Include="reference\FFP_orig.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="fxh\SystemVariables.fxh">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

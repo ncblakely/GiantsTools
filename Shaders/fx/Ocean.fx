@@ -4,6 +4,8 @@
 // Ocean water reflection shader.
 //--------------------------------------------------------------------------------------
 
+#include "../fxh/SystemVariables.fxh"
+
 /* Original asm code:
 	ps_1_1
 	tex t0
@@ -32,18 +34,13 @@ float4 MainPS(const PS_INPUT input) : COLOR0
 // C26: {minfog, maxfog, 1.0f / (maxfog - minfog), 1.0}
 
 float4 const44 : register(c44);
-matrix<float, 4, 4> matWorld : OceanWorldViewProjection : register(c2);
+shared matrix<float, 4, 4> g_OceanWorldViewProjection : OceanWorldViewProjection : register(c2);
 float4 fog : register (c26);
-texture g_SeabedTexture : Texture0;
-texture g_EnvironmentTexture : Texture1;
 
 struct VS_OUTPUT
 {
     float4 pos : POSITION;
 	float4 texCoord1 : TEXCOORD1;
-	//float4 texCoord0 : TEXCOORD0;
-	//float4 color : COLOR0;
-    //float fog : FOG;
 };
 
 struct VS_INPUT
@@ -56,7 +53,7 @@ VS_OUTPUT MainVS(const VS_INPUT input)
 	float4 const27 = {0.0f, 1.0f, 0.5f, 0.75f};
 	VS_OUTPUT output;
 	
-	output.pos = mul(input.pos, matWorld);
+	output.pos = mul(input.pos, g_OceanWorldViewProjection);
 	
 	// add r0, v0, -c44
 	float4 r0 = input.pos + -const44;
@@ -87,17 +84,17 @@ technique t0
 {
 	pass p0
 	{
-		Texture[0] = <g_SeabedTexture>;	// Seabed texture
-		Texture[1] = <g_EnvironmentTexture>;	// Environment texture
+		Texture[0] = <g_texture0>;	// Seabed texture
+		Texture[1] = <g_texture1>;	// Environment texture
 		
 		// All of these constants are set by the game engine before drawing the shader
 		// Each constant register (c# in the asm code) has 4 floating point values
 		
-		// World view matrix
-		VertexShaderConstant[2] = <matWorld[0]>;
-		VertexShaderConstant[3] = <matWorld[1]>;
-		VertexShaderConstant[4] = <matWorld[2]>;
-		VertexShaderConstant[5] = <matWorld[3]>;
+		// Special world * view * projection matrix for ocean shader
+		VertexShaderConstant[2] = <g_OceanWorldViewProjection[0]>;
+		VertexShaderConstant[3] = <g_OceanWorldViewProjection[1]>;
+		VertexShaderConstant[4] = <g_OceanWorldViewProjection[2]>;
+		VertexShaderConstant[5] = <g_OceanWorldViewProjection[3]>;
 		
 		VertexShaderConstant[26] = <fog>;	// This constant is calculated from the current fog min/max values
 		VertexShaderConstant[27] = {0.0f, 1.0f, 0.5f, 0.75f}; // I don't know what this does but it doesn't change

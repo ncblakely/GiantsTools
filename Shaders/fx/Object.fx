@@ -1,38 +1,13 @@
-#include "../fxh/Constants.fxh"
-#include "../fxh/Lighting.fxh"
-
-// Lighting state
-float4 g_DirectionalAmbientLightSum : DirectionalLightAmbientSum;
-float4 g_DirectionalLightDiffuse[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightDiffuse;
-float3 g_DirectionalLightDirection[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightDirection;
-float4 g_DirectionalLightSpecular[MAX_DIRECTIONAL_LIGHTS] : DirectionalLightSpecular;
-int g_numDirectionalLights : DirectionalLightCount;
-
-// Texturing and blending
-TextureBlendStage g_blendStages[MAX_BLEND_STAGES] : BlendStages;
-int g_numBlendStages : BlendStageCount;
-float4 g_textureFactor : TextureFactor;
-
-texture g_ObjTexture : Texture0;
+#include "../fxh/SystemVariables.fxh"
 
 sampler g_ObjTextureSampler =
 sampler_state
 {
-    Texture = <g_ObjTexture>;
+    Texture = <g_texture0>;
     MipFilter = LINEAR;
     MinFilter = LINEAR;
     MagFilter = LINEAR;
 };
-
-// Camera
-float3 g_CameraPosition : CameraPosition;
-
-// Current material
-Material g_Material : Material;
-
-// Transforms
-float4x4 g_WorldViewProjection : WorldViewProjection;
-float4x4 g_World : World;
 
 // =======================================================
 // Textured per pixel lighting
@@ -197,6 +172,7 @@ struct ColorPerVertexVSOutput
     float4 Pos : POSITION;
     float2 Tex0 : TEXCOORD0;
     float4 Color : COLOR0;
+    float Fog : FOG;
 };
 
 float4 ColorPerVertexPS(ColorPerVertexVSOutput input) : COLOR0
@@ -205,10 +181,14 @@ float4 ColorPerVertexPS(ColorPerVertexVSOutput input) : COLOR0
     return color;
 }
 
+float fFogStart = 25.f;
+float fFogEnd = 1525.f;
+
 ColorPerVertexVSOutput ColorPerVertexVS(
     float4 vPosition : POSITION0,
     float2 tc : TEXCOORD0,
-    float4 color : COLOR0)
+    float4 color : COLOR0,
+    float fog : FOG)
 {
     // Simple transform, pre-compute as much as we can for the pixel shader
     ColorPerVertexVSOutput output = (ColorPerVertexVSOutput)0;
@@ -216,6 +196,11 @@ ColorPerVertexVSOutput ColorPerVertexVS(
     output.Pos = mul(vPosition, g_WorldViewProjection);
     output.Tex0 = tc;
     output.Color = color;
+
+    float3 P = mul(vPosition, g_WorldView);           //position in view space
+    float d = length(P);
+
+    output.Fog = 0.0; //saturate((fFogEnd - d) / (fFogEnd - fFogStart));
     return output;
 }
 
