@@ -4,14 +4,15 @@
 // Ocean water reflection shader.
 //--------------------------------------------------------------------------------------
 
-#include "../fxh/SystemVariables.fxh"
-
 /* Original asm code:
 	ps_1_1
 	tex t0
 	tex t1
 	lrp r0, -v0.w, t0, t1 // lrp = linear interpolate
 */
+
+shared texture g_Texture0;
+shared texture g_Texture1;
 
 struct PS_INPUT
 {
@@ -84,8 +85,8 @@ technique t0
 {
 	pass p0
 	{
-		Texture[0] = <g_texture0>;	// Seabed texture
-		Texture[1] = <g_texture1>;	// Environment texture
+		Texture[0] = <g_Texture0>;	// Seabed texture
+		Texture[1] = <g_Texture1>;	// Environment texture
 		
 		// All of these constants are set by the game engine before drawing the shader
 		// Each constant register (c# in the asm code) has 4 floating point values

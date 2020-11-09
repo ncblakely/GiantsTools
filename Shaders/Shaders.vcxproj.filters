@@ -10,9 +10,6 @@
     <Filter Include="Include">
       <UniqueIdentifier>{026956f1-0f27-4b3d-80ab-f81eafce58f5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pixel">
-      <UniqueIdentifier>{0ead58ec-1210-4df1-88c8-dfd73f6fb054}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="fxh\Constants.fxh">
@@ -27,10 +24,5 @@
   <ItemGroup>
     <FxCompile Include="reference\FixedFuncEMU.fx" />
     <FxCompile Include="reference\FFP_orig.fx" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="fxh\SystemVariables.fxh">
-      <Filter>Include</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

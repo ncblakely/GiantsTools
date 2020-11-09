@@ -4,7 +4,21 @@
 // Land bumpmapping and lighting shader.
 //--------------------------------------------------------------------------------------
 
-#include "../fxh/SystemVariables.fxh"
+#include "../fxh/Constants.fxh"
+#include "../fxh/Lighting.fxh"
+
+shared texture g_Texture0;
+shared texture g_Texture1;
+shared float4x4 g_WorldViewProjection;
+shared float4x4 g_World;
+
+shared float4x4 g_TexGenMatrix0;
+shared float4x4 g_TexGenMatrix1;
+
+shared float4 g_PointLightDiffuse[MAX_LIGHTS];
+shared float3 g_PointLightPosition[MAX_LIGHTS];
+shared float g_PointLightRange[MAX_LIGHTS];
+shared int g_PointLightCount;
 
 //float4x4 g_texGenMatrix2 : TexGenTransform2; // Shore texgen
 
@@ -16,7 +30,7 @@
 sampler g_LandTextureSampler = 
 sampler_state
 {
-	Texture = <g_texture0>;
+	Texture = <g_Texture0>;
     MipFilter	= LINEAR;
     MinFilter	= LINEAR;
     MagFilter	= LINEAR;
@@ -25,7 +39,7 @@ sampler_state
 sampler g_LandBumpTextureSampler = 
 sampler_state
 {
-	Texture = <g_texture1>;
+	Texture = <g_Texture1>;
     MipFilter	= LINEAR;
     MinFilter	= LINEAR;
     MagFilter	= LINEAR;
@@ -89,8 +103,8 @@ VS_OUTPUT_BUMP LandBumpVS(
 	Output.WorldPos = mul(vPos, g_World);
 
 	// Set dynamically generated tex coords
-	Output.LandBumpTextureUV = mul(vPos, g_texGenMatrix0);
-	Output.LandTextureUV = mul(vPos, g_texGenMatrix1);
+	Output.LandBumpTextureUV = mul(vPos, g_TexGenMatrix0);
+	Output.LandTextureUV = mul(vPos, g_TexGenMatrix1);
 	//Output.ShoreTextureUV = mul(vPos, g_texGenMatrix2);
 	
 	// Transform the normal from object space to world space    
@@ -108,7 +122,7 @@ float4 LandBumpPS(VS_OUTPUT_BUMP input) : COLOR0
 	normalMap = saturate((float4)dot((float3)normal, (float3)normalcol)).xyz; 
 	float3 finalColor = 2.0 * (normalMap * (tex2D(g_LandTextureSampler, input.LandTextureUV)) + input.LandBumpDiffuse);
 
-	for (int i = 0; i < g_numPointLights; i++)
+	for (int i = 0; i < g_PointLightCount; i++)
 	{
 		// Get light direction for this fragment
 		float3 lightDir = normalize(input.WorldPos - g_PointLightPosition[i]); // per pixel diffuse lighting
@@ -117,7 +131,7 @@ float4 LandBumpPS(VS_OUTPUT_BUMP input) : COLOR0
 		float diffuseLighting = saturate(dot(input.Normal, -lightDir));
 
 		// Introduce fall-off of light intensity
-		diffuseLighting *= (g_PointLightRangeSquared[i] / dot(g_PointLightPosition[i] - input.WorldPos, g_PointLightPosition[i] - input.WorldPos));
+		diffuseLighting *= (g_PointLightRange[i] / dot(g_PointLightPosition[i] - input.WorldPos, g_PointLightPosition[i] - input.WorldPos));
 
 		float4 diffuseColor = diffuseLighting * g_PointLightDiffuse[i];
 
@@ -167,7 +181,7 @@ VS_OUTPUT LandscapeVS(
 	Output.WorldPos = mul(vPos, g_World);
 
 	// Set dynamically generated tex coords
-	Output.TextureUV = mul(vPos, g_texGenMatrix0);
+	Output.TextureUV = mul(vPos, g_TexGenMatrix0);
 
 	return Output;    
 }
@@ -176,7 +190,7 @@ float4 LandscapePS(VS_OUTPUT input) : COLOR0
 { 
 	float4 finalColor = 0;
 
-	for (int i = 0; i < g_numPointLights; i++)
+	for (int i = 0; i < g_PointLightCount; i++)
 	{
 		// Get light direction for this fragment
 		float3 lightDir = normalize(input.WorldPos - g_PointLightPosition[i]); // per pixel diffuse lighting
@@ -185,7 +199,7 @@ float4 LandscapePS(VS_OUTPUT input) : COLOR0
 		float diffuseLighting = saturate(dot(input.Normal, -lightDir));
 
 		// Introduce fall-off of light intensity
-		diffuseLighting *= (g_PointLightRangeSquared[i] / dot(g_PointLightPosition[i] - input.WorldPos, g_PointLightPosition[i] - input.WorldPos));
+		diffuseLighting *= (g_PointLightRange[i] / dot(g_PointLightPosition[i] - input.WorldPos, g_PointLightPosition[i] - input.WorldPos));
 
 		float4 diffuseColor = diffuseLighting * g_PointLightDiffuse[i];
 

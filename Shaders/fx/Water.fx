@@ -5,12 +5,16 @@
 // the original fixed-function water rendering behavior.
 //--------------------------------------------------------------------------------------
 
-#include "../fxh/SystemVariables.fxh"
+//#include "../fxh/SystemVariables.fxh"
+
+shared texture g_Texture0;
+shared float4x4 g_WorldViewProjection;
+shared float4 g_TextureFactor;
 
 sampler2D g_WaterTextureSampler = 
 sampler_state
 {
-	Texture = <g_texture0>;
+	Texture = <g_Texture0>;
 };
 
 struct VS_OUTPUT
@@ -42,8 +46,8 @@ VS_OUTPUT RenderSceneVS(float4 inPos : POSITION,
 float4 RenderScenePS(VS_OUTPUT input) : COLOR0
 { 
 	float4 texel = tex2D(g_WaterTextureSampler, input.TextureUV);
-	float4 result = saturate(texel +  (1 - texel) * g_textureFactor); // equivalent to saturate((texel + g_TextureFactor) - (texel * g_TextureFactor));
-	result.a = input.Color.a * g_textureFactor.a;
+	float4 result = saturate(texel +  (1 - texel) * g_TextureFactor); // equivalent to saturate((texel + g_TextureFactor) - (texel * g_TextureFactor));
+	result.a = input.Color.a * g_TextureFactor.a;
 
 	return result;
 }
