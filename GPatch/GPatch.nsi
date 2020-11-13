@@ -42,7 +42,7 @@ SetCompressor /SOLID zlib ; LZMA compresses about 20% better but is more likely 
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "Output\GPatch1_499_0_0.exe"
+OutFile "Output\GPatch1_499_1_0.exe"
 InstallDir "$PROGRAMFILES\Giants\"
 InstallDirRegKey HKCU "SOFTWARE\PlanetMoon\Giants" "DestDir"
 ShowInstDetails hide
