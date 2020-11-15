@@ -10,12 +10,12 @@
 
     public class ServerRegistryService : IServerRegistryService
     {
-        private static readonly string[] SupportedGameNames = new[] { "Giants", "Giants Beta" };
+        private static readonly string[] SupportedGameNames = new[] { "Giants", "Giants Beta", "Giants Beta Dedicated", "Giants Dedicated" };
         private readonly ILogger<ServerRegistryService> logger;
         private readonly IServerRegistryStore registryStore;
         private readonly IConfiguration configuration;
         private readonly int maxServerCount;
-        private readonly int maxServersPerIpGame;
+        private readonly int maxServersPerIp;
 
         public ServerRegistryService(
             ILogger<ServerRegistryService> logger,
@@ -26,7 +26,7 @@
             this.registryStore = registryStore;
             this.configuration = configuration;
             this.maxServerCount = Convert.ToInt32(this.configuration["MaxServerCount"]);
-            this.maxServersPerIpGame = Convert.ToInt32(this.configuration["MaxServersPerIpGame"]);
+            this.maxServersPerIp = Convert.ToInt32(this.configuration["MaxServersPerIp"]);
         }
 
         public async Task AddServer(
@@ -35,13 +35,15 @@
             ArgumentUtility.CheckForNull(serverInfo, nameof(serverInfo));
             ArgumentUtility.CheckStringForNullOrEmpty(serverInfo.HostIpAddress, nameof(serverInfo.HostIpAddress));
 
+            string gameName = serverInfo.GameName.Replace("Dedicated", string.Empty).Trim();
+            serverInfo.GameName = gameName;
             if (!SupportedGameNames.Contains(serverInfo.GameName, StringComparer.OrdinalIgnoreCase))
             {
                 throw new ArgumentException($"Unsupported game name {serverInfo.GameName}", nameof(serverInfo));
             }
 
             var existingServers = await this.registryStore.GetServerInfos(whereExpression: x => x.HostIpAddress == serverInfo.HostIpAddress);
-            if (existingServers.GroupBy(g => g.GameName).Any(g => g.Count() > this.maxServersPerIpGame))
+            if (existingServers.GroupBy(g => new { g.HostIpAddress }).Any(g => g.Count() > this.maxServersPerIp))
             {
                 throw new InvalidOperationException("Exceeded maximum servers per IP.");
             }

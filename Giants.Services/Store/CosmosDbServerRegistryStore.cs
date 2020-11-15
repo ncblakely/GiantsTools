@@ -99,7 +99,8 @@
 
             if (allServerInfo.ContainsKey(serverInfo.HostIpAddress))
             {
-                ServerInfo existingServerInfo = FindExistingServerForHostIp(allServerInfo[serverInfo.HostIpAddress], serverInfo);
+                IList<ServerInfo> serverInfoForHostIp = allServerInfo[serverInfo.HostIpAddress];
+                ServerInfo existingServerInfo = FindExistingServerForHostIp(serverInfoForHostIp, serverInfo);
 
                 // DDOS protection: skip write to Cosmos if parameters have not changed,
                 // or it's not been long enough.
@@ -108,24 +109,35 @@
                     this.logger.LogInformation("State for {IPAddress} is unchanged. Skipping write to store.", serverInfo.HostIpAddress);
                     return;
                 }
+
+                this.logger.LogInformation("State for {IPAddress} has changed. Committing update to store.", serverInfo.HostIpAddress);
+                await this.client.UpsertItem(
+                    item: serverInfo,
+                    partitionKey: new PartitionKey(serverInfo.DocumentType));
+
+                // Update cache
+                if (existingServerInfo != null)
+                {
+                    var newServerInfo = serverInfoForHostIp.Where(s => !s.Equals(serverInfo)).ToList();
+                    newServerInfo.Add(serverInfo);
+                    allServerInfo[serverInfo.HostIpAddress] = newServerInfo;
+
+                    this.logger.LogInformation("Updating cache for request from {IPAddress} (replaced existing server).", serverInfo.HostIpAddress);
+                }
                 else
                 {
-                    this.logger.LogInformation("State for {IPAddress} has changed. Committing update to store.", serverInfo.HostIpAddress);
+                    allServerInfo[serverInfo.HostIpAddress].Add(serverInfo);
+                    this.logger.LogInformation("Updating cache for request from {IPAddress} (added new server).", serverInfo.HostIpAddress);
                 }
-            }
-
-            await this.client.UpsertItem(
-                item: serverInfo,
-                partitionKey: new PartitionKey(serverInfo.DocumentType));
-
-            this.logger.LogInformation("Updating cache for request from {IPAddress}.", serverInfo.HostIpAddress);
-
-            if (allServerInfo.ContainsKey(serverInfo.HostIpAddress))
-            {
-                allServerInfo[serverInfo.HostIpAddress].Add(serverInfo);
             }
             else
             {
+                // Update cache
+                await this.client.UpsertItem(
+                    item: serverInfo,
+                    partitionKey: new PartitionKey(serverInfo.DocumentType));
+
+                this.logger.LogInformation("Updating cache for request from {IPAddress} (no existing servers).", serverInfo.HostIpAddress);
                 allServerInfo.TryAdd(serverInfo.HostIpAddress, new List<ServerInfo>() { serverInfo });
             }
         }
@@ -199,15 +211,7 @@
 
         private static ServerInfo FindExistingServerForHostIp(IList<ServerInfo> serverInfoForHostIp, ServerInfo candidateServerInfo)
         {
-            foreach (var existingServerInfo in serverInfoForHostIp)
-            {
-                if (existingServerInfo.Equals(candidateServerInfo))
-                {
-                    return existingServerInfo;
-                }
-            }
-
-            return null;
+            return serverInfoForHostIp.FirstOrDefault(s => s.Equals(candidateServerInfo));
         }
     }
 }
