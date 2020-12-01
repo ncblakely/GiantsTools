@@ -4,10 +4,9 @@
 // Experimental sky shader. Does nothing currently.
 //--------------------------------------------------------------------------------------
 
-float4x4 g_mWorldViewProjection : WorldViewProjection;
-float4x4 g_World : World;
-float4x4 g_View : View;
-float4x4 g_Projection : Projection;
+#include "../fxh/Transform.fxh"
+
+shared WorldTransforms g_WorldTransforms;
 float intensityThreshold = 1.f;
 float colorMultiplier = 1.f;
 texture	g_SkyTexture;
@@ -28,7 +27,7 @@ void RenderSceneVS(
     out float4 oColor0 : COLOR0,
     out float2 oTexCoord0 : TEXCOORD0 )
 {
-	oPosition = mul(iPosition, g_mWorldViewProjection);
+	oPosition = mul(iPosition, g_WorldTransforms.WorldViewProjection);
     oColor0 = float4(1, 1, 1, 1);
     oTexCoord0 = iTexCoord0;
 }

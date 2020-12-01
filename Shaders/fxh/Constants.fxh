@@ -1,5 +1,5 @@
 #define MAX_DIRECTIONAL_LIGHTS 3
-#define MAX_LIGHTS 4
+#define MAX_POINT_LIGHTS 4
 
 #define MAX_BLEND_STAGES 2 // Giants does not currently use more than 2
 
@@ -42,9 +42,9 @@
 // where each component has been scaled and offset to make it signed.
 // The result is replicated into all four (including alpha) channels.
 // This is a valid COLOROP only.
-#define D3DTOP_DOTPRODUCT3 24,
+#define D3DTOP_DOTPRODUCT3 24
 // Triadic ops
-#define D3DTOP_MULTIPLYADD 25, // Arg0 + Arg1*Arg2
+#define D3DTOP_MULTIPLYADD 25 // Arg0 + Arg1*Arg2
 #define D3DTOP_LERP 26 // (Arg0)*Arg1 + (1-Arg0)*Arg2
 
 /*
