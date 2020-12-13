@@ -16,7 +16,6 @@ namespace Giants.Launcher
     public partial class LauncherForm : Form
     {
         // Constant settings
-        private const string GameName = "Giants: Citizen Kabuto";
         private const string GamePath = "GiantsMain.exe";
 		private const string RegistryKey = @"HKEY_CURRENT_USER\Software\PlanetMoon\Giants";
 		private const string RegistryValue = "DestDir";
@@ -38,7 +37,7 @@ namespace Giants.Launcher
 			this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
 
 			// Set window title
-			this.Text = GameName;
+			this.SetTitle();
 
 			// Read newer file-based game settings
 			this.config = new Config();
@@ -97,7 +96,7 @@ namespace Giants.Launcher
 
         private void btnOptions_Click(object sender, EventArgs e)
         {
-            OptionsForm form = new OptionsForm(GameName + " Options", this.gamePath);
+            OptionsForm form = new OptionsForm(Resources.AppName + " Options", this.gamePath);
 
 			form.StartPosition = FormStartPosition.CenterParent;
 			form.ShowDialog();
@@ -116,7 +115,7 @@ namespace Giants.Launcher
 
                 if (this.gamePath == null || !File.Exists(this.gamePath))
                 {
-                    string message = string.Format(Resources.AppNotFound, GameName);
+                    string message = string.Format(Resources.AppNotFound, Resources.AppName);
                     MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Application.Exit();
 					return;
@@ -131,7 +130,7 @@ namespace Giants.Launcher
                 Version gameVersion = VersionHelper.GetGameVersion(this.gamePath);
                 if (gameVersion == null)
                 {
-                    string message = string.Format(Resources.AppNotFound, GameName);
+                    string message = string.Format(Resources.AppNotFound, Resources.AppName);
                     MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Application.Exit();
                 }
@@ -334,6 +333,21 @@ namespace Giants.Launcher
             }
 
 			Process.Start(this.communityAppUri);
+        }
+
+		private void SetTitle()
+        {
+			string title = Resources.AppName;
+
+#if DEBUG
+			title += " DEBUG";
+#endif
+
+#if BETA
+			title += " BETA";
+#endif
+
+			this.Text = title;
         }
     }
 }
