@@ -2,7 +2,6 @@
 
 #include "ServerConsoleApp.h"
 #include "ServerDialog.h"
-#include "Utils.h"
 
 IMPLEMENT_DYNAMIC(ServerDialog, CDialogEx)
 
@@ -109,10 +108,11 @@ void ServerDialog::OnOK()
 void ServerDialog::OnCancel()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	KillTimer((UINT_PTR)this);
+	
 	ShowWindow(SW_HIDE);
 	DestroyWindow();
+	KillTimer((UINT_PTR)this);
+	m_pParentWnd->SendMessage(WM_CLOSE, 0, 0);
 }
 
 void ServerDialog::RefreshPlayers()

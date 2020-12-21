@@ -14,7 +14,7 @@ class ServerDialog : public CDialogEx, public ComponentBase<IGameServerConsole>
 
 public:
 	~ServerDialog();
-	ServerDialog(IComponentContainer* container, CWnd* parent = nullptr);
+	ServerDialog(IComponentContainer* container, CWnd* parent);
 
 	void CreateColumns();
 	void RefreshPlayers();

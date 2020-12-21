@@ -18,7 +18,7 @@ public:
 	BOOL InitInstance() override;
 	BOOL ExitInstance() override;
 
-	IGameServerConsole* InitializeDialog(IComponentContainer* container);
+	IGameServerConsole* InitializeDialog(HWND hWndParent, IComponentContainer* container);
 
 	DECLARE_MESSAGE_MAP()
 };

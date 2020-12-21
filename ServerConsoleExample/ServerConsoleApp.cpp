@@ -1,5 +1,4 @@
 #include "pch.h"
-#include <initguid.h>
 #include "ServerConsoleApp.h"
 #include "ServerDialog.h"
 
@@ -32,18 +31,19 @@ BOOL ServerConsoleApp::ExitInstance()
 	return CWinApp::ExitInstance();
 }
 
-IGameServerConsole* ServerConsoleApp::InitializeDialog(IComponentContainer* container)
+IGameServerConsole* ServerConsoleApp::InitializeDialog(HWND hWndParent, IComponentContainer* container)
 {
 	// Create the server console window.
 	// As this is also a Component, Giants will clean up this object automatically once
 	// it is no longer needed (i.e, there is no need to call delete).
-	auto* dialog = new ServerDialog(container);
+	auto* dialog = new ServerDialog(container, CWnd::FromHandle(hWndParent));
 	m_pMainWnd = dialog;
 	return dialog;
 }
 
 __declspec(dllexport) void CreateServerConsole(
-	int apiVersion, 
+	int apiVersion,
+	HWND hWnd,
 	IComponentContainer* container)
 {
 	if (apiVersion > 1)
@@ -52,5 +52,5 @@ __declspec(dllexport) void CreateServerConsole(
 	}
 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	ConsoleApp.InitializeDialog(container);
+	ConsoleApp.InitializeDialog(hWnd, container);
 }

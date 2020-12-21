@@ -16,7 +16,7 @@ struct IGiantsApiClient : IComponent
 {
 	virtual ~IGiantsApiClient() = default;
 
-	virtual void STDMETHODCALLTYPE DeleteServerInformationAsync() = 0;
+	virtual void STDMETHODCALLTYPE DeleteServerInformationAsync(tstring_view gameName, int hostPort) = 0;
 	virtual ServerInfoFuture STDMETHODCALLTYPE GetServerInformationAsync() = 0;
 	virtual void STDMETHODCALLTYPE PostServerInformationAsync(const njson& requestBody) = 0;
 };

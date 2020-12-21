@@ -104,6 +104,7 @@
       <EnablePREfast>true</EnablePREfast>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -158,6 +159,7 @@
       <EnablePREfast>true</EnablePREfast>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -213,7 +215,6 @@
     </ClCompile>
     <ClCompile Include="ServerDialog.cpp" />
     <ClCompile Include="ServerConsoleApp.cpp" />
-    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\ServerConsole.rc2" />
@@ -226,7 +227,6 @@
     <ClInclude Include="ServerDialog.h" />
     <ClInclude Include="ServerConsoleApp.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ServerConsole.rc" />
