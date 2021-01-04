@@ -1,5 +1,7 @@
 #pragma once
 
+#include <DataTypes.h>
+
 #include "NetCommon.h"
 
 /// <summary>
@@ -29,21 +31,22 @@ struct PlayerConnectedEvent : GameServerEvent
 {
 	PlayerConnectedEvent() noexcept : GameServerEvent(GameServerEventType::PlayerConnected) { }
 
-	std::unique_ptr<PlayerInfo> info;
+	std::shared_ptr<PlayerInfo> info;
 };
 
 struct PlayerDisconnectedEvent : GameServerEvent
 {
 	PlayerDisconnectedEvent() noexcept : GameServerEvent(GameServerEventType::PlayerDisconnected) { }
 
-	std::unique_ptr<PlayerInfo> info;
+	std::shared_ptr<PlayerInfo> info;
 };
 
 struct ChatMessageEvent : GameServerEvent
 {
 	ChatMessageEvent() noexcept : GameServerEvent(GameServerEventType::ChatMessage) { }
 
-	std::string_view message;
+	tstring_view message{};
+	PlayerIndex senderIndex{};
 };
 
 struct WorldLoadedEvent : GameServerEvent

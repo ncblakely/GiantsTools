@@ -1,5 +1,6 @@
 #pragma once
 
+#include <DataTypes.h>
 #include <IComponent.h>
 #include <string>
 
@@ -14,7 +15,7 @@ inline const GUID IID_ITextLookupService = { 0x770debd3, 0x165d, 0x4340, 0x82, 0
 /// </summary>
 struct ITextLookupService : public IComponent
 {
-	virtual std::string STDMETHODCALLTYPE GetLocalized(std::string_view lookup) = 0;
+	virtual std::string STDMETHODCALLTYPE GetLocalized(tstring_view lookup) = 0;
 
 	virtual std::string STDMETHODCALLTYPE GetNetPlayerStateName(enum class NetPlayerState state) = 0;
 

@@ -132,7 +132,7 @@ void ServerDialog::RefreshPlayers()
 	const auto& pGameServer = m_pContainer->Get<IGameServer>();
 	for (const auto& player : pGameServer->GetPlayers())
 	{
-		if (player.host)
+		if (player->host)
 		{
 			continue; // Skip host player
 		}
@@ -140,14 +140,14 @@ void ServerDialog::RefreshPlayers()
 		LVITEM item{};
 		item.cColumns = NumColumns;
 		item.mask = LVIF_COLUMNS | LVIF_PARAM;
-		item.lParam = player.index;
+		item.lParam = player->index;
 
 		const int index = PlayersListCtrl.InsertItem(&item);
-		PlayersListCtrl.SetItemText(index, 0, player.name.c_str());
-		PlayersListCtrl.SetItemText(index, 1, pTextLookupService->GetNetPlayerStateName(player.state).c_str());
-		PlayersListCtrl.SetItemText(index, 2, fmt::format(_T("{0}"), player.ping).c_str());
-		PlayersListCtrl.SetItemText(index, 3, fmt::format(_T("{0}"), player.score).c_str());
-		PlayersListCtrl.SetItemText(index, 4, pTextLookupService->GetPlayerTeamName(player.team).c_str());
+		PlayersListCtrl.SetItemText(index, 0, player->name.c_str());
+		PlayersListCtrl.SetItemText(index, 1, pTextLookupService->GetNetPlayerStateName(player->state).c_str());
+		PlayersListCtrl.SetItemText(index, 2, fmt::format(_T("{0}"), player->ping).c_str());
+		PlayersListCtrl.SetItemText(index, 3, fmt::format(_T("{0}"), player->score).c_str());
+		PlayersListCtrl.SetItemText(index, 4, pTextLookupService->GetPlayerTeamName(player->team).c_str());
 	}
 
 	PlayersListCtrl.SetSelectionMark(savedSelection);
@@ -181,7 +181,7 @@ void ServerDialog::HandleWorldLoaded(const GameServerEvent& event)
 
 	const auto& pGameServer = m_pContainer->Get<IGameServer>();
 
-	NetGameDetails details = pGameServer->GetGameDetails();
+	auto details = pGameServer->GetGameDetails();
 
 	// TODO: Connect to world state controls
 }
