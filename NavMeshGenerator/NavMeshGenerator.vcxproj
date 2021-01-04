@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{ca9c0938-3ada-4c73-a89a-e9447abce101}</ProjectGuid>
+    <RootNamespace>NavMeshGenerator</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\External\recastnavigation\DebugUtils\Include;..\External\recastnavigation\Detour\Include;..\External\recastnavigation\DetourTileCache\Include;;..\External\recastnavigation\Recast\Include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\External\recastnavigation\DebugUtils\Include;..\External\recastnavigation\Detour\Include;..\External\recastnavigation\DetourTileCache\Include;;..\External\recastnavigation\Recast\Include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\External\recastnavigation\DebugUtils\Source\DebugDraw.cpp" />
+    <ClCompile Include="..\External\recastnavigation\DebugUtils\Source\DetourDebugDraw.cpp" />
+    <ClCompile Include="..\External\recastnavigation\DebugUtils\Source\RecastDebugDraw.cpp" />
+    <ClCompile Include="..\External\recastnavigation\DebugUtils\Source\RecastDump.cpp" />
+    <ClCompile Include="..\External\recastnavigation\DetourTileCache\Source\DetourTileCache.cpp" />
+    <ClCompile Include="..\External\recastnavigation\DetourTileCache\Source\DetourTileCacheBuilder.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourAlloc.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourAssert.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourCommon.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourNavMesh.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourNavMeshBuilder.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourNavMeshQuery.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourNode.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\Recast.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastAlloc.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastArea.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastAssert.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastContour.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastFilter.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastLayers.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastMesh.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastMeshDetail.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastRasterization.cpp" />
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastRegion.cpp" />
+    <ClCompile Include="Framework\ChunkyTriMesh.cpp" />
+    <ClCompile Include="Framework\InputGeom.cpp" />
+    <ClCompile Include="Framework\MeshLoaderObj.cpp" />
+    <ClCompile Include="Framework\PerfTimer.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="NavMeshGenerator.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="RecastContext.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\External\recastnavigation\DebugUtils\Include\DebugDraw.h" />
+    <ClInclude Include="..\External\recastnavigation\DebugUtils\Include\DetourDebugDraw.h" />
+    <ClInclude Include="..\External\recastnavigation\DebugUtils\Include\RecastDebugDraw.h" />
+    <ClInclude Include="..\External\recastnavigation\DebugUtils\Include\RecastDump.h" />
+    <ClInclude Include="..\External\recastnavigation\DetourTileCache\Include\DetourTileCache.h" />
+    <ClInclude Include="..\External\recastnavigation\DetourTileCache\Include\DetourTileCacheBuilder.h" />
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourAlloc.h" />
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourAssert.h" />
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourCommon.h" />
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourMath.h" />
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourNavMesh.h" />
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourNavMeshBuilder.h" />
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourNavMeshQuery.h" />
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourNode.h" />
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourStatus.h" />
+    <ClInclude Include="..\External\recastnavigation\Recast\Include\Recast.h" />
+    <ClInclude Include="..\External\recastnavigation\Recast\Include\RecastAlloc.h" />
+    <ClInclude Include="..\External\recastnavigation\Recast\Include\RecastAssert.h" />
+    <ClInclude Include="Framework\ChunkyTriMesh.h" />
+    <ClInclude Include="Framework\InputGeom.h" />
+    <ClInclude Include="Framework\MeshLoaderObj.h" />
+    <ClInclude Include="Framework\PerfTimer.h" />
+    <ClInclude Include="Framework\Sample.h" />
+    <ClInclude Include="Framework\SampleInterfaces.h" />
+    <ClInclude Include="NavMeshGenerator.h" />
+    <ClInclude Include="NavMeshUtil.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="RecastContext.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,243 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Recast">
+      <UniqueIdentifier>{82f0fd75-bb9d-4e6c-849a-71f66d5a8f0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Recast\DebugUtils">
+      <UniqueIdentifier>{31af1122-2287-4254-860d-7d9819551310}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Recast\DebugUtils\Include">
+      <UniqueIdentifier>{7589cc4f-b87f-4191-81fc-17622331c7ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Recast\DebugUtils\Source">
+      <UniqueIdentifier>{203ec006-7bdb-47fa-858a-6f12327c5d44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Recast\Detour">
+      <UniqueIdentifier>{b05a0256-22d5-478e-85d7-c56cef704e1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Recast\Detour\Source">
+      <UniqueIdentifier>{d30da57a-2663-4461-a272-be169bd1a3a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Recast\Detour\Include">
+      <UniqueIdentifier>{1cb89f5c-da8d-49cf-9bfa-0cb8b38fabac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Recast\DetourTileCache">
+      <UniqueIdentifier>{b4850d74-861d-4dc8-aa4e-59b6f18a7754}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Recast\DetourTileCache\Include">
+      <UniqueIdentifier>{f0447598-7859-485b-97e8-61035bd87634}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Recast\DetourTileCache\Source">
+      <UniqueIdentifier>{1bc45b59-e845-4a30-b042-2c6ff3fdc3fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Recast\Recast">
+      <UniqueIdentifier>{b17dc902-8d50-4da4-9013-e1bd39206ca5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Recast\Recast\Source">
+      <UniqueIdentifier>{091ace17-5d99-46d0-9d81-57fd2b4eb225}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Recast\Recast\Include">
+      <UniqueIdentifier>{54fffb89-f106-45f9-9a78-119f59e17fed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Framework">
+      <UniqueIdentifier>{c5ca75e6-1ec9-4c06-a733-4323f130f5c4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\External\recastnavigation\DebugUtils\Source\DebugDraw.cpp">
+      <Filter>Recast\DebugUtils\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\DebugUtils\Source\DetourDebugDraw.cpp">
+      <Filter>Recast\DebugUtils\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\DebugUtils\Source\RecastDebugDraw.cpp">
+      <Filter>Recast\DebugUtils\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\DebugUtils\Source\RecastDump.cpp">
+      <Filter>Recast\DebugUtils\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourAlloc.cpp">
+      <Filter>Recast\Detour\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourAssert.cpp">
+      <Filter>Recast\Detour\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourCommon.cpp">
+      <Filter>Recast\Detour\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourNavMesh.cpp">
+      <Filter>Recast\Detour\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourNavMeshBuilder.cpp">
+      <Filter>Recast\Detour\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourNavMeshQuery.cpp">
+      <Filter>Recast\Detour\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Detour\Source\DetourNode.cpp">
+      <Filter>Recast\Detour\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\DetourTileCache\Source\DetourTileCache.cpp">
+      <Filter>Recast\DetourTileCache\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\DetourTileCache\Source\DetourTileCacheBuilder.cpp">
+      <Filter>Recast\DetourTileCache\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\Recast.cpp">
+      <Filter>Recast\Recast\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastAlloc.cpp">
+      <Filter>Recast\Recast\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastArea.cpp">
+      <Filter>Recast\Recast\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastAssert.cpp">
+      <Filter>Recast\Recast\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastContour.cpp">
+      <Filter>Recast\Recast\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastFilter.cpp">
+      <Filter>Recast\Recast\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastLayers.cpp">
+      <Filter>Recast\Recast\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastMesh.cpp">
+      <Filter>Recast\Recast\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastMeshDetail.cpp">
+      <Filter>Recast\Recast\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastRasterization.cpp">
+      <Filter>Recast\Recast\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastRegion.cpp">
+      <Filter>Recast\Recast\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NavMeshGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RecastContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\ChunkyTriMesh.cpp">
+      <Filter>Source Files\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\InputGeom.cpp">
+      <Filter>Source Files\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\MeshLoaderObj.cpp">
+      <Filter>Source Files\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\PerfTimer.cpp">
+      <Filter>Source Files\Framework</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\External\recastnavigation\DebugUtils\Include\DebugDraw.h">
+      <Filter>Recast\DebugUtils\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\DebugUtils\Include\DetourDebugDraw.h">
+      <Filter>Recast\DebugUtils\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\DebugUtils\Include\RecastDebugDraw.h">
+      <Filter>Recast\DebugUtils\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\DebugUtils\Include\RecastDump.h">
+      <Filter>Recast\DebugUtils\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourAlloc.h">
+      <Filter>Recast\Detour\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourAssert.h">
+      <Filter>Recast\Detour\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourCommon.h">
+      <Filter>Recast\Detour\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourMath.h">
+      <Filter>Recast\Detour\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourNavMesh.h">
+      <Filter>Recast\Detour\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourNavMeshBuilder.h">
+      <Filter>Recast\Detour\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourNavMeshQuery.h">
+      <Filter>Recast\Detour\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourNode.h">
+      <Filter>Recast\Detour\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\Detour\Include\DetourStatus.h">
+      <Filter>Recast\Detour\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\DetourTileCache\Include\DetourTileCache.h">
+      <Filter>Recast\DetourTileCache\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\DetourTileCache\Include\DetourTileCacheBuilder.h">
+      <Filter>Recast\DetourTileCache\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\Recast\Include\Recast.h">
+      <Filter>Recast\Recast\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\Recast\Include\RecastAlloc.h">
+      <Filter>Recast\Recast\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\External\recastnavigation\Recast\Include\RecastAssert.h">
+      <Filter>Recast\Recast\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="NavMeshGenerator.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NavMeshUtil.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RecastContext.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\ChunkyTriMesh.h">
+      <Filter>Source Files\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\InputGeom.h">
+      <Filter>Source Files\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\MeshLoaderObj.h">
+      <Filter>Source Files\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\PerfTimer.h">
+      <Filter>Source Files\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\Sample.h">
+      <Filter>Source Files\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\SampleInterfaces.h">
+      <Filter>Source Files\Framework</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Giants.Services.Tests", "Gi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerConsole", "ServerConsoleExample\ServerConsole.vcxproj", "{8AEE9CFF-0E24-498F-B60A-627A7F4A727D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NavMeshGenerator", "NavMeshGenerator\NavMeshGenerator.vcxproj", "{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -327,6 +329,28 @@ Global
 		{8AEE9CFF-0E24-498F-B60A-627A7F4A727D}.ReleaseBeta|x64.Build.0 = Release|x64
 		{8AEE9CFF-0E24-498F-B60A-627A7F4A727D}.ReleaseBeta|x86.ActiveCfg = Release|Win32
 		{8AEE9CFF-0E24-498F-B60A-627A7F4A727D}.ReleaseBeta|x86.Build.0 = Release|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.Debug|x64.ActiveCfg = Debug|x64
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.Debug|x64.Build.0 = Debug|x64
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.Debug|x86.ActiveCfg = Debug|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.Debug|x86.Build.0 = Debug|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.DebugBeta|Any CPU.ActiveCfg = Debug|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.DebugBeta|Any CPU.Build.0 = Debug|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.DebugBeta|x64.ActiveCfg = Debug|x64
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.DebugBeta|x64.Build.0 = Debug|x64
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.DebugBeta|x86.ActiveCfg = Debug|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.DebugBeta|x86.Build.0 = Debug|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.Release|Any CPU.ActiveCfg = Release|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.Release|x64.ActiveCfg = Release|x64
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.Release|x64.Build.0 = Release|x64
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.Release|x86.ActiveCfg = Release|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.Release|x86.Build.0 = Release|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.ReleaseBeta|Any CPU.ActiveCfg = Debug|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.ReleaseBeta|Any CPU.Build.0 = Debug|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.ReleaseBeta|x64.ActiveCfg = Release|x64
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.ReleaseBeta|x64.Build.0 = Release|x64
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.ReleaseBeta|x86.ActiveCfg = Release|Win32
+		{CA9C0938-3ADA-4C73-A89A-E9447ABCE101}.ReleaseBeta|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
