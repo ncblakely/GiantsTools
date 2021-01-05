@@ -5,7 +5,34 @@
 #include "Recast.h"
 #include "RecastContext.h"
 
-NavMeshGenerator::NavMeshGenerator(InputGeom* geom, std::shared_ptr<RecastContext> context)
+using namespace nlohmann;
+using namespace std::filesystem;
+
+inline unsigned int nextPow2(unsigned int v)
+{
+	v--;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+	v++;
+	return v;
+}
+
+inline unsigned int ilog2(unsigned int v)
+{
+	unsigned int r;
+	unsigned int shift;
+	r = (v > 0xffff) << 4; v >>= r;
+	shift = (v > 0xff) << 3; v >>= shift; r |= shift;
+	shift = (v > 0xf) << 2; v >>= shift; r |= shift;
+	shift = (v > 0x3) << 1; v >>= shift; r |= shift;
+	r |= (v >> 1);
+	return r;
+}
+
+NavMeshGenerator::NavMeshGenerator(std::shared_ptr<InputGeom> geom, std::shared_ptr<RecastContext> context)
     : m_geom(geom),
     m_navMeshQuery(dtAllocNavMeshQuery()),
     m_navMesh(dtAllocNavMesh()),
@@ -36,6 +63,8 @@ void NavMeshGenerator::Cleanup()
 
 bool NavMeshGenerator::BuildNavMesh()
 {
+	CalculateTileSize();
+
     dtNavMeshParams params{};
     rcVcopy(params.orig, m_geom->getNavMeshBoundsMin());
     params.tileWidth = m_tileSize * m_cellSize;
@@ -58,6 +87,27 @@ bool NavMeshGenerator::BuildNavMesh()
 
     BuildAllTiles();
 	return true;
+}
+
+void NavMeshGenerator::CalculateTileSize()
+{
+	const float* bmin = m_geom->getNavMeshBoundsMin();
+	const float* bmax = m_geom->getNavMeshBoundsMax();
+
+	int gw = 0, gh = 0;
+	rcCalcGridSize(bmin, bmax, m_cellSize, &gw, &gh);
+	const int ts = (int)m_tileSize;
+	const int tw = (gw + ts - 1) / ts;
+	const int th = (gh + ts - 1) / ts;
+	const float tcs = m_tileSize * m_cellSize;
+
+	// Max tiles and max polys affect how the tile IDs are caculated.
+	// There are 22 bits available for identifying a tile and a polygon.
+	int tileBits = rcMin((int)ilog2(nextPow2(tw * th)), 14);
+	if (tileBits > 14) tileBits = 14;
+	int polyBits = 22 - tileBits;
+	m_maxTiles = 1 << tileBits;
+	m_maxPolysPerTile = 1 << polyBits;
 }
 
 void NavMeshGenerator::BuildAllTiles()
@@ -485,13 +535,14 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 	return navData;
 }
 
-void NavMeshGenerator::Serialize(const std::filesystem::path& path) const
+bool NavMeshGenerator::Serialize(const std::filesystem::path& path, bool saveStatistics)
 {
-	if (!m_navMesh) return;
+	if (!m_navMesh) 
+		return false;
 
 	FILE* fp = fopen(path.string().c_str(), "wb");
 	if (!fp)
-		return;
+		return false;
 
 	// Store header.
 	NavMeshSetHeader header;
@@ -524,4 +575,49 @@ void NavMeshGenerator::Serialize(const std::filesystem::path& path) const
 	}
 
 	fclose(fp);
+
+	if (saveStatistics)
+	{
+		std::filesystem::path statsPath = path;
+		statsPath = statsPath.replace_extension(".navstats");
+		WriteStatistics(statsPath);
+	}
+
+	return true;
+}
+
+bool NavMeshGenerator::WriteStatistics(const std::filesystem::path& path)
+{
+	std::ofstream outputFile(path);
+	if (!outputFile.is_open())
+		return false;
+
+	njson json;
+	json["m_cellSize"] = m_cellSize;
+	json["m_cellHeight"] = m_cellHeight;
+	json["m_agentHeight"] = m_agentHeight;
+	json["m_agentRadius"] = m_agentRadius;
+	json["m_agentMaxClimb"] = m_agentMaxClimb;
+	json["m_agentMaxSlope"] = m_agentMaxSlope;
+	json["m_regionMinSize"] = m_regionMinSize;
+	json["m_regionMergeSize"] = m_regionMergeSize;
+	json["m_edgeMaxLen"] = m_edgeMaxLen;
+	json["m_edgeMaxError"] = m_edgeMaxError;
+	json["m_vertsPerPoly"] = m_vertsPerPoly;
+	json["m_detailSampleDist"] = m_detailSampleDist;
+	json["m_detailSampleMaxError"] = m_detailSampleMaxError;
+	json["m_partitionType"] = m_partitionType;
+	json["m_filterLowHangingObstacles"] = m_filterLowHangingObstacles;
+	json["m_filterLedgeSpans"] = m_filterLedgeSpans;
+	json["m_filterWalkableLowHeightSpans"] = m_filterWalkableLowHeightSpans;
+	json["m_maxTiles"] = m_maxTiles;
+	json["m_maxPolysPerTile"] = m_maxPolysPerTile;
+	json["m_tileSize"] = m_tileSize;
+	json["m_tileCol"] = m_tileCol;
+	json["m_tileMemUsage"] = m_tileMemUsage;
+	json["m_tileBuildTime"] = m_tileBuildTime;
+	json["m_tileTriCount"] = m_tileTriCount;
+	
+	outputFile << std::setw(4) << json;
+	return true;
 }

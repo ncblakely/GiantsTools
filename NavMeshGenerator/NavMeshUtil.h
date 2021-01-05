@@ -23,6 +23,7 @@ struct NavMeshQueryDeleter
 
 //////////////////////////////////////////////////////////
 // Serialization logic
+// Note: identical to Recast's demo app so it can be loaded by it
 struct NavMeshSetHeader
 {
     int magic;

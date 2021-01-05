@@ -1,18 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Recast">
       <UniqueIdentifier>{82f0fd75-bb9d-4e6c-849a-71f66d5a8f0a}</UniqueIdentifier>
     </Filter>
@@ -52,7 +40,7 @@
     <Filter Include="Recast\Recast\Include">
       <UniqueIdentifier>{54fffb89-f106-45f9-9a78-119f59e17fed}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Framework">
+    <Filter Include="Framework">
       <UniqueIdentifier>{c5ca75e6-1ec9-4c06-a733-4323f130f5c4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -129,30 +117,22 @@
     <ClCompile Include="..\External\recastnavigation\Recast\Source\RecastRegion.cpp">
       <Filter>Recast\Recast\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NavMeshGenerator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RecastContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Framework\ChunkyTriMesh.cpp">
-      <Filter>Source Files\Framework</Filter>
+      <Filter>Framework</Filter>
     </ClCompile>
     <ClCompile Include="Framework\InputGeom.cpp">
-      <Filter>Source Files\Framework</Filter>
+      <Filter>Framework</Filter>
     </ClCompile>
     <ClCompile Include="Framework\MeshLoaderObj.cpp">
-      <Filter>Source Files\Framework</Filter>
+      <Filter>Framework</Filter>
     </ClCompile>
     <ClCompile Include="Framework\PerfTimer.cpp">
-      <Filter>Source Files\Framework</Filter>
+      <Filter>Framework</Filter>
     </ClCompile>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="NavMeshGenerator.cpp" />
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="RecastContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\External\recastnavigation\DebugUtils\Include\DebugDraw.h">
@@ -209,35 +189,27 @@
     <ClInclude Include="..\External\recastnavigation\Recast\Include\RecastAssert.h">
       <Filter>Recast\Recast\Include</Filter>
     </ClInclude>
-    <ClInclude Include="NavMeshGenerator.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pch.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NavMeshUtil.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RecastContext.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Framework\ChunkyTriMesh.h">
-      <Filter>Source Files\Framework</Filter>
+      <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="Framework\InputGeom.h">
-      <Filter>Source Files\Framework</Filter>
+      <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="Framework\MeshLoaderObj.h">
-      <Filter>Source Files\Framework</Filter>
+      <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="Framework\PerfTimer.h">
-      <Filter>Source Files\Framework</Filter>
+      <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="Framework\Sample.h">
-      <Filter>Source Files\Framework</Filter>
+      <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="Framework\SampleInterfaces.h">
-      <Filter>Source Files\Framework</Filter>
+      <Filter>Framework</Filter>
     </ClInclude>
+    <ClInclude Include="NavMeshGenerator.h" />
+    <ClInclude Include="NavMeshUtil.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="RecastContext.h" />
   </ItemGroup>
 </Project>
