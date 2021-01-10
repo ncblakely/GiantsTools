@@ -47,7 +47,7 @@ private:
     float m_agentHeight = 2.0f;
     float m_agentRadius = 0.6f;
     float m_agentMaxClimb = 0.9f;
-    float m_agentMaxSlope = 60.0f; // Sample: 45.0f
+    float m_agentMaxSlope = 50.0f; // Sample: 45.0f
     float m_regionMinSize = 8;
     float m_regionMergeSize = 20;
     float m_edgeMaxLen = 12.0f;

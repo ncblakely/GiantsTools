@@ -59,7 +59,7 @@ int main(int argc, char** argv)
         {
             try
             {
-                copy_file(outputPath, outputPath2);
+                copy_file(outputPath, outputPath2, copy_options::overwrite_existing);
             }
             catch (const filesystem_error& ex)
             {
