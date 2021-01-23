@@ -1,27 +1,26 @@
 #pragma once
 
-#include <ComponentBase.h>
-#include <IGameServer.h>
-#include <IGameServerConsole.h>
-#include <IComponentContainer.h>
-#include <ITextLookupService.h>
+#include "Network/Public/IGameServer.h"
+#include "Network/Public/IGameServerConsole.h"
+#include "Core/Public/IGameServiceProvider.h"
+#include "Core/Public/ITextLookupService.h"
 
 // ServerDialog dialog
 
-class ServerDialog : public CDialogEx, public ComponentBase<IGameServerConsole>
+class ServerDialog : public CDialogEx, public IGameServerConsole
 {
 	DECLARE_DYNAMIC(ServerDialog)
 
 public:
 	~ServerDialog();
-	ServerDialog(IComponentContainer* container, CWnd* parent = nullptr);
+	ServerDialog(IGameServiceProvider* container, CWnd* parent = nullptr);
 
 	void CreateColumns();
 	void RefreshPlayers();
 
 	static void STDMETHODCALLTYPE TimerCallback(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime);
-	void STDMETHODCALLTYPE CloseDialog() override;
-	void STDMETHODCALLTYPE ShowDialog() override;
+	void CloseDialog() override;
+	void ShowDialog() override;
 
 	void HandlePlayerConnected(const GameServerEvent& event);
 	void HandlePlayerDisconnected(const GameServerEvent& event);
@@ -57,6 +56,7 @@ private:
 	UUID m_playerDisconnectedEventHandle{};
 	UUID m_playerChatMessageHandle{};
 	UUID m_worldLoadedHandle{};
+	IGameServiceProvider* m_serviceProvider{};
 
 	const int NumColumns = 5;
 };

@@ -6,11 +6,11 @@
 
 IMPLEMENT_DYNAMIC(ServerDialog, CDialogEx)
 
-ServerDialog::ServerDialog(IComponentContainer* container, CWnd* parent) 
-	: ComponentBase(container),
-	CDialogEx(IDD_SERVER, parent)
+ServerDialog::ServerDialog(IGameServiceProvider* serviceProvider, CWnd* parent)
+	: CDialogEx(IDD_SERVER, parent),
+	m_serviceProvider(serviceProvider)
 {
-	const auto& pGameServer = m_pContainer->Get<IGameServer>();
+	const auto& pGameServer = m_serviceProvider->Get<IGameServer>();
 
 	using namespace std::placeholders;
 	m_playerConnectedEventHandle = pGameServer->Listen(GameServerEventType::PlayerConnected, std::bind(&ServerDialog::HandlePlayerConnected, this, _1));
@@ -23,7 +23,7 @@ ServerDialog::~ServerDialog()
 {
 	try
 	{
-		const auto& pGameServer = m_pContainer->Get<IGameServer>();
+		const auto& pGameServer = m_serviceProvider->Get<IGameServer>();
 
 		pGameServer->Unlisten(GameServerEventType::PlayerConnected, m_playerConnectedEventHandle);
 		pGameServer->Unlisten(GameServerEventType::PlayerDisconnected, m_playerDisconnectedEventHandle);
@@ -128,8 +128,8 @@ void ServerDialog::RefreshPlayers()
 	PlayersListCtrl.DeleteAllItems();
 
 
-	const auto& pTextLookupService = m_pContainer->Get<ITextLookupService>();
-	const auto& pGameServer = m_pContainer->Get<IGameServer>();
+	const auto& pTextLookupService = m_serviceProvider->Get<ITextLookupService>();
+	const auto& pGameServer = m_serviceProvider->Get<IGameServer>();
 	for (const auto& player : pGameServer->GetPlayers())
 	{
 		if (player->host)
@@ -179,7 +179,7 @@ void ServerDialog::HandleWorldLoaded(const GameServerEvent& event)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	const auto& pGameServer = m_pContainer->Get<IGameServer>();
+	const auto& pGameServer = m_serviceProvider->Get<IGameServer>();
 
 	auto details = pGameServer->GetGameDetails();
 
@@ -206,7 +206,7 @@ void ServerDialog::OnBnClickedBan()
 	const PlayerIndex playerIndex = (PlayerIndex)PlayersListCtrl.GetItemData(selection);
 	if (playerIndex > 0)
 	{
-		const auto& pGameServer = m_pContainer->Get<IGameServer>();
+		const auto& pGameServer = m_serviceProvider->Get<IGameServer>();
 		pGameServer->BanPlayer(playerIndex);
 	}
 }
@@ -222,7 +222,7 @@ void ServerDialog::OnBnClickedKick()
 	const PlayerIndex playerIndex = (PlayerIndex)PlayersListCtrl.GetItemData(selection);
 	if (playerIndex > 0)
 	{
-		const auto& pGameServer = m_pContainer->Get<IGameServer>();
+		const auto& pGameServer = m_serviceProvider->Get<IGameServer>();
 		pGameServer->KickPlayer(playerIndex, KickReason::Removed);
 	}
 }

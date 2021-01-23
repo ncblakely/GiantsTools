@@ -6,8 +6,7 @@
 
 #include "resource.h"		// main symbols
 #include "ServerDialog.h"
-#include <IGameServerConsole.h>
-#include <ComponentBase.h>
+#include "Network/Public/IGameServerConsole.h"
 
 class ServerConsoleApp : public CWinApp
 {
@@ -18,7 +17,7 @@ public:
 	BOOL InitInstance() override;
 	BOOL ExitInstance() override;
 
-	IGameServerConsole* InitializeDialog(IComponentContainer* container);
+	void InitializeDialog(IGameServiceProvider* serviceProvider);
 
 	DECLARE_MESSAGE_MAP()
 };
