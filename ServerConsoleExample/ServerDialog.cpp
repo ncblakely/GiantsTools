@@ -28,6 +28,7 @@ ServerDialog::~ServerDialog()
 		pGameServer->Unlisten(GameServerEventType::PlayerConnected, m_playerConnectedEventHandle);
 		pGameServer->Unlisten(GameServerEventType::PlayerDisconnected, m_playerDisconnectedEventHandle);
 		pGameServer->Unlisten(GameServerEventType::ChatMessage, m_playerChatMessageHandle);
+		pGameServer->Unlisten(GameServerEventType::WorldLoaded, m_worldLoadedHandle);
 	}
 	catch (...)
 	{

@@ -46,6 +46,7 @@ struct ChatMessageEvent : GameServerEvent
 
 	tstring_view message{};
 	PlayerIndex senderIndex{};
+	ChatFlag flags{};
 };
 
 struct WorldLoadedEvent : GameServerEvent

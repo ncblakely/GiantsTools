@@ -8,9 +8,6 @@
 #include "GameServerEvents.h"
 #include "NetCommon.h"
 
-// {B2D67EE7-8063-488F-B3B9-E7DA675CB752}
-inline const GUID IID_IGameServer = { 0xb2d67ee7, 0x8063, 0x488f, 0xb3, 0xb9, 0xe7, 0xda, 0x67, 0x5c, 0xb7, 0x52 };
-
 /// <summary>
 /// Defines an API for communicating with the game server.
 /// </summary>
@@ -31,15 +28,24 @@ DEFINE_SERVICE_MULTI("{B2D67EE7-8063-488F-B3B9-E7DA675CB752}", IGameServer, IEve
 	/// Bans the player at the specified index.
 	/// </summary>
 	/// <param name="index">The player index.</param>
-	/// <returns></returns>
 	virtual void BanPlayer(int index) = 0;
+
+	/// <summary>
+	/// Removes the IP address from the ban list.
+	/// </summary>
+	/// <param name="index">The IP address.</param>
+	virtual void UnbanPlayer(const IPAddress & ipAddress) = 0;
+
+	/// <summary>
+	/// Gets the IP addresses that are currently banned.
+	/// </summary>
+	virtual const std::vector<IPAddress> GetBans() const = 0;
 
 	/// <summary>
 	/// Kicks the player at the specified index.
 	/// </summary>
 	/// <param name="index">The player index.</param>
 	/// <param name="reason">The reason for kicking the player.</param>
-	/// <returns></returns>
 	virtual void KickPlayer(int index, KickReason reason) = 0;
 
 	/// <summary>
@@ -73,5 +79,3 @@ DEFINE_SERVICE_MULTI("{B2D67EE7-8063-488F-B3B9-E7DA675CB752}", IGameServer, IEve
 	/// <param name="gameDetails">The game details.</param>
 	virtual void ChangeGameDetails(const NetGameDetails& gameDetails) = 0;
 };
-
-struct DECLSPEC_UUID("{B2D67EE7-8063-488F-B3B9-E7DA675CB752}") IGameServer;

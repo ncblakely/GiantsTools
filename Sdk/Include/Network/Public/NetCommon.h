@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "IPAddress.h"
+
 typedef int PlayerIndex;
 typedef int PlayerTeamIndex;
 
@@ -81,13 +83,14 @@ enum class GameTeam
 struct PlayerInfo
 {
 	PlayerIndex index = 0;
-	std::string name;
+	tstring name;
 	float score = 0;
 	float deaths = 0;
 	int ping = 0;
 	PlayerTeamIndex team = 0;
 	bool host = false;
 	NetPlayerState state = NetPlayerState::None;
+	IPAddress ipAddress;
 };
 
 struct NetGameSettings
@@ -105,6 +108,7 @@ struct NetGameSettings
 	bool vimpsDisabled = false;
 	bool weaponAvailabilityModified = false;
 	int worldId = 0;
+	tstring sessionName;
 };
 
 struct NetGameDetails
@@ -112,7 +116,7 @@ struct NetGameDetails
 	// User-adjustable settings for the current game.
 	NetGameSettings settings;
 
-	std::string worldName;
-	std::string teamTypeName;
-	std::string gameTypeName;
+	tstring worldName;
+	tstring teamTypeName;
+	tstring gameTypeName;
 };
