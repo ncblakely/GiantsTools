@@ -36,8 +36,8 @@
     <RemoveDir Directories="$(OutDir)References" />
   </Target>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /DY &quot;$(TargetPath)&quot; &quot;$(GIANTS_PATH)\$(TargetFileName)*&quot;" />
+  <Target Name="PostBuild" AfterTargets="Build">
+    <CallTarget Condition="$(GIANTS_PATH) != ''" Targets="CopyTargetToGameFolder" />
   </Target>
 
 </Project>
