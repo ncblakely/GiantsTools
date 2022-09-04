@@ -224,16 +224,12 @@ namespace Giants.Launcher
 			}
 			catch (ApiException ex)
 			{
-#if DEBUG
 				MessageBox.Show($"Exception retrieving version information: {ex.StatusCode}");
-#endif
 				return null;
 			}
 			catch (Exception ex)
 			{
-#if DEBUG
 				MessageBox.Show($"Exception retrieving version information: {ex.Message}");
-#endif
 				return null;
 			}
 		}
