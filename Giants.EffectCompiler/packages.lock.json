@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net6.0": {
+      "Newtonsoft.Json": {
+        "type": "Direct",
+        "requested": "[12.0.3, )",
+        "resolved": "12.0.3",
+        "contentHash": "6mgjfnRB4jKMlzHSl+VD+oUc1IebOZabkbyWj2RiTgWwYPPuaK1H97G1sHqGwPlS5npiF5Q0OrxN1wni2n5QWg=="
+      },
+      "System.CommandLine": {
+        "type": "Direct",
+        "requested": "[2.0.0-beta1.20427.1, )",
+        "resolved": "2.0.0-beta1.20427.1",
+        "contentHash": "UjTbOfEKkAd2HlzNOL9d9jv8if+Xkhr+iL6oBaYJfQi8qIKvDwFSub3bjNczwaGQYRgVcTqX2Tle4wi/r2y65g==",
+        "dependencies": {
+          "Microsoft.CSharp": "4.4.1",
+          "system.memory": "4.5.4"
+        }
+      },
+      "System.CommandLine.DragonFruit": {
+        "type": "Direct",
+        "requested": "[0.3.0-alpha.20427.1, )",
+        "resolved": "0.3.0-alpha.20427.1",
+        "contentHash": "ID4jdhJM3BR3WKb6rWBwSigySAQXu5HJaUTzNtLL8zPGC5U/NliT3dW4c+8PfyitKffDr12vdl391s0d17sUXw==",
+        "dependencies": {
+          "System.CommandLine": "2.0.0-beta1.20427.1",
+          "System.CommandLine.Rendering": "0.3.0-alpha.20427.1"
+        }
+      },
+      "Microsoft.CSharp": {
+        "type": "Transitive",
+        "resolved": "4.4.1",
+        "contentHash": "A5hI3gk6WpcBI0QGZY6/d5CCaYUxJgi7iENn1uYEng+Olo8RfI5ReGVkjXjeu3VR3srLvVYREATXa2M0X7FYJA=="
+      },
+      "NLog": {
+        "type": "Transitive",
+        "resolved": "4.7.4",
+        "contentHash": "gSGX/ur0P3jp17H37HW7ycXR6L1578tQbilf4HLX1t2viCDFgtwEsfHMPf0/jcuf7/qqGgoU/vKgyQ9hzxuOEQ=="
+      },
+      "System.CommandLine.Rendering": {
+        "type": "Transitive",
+        "resolved": "0.3.0-alpha.20427.1",
+        "contentHash": "AqkOKT5LOq5syNi6EuINAEtMis5UaGX4d7XTNT7zzaGqxsrJcg5OarBjYhEK4w7JWRHo3918hyBKOuEUnkhlIg==",
+        "dependencies": {
+          "System.CommandLine": "2.0.0-beta1.20427.1"
+        }
+      },
+      "System.Memory": {
+        "type": "Transitive",
+        "resolved": "4.5.4",
+        "contentHash": "1MbJTHS1lZ4bS4FmsJjnuGJOu88ZzTT2rLvrhW7Ygic+pC0NWA+3hgAen0HRdsocuQXCkUTdFn9yHJJhsijDXw=="
+      },
+      "giants.bintools": {
+        "type": "Project",
+        "dependencies": {
+          "NLog": "[4.7.4, )",
+          "Newtonsoft.Json": "[12.0.3, )"
+        }
+      }
+    }
+  }
+}
