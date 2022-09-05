@@ -1,5 +1,4 @@
 #include "pch.h"
-#include <initguid.h>
 #include "ServerConsoleApp.h"
 #include "ServerDialog.h"
 

@@ -61,6 +61,15 @@ namespace Giants.Launcher {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Giants: Citizen Kabuto.
+        /// </summary>
+        internal static string AppName {
+            get {
+                return ResourceManager.GetString("AppName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not locate an installation of {0}. The launcher will now exit..
         /// </summary>
         internal static string AppNotFound {

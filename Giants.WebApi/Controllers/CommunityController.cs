@@ -6,6 +6,7 @@
 
     [ApiController]
     [ApiVersion("1.0")]
+    [ApiVersion("1.1")]
     [Route("api/[controller]")]
     public class CommunityController : ControllerBase
     {

@@ -4,7 +4,7 @@
 
     public class ServerInfo : DataContract.V1.ServerInfo, IIdentifiable
     {
-        public string id => this.HostIpAddress;
+        public string id => $"{this.HostIpAddress}-{this.GameName}-{this.Port}";
 
         public string DocumentType => nameof(ServerInfo);
 
@@ -17,6 +17,8 @@
             return obj is ServerInfo info &&
                    base.Equals(obj) &&
                    this.HostIpAddress == info.HostIpAddress &&
+                   this.Port == info.Port &&
+                   this.GameName == info.GameName &&
                    this.DocumentType == info.DocumentType;
         }
 
