@@ -6,13 +6,13 @@ namespace ECS
 	template<typename TComponent>
 	void EntityComponentEditor(TComponent& component)
 	{
-		static_assert(false, "No specialization has been defined for the component.");
+		// No specialization has been defined for the component
 	}
 
 	template <typename T>
 	inline T EntityValueParser(const std::string& inputValue)
 	{
-		static_assert(false, "No parser is defined for the property type.");
+		// No parser is defined for the property type
 	}
 
 	template<>

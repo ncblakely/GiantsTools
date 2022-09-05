@@ -20,4 +20,5 @@
 #pragma warning(push, 1)
 #pragma warning (disable : ALL_CODE_ANALYSIS_WARNINGS)
 #include <fmt/format.h>
+#include <fmt/printf.h>
 #pragma warning(pop)

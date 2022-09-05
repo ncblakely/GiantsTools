@@ -51,7 +51,10 @@ struct P4D
 	P4D() noexcept { }
 	explicit P4D(float x, float y, float z, float w) noexcept : x(x), y(y), z(z), w(w) { }
 
-	float x, y, z, w;
+	float x = 0;
+	float y = 0;
+	float z = 0;
+	float w = 0;
 };
 
 struct P3D

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "DebugDraw.h"
-#include "DetourDebugDraw.h"
+#include "recastnavigation/DebugUtils/Include/DebugDraw.h"
+#include "recastnavigation/DebugUtils/Include/DetourDebugDraw.h"
 
 namespace Nav
 {
