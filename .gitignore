@@ -13,6 +13,7 @@ vcpkg_installed
 *.userosscache
 *.sln.docstates
 appsettings.Development.json
+appsettings.Production.json
 profile.arm.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)

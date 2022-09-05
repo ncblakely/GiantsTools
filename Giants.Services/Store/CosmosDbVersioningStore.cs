@@ -6,14 +6,14 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
 
-    public class CosmosDbUpdaterStore : IUpdaterStore
+    public class CosmosDbVersioningStore : IVersioningStore
     {
         private readonly ILogger<CosmosDbServerRegistryStore> logger;
         private readonly IMemoryCache memoryCache;
         private readonly IConfiguration configuration;
         private CosmosDbClient client;
 
-        public CosmosDbUpdaterStore(
+        public CosmosDbVersioningStore(
             ILogger<CosmosDbServerRegistryStore> logger,
             IMemoryCache memoryCache,
             IConfiguration configuration)
@@ -37,6 +37,11 @@
                 });
 
             return versionInfo;
+        }
+
+        public async Task UpdateVersionInfo(VersionInfo versionInfo)
+        {
+            await this.client.UpsertItem(versionInfo);
         }
 
         public async Task Initialize()
