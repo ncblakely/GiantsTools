@@ -22,10 +22,10 @@ public:
 	void CloseDialog() override;
 	void ShowDialog() override;
 
-	void HandlePlayerConnected(const GameServerEvent& event);
-	void HandlePlayerDisconnected(const GameServerEvent& event);
-	void HandleChatMessage(const GameServerEvent& event);
-	void HandleWorldLoaded(const GameServerEvent& event);
+	EventListenerResult HandlePlayerConnected(const GameServerEvent& event);
+	EventListenerResult HandlePlayerDisconnected(const GameServerEvent& event);
+	EventListenerResult HandleChatMessage(const GameServerEvent& event);
+	EventListenerResult HandleWorldLoaded(const GameServerEvent& event);
 
 	// MFC methods
 	BOOL OnInitDialog() override;

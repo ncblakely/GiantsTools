@@ -14,4 +14,4 @@
 #include <string>
 
 // Game SDK includes
-#include <DataTypes.h>
+#include <Sdk/Include/Core/Public/DataTypes.h>

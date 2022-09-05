@@ -154,17 +154,21 @@ void ServerDialog::RefreshPlayers()
 	PlayersListCtrl.SetSelectionMark(savedSelection);
 }
 
-void ServerDialog::HandlePlayerConnected(const GameServerEvent& event)
+EventListenerResult ServerDialog::HandlePlayerConnected(const GameServerEvent& event)
 {
 	RefreshPlayers();
+
+	return EventListenerResult::Continue;
 }
 
-void ServerDialog::HandlePlayerDisconnected(const GameServerEvent& event)
+EventListenerResult ServerDialog::HandlePlayerDisconnected(const GameServerEvent& event)
 {
 	RefreshPlayers();
+
+	return EventListenerResult::Continue;
 }
 
-void ServerDialog::HandleChatMessage(const GameServerEvent& event)
+EventListenerResult ServerDialog::HandleChatMessage(const GameServerEvent& event)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -174,15 +178,19 @@ void ServerDialog::HandleChatMessage(const GameServerEvent& event)
 	ConsoleEditBox.ReplaceSel(chatMessageEvent.message.data());
 	ConsoleEditBox.SetSel(-1, 0);
 	ConsoleEditBox.ReplaceSel("\n");
+
+	return EventListenerResult::Continue;
 }
 
-void ServerDialog::HandleWorldLoaded(const GameServerEvent& event)
+EventListenerResult ServerDialog::HandleWorldLoaded(const GameServerEvent& event)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	const auto& pGameServer = m_serviceProvider->Get<IGameServer>();
 
 	auto details = pGameServer->GetGameDetails();
+
+	return EventListenerResult::Continue;
 
 	// TODO: Connect to world state controls
 }

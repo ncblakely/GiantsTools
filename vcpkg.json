@@ -1,0 +1,9 @@
+{
+	"dependencies": [
+        {
+          "name": "fmt",
+          "version>=": "9.0.0"
+        }
+	],
+    "builtin-baseline": "88b1071e39f13b632644d9d953738d345a4ac055"
+}

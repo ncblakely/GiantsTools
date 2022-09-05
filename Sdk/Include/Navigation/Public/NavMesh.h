@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DetourNavMeshQuery.h"
+#include "recastnavigation/Detour/Include/DetourNavMeshQuery.h"
 
 namespace Nav
 {
