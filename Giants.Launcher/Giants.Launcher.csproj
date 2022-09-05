@@ -234,7 +234,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="PostBuild" AfterTargets="Build">
-    <Copy Condition="$(CopyToImageOutputPath) == 'true'" SourceFiles="$(TargetPath)" DestinationFolder="$(GameImagePath)" SkipUnchangedFiles="true" />
+    <Copy Condition="$(GameImagePath) != ''" SourceFiles="$(TargetPath)" DestinationFolder="$(GameImagePath)" SkipUnchangedFiles="true" />
+    <Copy Condition="$(GameImagePath) != ''" SourceFiles="@(ReferenceCopyLocalPaths)" DestinationFolder="$(GameImagePath)" SkipUnchangedFiles="true" />
     <CallTarget Condition="$(GIANTS_PATH) != ''" Targets="CopyTargetToGameFolder" />
   </Target>
 </Project>
