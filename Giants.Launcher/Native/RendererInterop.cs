@@ -58,6 +58,8 @@ namespace Giants.Launcher
             {
                 try
                 {
+                    NativeMethods.SetDllDirectory(Environment.CurrentDirectory);
+
                     // Make interop call to native renderer DLLs to get capability info
                     var interopCaps = new RendererInterop.GFXCapabilityInfo();
                     string path = Path.Combine(file.DirectoryName, file.Name);

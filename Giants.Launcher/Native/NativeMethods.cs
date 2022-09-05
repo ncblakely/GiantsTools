@@ -6,8 +6,12 @@ namespace Giants.Launcher
 {
     static class NativeMethods
     {
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtr LoadLibrary(string dllToLoad);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetDllDirectory(string lpPathName);
 
         [DllImport("kernel32.dll")]
         public static extern IntPtr GetProcAddress(IntPtr hModule, string procedureName);

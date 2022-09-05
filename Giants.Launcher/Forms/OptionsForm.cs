@@ -22,6 +22,7 @@ namespace Giants.Launcher
 		{
 			// Must come first as other options depend on it
 			this.PopulateRenderers();
+			this.SetRenderer();
 
 			this.PopulateResolution();
 			this.PopulateAnisotropy();
@@ -40,6 +41,24 @@ namespace Giants.Launcher
 					.ToArray());
 		}
 
+		private void SetRenderer()
+        {
+			string selectedRenderer = GameSettings.Get<string>(RegistryKeys.Renderer);
+			RendererInfo renderer = 
+				GameSettings.CompatibleRenderers.Find(
+					r => Path.GetFileName(r.FilePath).Equals(selectedRenderer, StringComparison.OrdinalIgnoreCase));
+
+			if (renderer != null)
+			{
+				this.cmbRenderer.SelectedItem = renderer;
+			}
+			else
+			{
+				renderer = GameSettings.CompatibleRenderers.Find(r => r.FileName == "gg_dx7r.dll");
+				this.cmbRenderer.SelectedItem = renderer;
+			}
+		}
+
 		private void SetOptions()
 		{
 			var resolutions = (List<ScreenResolution>)this.cmbResolution.DataSource;
@@ -53,19 +72,6 @@ namespace Giants.Launcher
                 this.cmbAntialiasing.SelectedIndex = 0;
 
             this.chkUpdates.Checked = GameSettings.Get<int>(RegistryKeys.NoAutoUpdate) != 1;
-
-			RendererInfo renderer = GameSettings.CompatibleRenderers.Find(
-				r => StringComparer.OrdinalIgnoreCase.Compare(Path.GetFileName(r.FilePath), GameSettings.Get<string>(RegistryKeys.Renderer)) == 0);
-
-			if (renderer != null)
-			{
-				this.cmbRenderer.SelectedItem = renderer;
-			}
-			else
-			{
-				renderer = GameSettings.CompatibleRenderers.Find(r => r.FileName == "gg_dx7r.dll");
-				this.cmbRenderer.SelectedItem = renderer;
-			}
 		}
 
 		private void PopulateAntialiasing()
