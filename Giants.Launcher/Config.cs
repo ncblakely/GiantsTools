@@ -39,13 +39,22 @@
             if (this.userConfig.ContainsKey(section))
             {
                 dynamic sectionObject = this.userConfig[section];
-                if (sectionObject != null)
+                if (sectionObject != null && sectionObject.ContainsKey(key))
                 {
-                    return sectionObject.ContainsKey(key) ? (string)sectionObject[key] : "";
+                    return (string)sectionObject[key];
                 }
             }
 
-            return this.defaultConfig[section][key];
+            if (this.defaultConfig.ContainsKey(section))
+            {
+                dynamic sectionObject = this.defaultConfig[section];
+                if (sectionObject != null && sectionObject.ContainsKey(key))
+                {
+                    return (string)sectionObject[key];
+                }
+            }
+
+            return string.Empty;
         }
 
         // TODO: other accessors unimplemented as we only need master server host name for now
