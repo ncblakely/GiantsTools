@@ -35,5 +35,15 @@
         {
             return new Version(this.Major, this.Minor, this.Build, this.Revision);
         }
+
+        public static bool operator<(AppVersion a, AppVersion b)
+        {
+            return a.ToVersion() < b.ToVersion();
+        }
+
+        public static bool operator>(AppVersion a, AppVersion b)
+        {
+            return a.ToVersion() > b.ToVersion();
+        }
     }
 }

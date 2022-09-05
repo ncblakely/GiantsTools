@@ -17,8 +17,8 @@
             services.AddSingleton<IServerRegistryStore, CosmosDbServerRegistryStore>();
             services.AddSingleton<IDateTimeProvider, DefaultDateTimeProvider>();
             services.AddSingleton<IMemoryCache, MemoryCache>();
-            services.AddSingleton<IUpdaterStore, CosmosDbUpdaterStore>();
-            services.AddSingleton<IUpdaterService, UpdaterService>();
+            services.AddSingleton<IVersioningStore, CosmosDbVersioningStore>();
+            services.AddSingleton<IVersioningService, VersioningService>();
             services.AddSingleton<ICommunityService, CommunityService>();
             services.AddSingleton<ICrashReportService, CrashReportService>();
 

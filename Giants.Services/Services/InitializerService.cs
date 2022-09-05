@@ -6,11 +6,11 @@
 
     public class InitializerService : IHostedService
     {
-        private readonly IUpdaterStore updaterStore;
+        private readonly IVersioningStore updaterStore;
         private readonly IServerRegistryStore serverRegistryStore;
 
         public InitializerService(
-            IUpdaterStore updaterStore,
+            IVersioningStore updaterStore,
             IServerRegistryStore serverRegistryStore)
         {
             // TODO: Pick these up from reflection and auto initialize

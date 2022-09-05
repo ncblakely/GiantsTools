@@ -1,7 +1,10 @@
-﻿using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
+using Giants.DataContract.Contracts.V1;
 using Giants.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Web.Resource;
+using System.Threading.Tasks;
 
 namespace Giants.WebApi.Controllers
 {
@@ -12,22 +15,36 @@ namespace Giants.WebApi.Controllers
     public class VersionController : ControllerBase
     {
         private readonly IMapper mapper;
-        private readonly IUpdaterService updaterService;
+        private readonly IVersioningService versioningService;
+        private const string VersionWriteScope = "App.Write";
 
         public VersionController(
             IMapper mapper,
-            IUpdaterService updaterService)
+            IVersioningService versioningService)
         {
             this.mapper = mapper;
-            this.updaterService = updaterService;
+            this.versioningService = versioningService;
         }
 
         [HttpGet]
         public async Task<DataContract.V1.VersionInfo> GetVersionInfo(string appName)
         {
-            Services.VersionInfo versionInfo = await this.updaterService.GetVersionInfo(appName);
+            ArgumentUtility.CheckStringForNullOrEmpty(appName);
+
+            Services.VersionInfo versionInfo = await this.versioningService.GetVersionInfo(appName);
 
             return this.mapper.Map<DataContract.V1.VersionInfo>(versionInfo);
+        }
+
+        [Authorize]
+        [RequiredScopeOrAppPermission(
+            AcceptedAppPermission = new[] { VersionWriteScope }) ]
+        [HttpPost]
+        public async Task UpdateVersionInfo([FromBody] VersionInfoUpdate versionInfoUpdate)
+        {
+            ArgumentUtility.CheckForNull(versionInfoUpdate);
+
+            await this.versioningService.UpdateVersionInfo(versionInfoUpdate.AppName, versionInfoUpdate.AppVersion, versionInfoUpdate.FileName);
         }
     }
 }

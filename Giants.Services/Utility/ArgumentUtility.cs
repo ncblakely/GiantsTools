@@ -1,10 +1,5 @@
 ﻿namespace Giants.Services
 {
-    // Decompiled with JetBrains decompiler
-    // Type: Microsoft.VisualStudio.Services.Common.ArgumentUtility
-    // Assembly: Microsoft.VisualStudio.Services.Common, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
-    // MVID: 8C174B92-2E1F-4F71-9E6B-FC8D9F2C517A
-
     using System;
     using System.Collections;
     using System.ComponentModel;
@@ -14,7 +9,7 @@
     public static class ArgumentUtility
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void CheckForNull(object var, string varName)
+        public static void CheckForNull(object var, [CallerArgumentExpression("var")] string varName = null)
         {
             if (var == null)
                 throw new ArgumentNullException(varName);
@@ -23,18 +18,18 @@
 
         public static void CheckStringForNullOrEmpty(
             string stringVar,
-            string stringVarName)
+            [CallerArgumentExpression("stringVar")] string stringVarName = null)
         {
-            ArgumentUtility.CheckStringForNullOrEmpty(stringVar, stringVarName, false);
+            ArgumentUtility.CheckStringForNullOrEmpty(stringVar, false, stringVarName);
         }
 
-        public static void CheckForNonnegativeInt(int var, string varName)
+        public static void CheckForNonnegativeInt(int var, [CallerArgumentExpression("var")] string varName = null)
         {
             if (var < 0)
                 throw new ArgumentOutOfRangeException(varName);
         }
 
-        public static void CheckForNonPositiveInt(int var, string varName)
+        public static void CheckForNonPositiveInt(int var, [CallerArgumentExpression("var")] string varName = null)
         {
             if (var <= 0)
                 throw new ArgumentOutOfRangeException(varName);
@@ -42,8 +37,8 @@
 
         public static void CheckStringForNullOrEmpty(
             string stringVar,
-            string stringVarName,
-            bool trim)
+            bool trim,
+            [CallerArgumentExpression("stringVar")] string stringVarName = null)
         {
             ArgumentUtility.CheckForNull((object)stringVar, stringVarName);
             if (trim)
@@ -54,9 +49,9 @@
 
         public static void CheckStringLength(
             string stringVar,
-            string stringVarName,
             int maxLength,
-            int minLength = 0)
+            int minLength = 0,
+            [CallerArgumentExpression("stringVar")] string stringVarName = null)
         {
             ArgumentUtility.CheckForNull((object)stringVar, stringVarName);
             if (stringVar.Length < minLength || stringVar.Length > maxLength)
@@ -65,7 +60,7 @@
 
         public static void CheckEnumerableForNullOrEmpty(
             IEnumerable enumerable,
-            string enumerableName)
+            [CallerArgumentExpression("enumerable")] string enumerableName = null)
         {
             ArgumentUtility.CheckForNull((object)enumerable, enumerableName);
             if (!enumerable.GetEnumerator().MoveNext())
@@ -74,7 +69,7 @@
 
         public static void CheckEnumerableForNullElement(
             IEnumerable enumerable,
-            string enumerableName)
+            [CallerArgumentExpression("enumerable")] string enumerableName = null)
         {
             ArgumentUtility.CheckForNull((object)enumerable, enumerableName);
             foreach (object obj in enumerable)
@@ -84,7 +79,7 @@
             }
         }
 
-        public static void CheckForEmptyGuid(Guid guid, string varName)
+        public static void CheckForEmptyGuid(Guid guid, [CallerArgumentExpression("guid")] string varName = null)
         {
             if (guid.Equals(Guid.Empty))
                 throw new ArgumentException("EmptyGuidNotAllowed", varName);
@@ -94,7 +89,7 @@
             int value,
             int minValue,
             int maxValue,
-            string varName)
+            [CallerArgumentExpression("value")] string varName = null)
         {
             if (value < minValue || value > maxValue)
                 throw new ArgumentOutOfRangeException(varName, "ValueOutOfRange");
@@ -103,8 +98,8 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CheckForOutOfRange<T>(
             T var,
-            string varName,
-            T minimum)
+            T minimum,
+            [CallerArgumentExpression("var")] string varName = null)
             where T : IComparable<T>
         {
             ArgumentUtility.CheckForNull((object)var, varName);
@@ -115,9 +110,9 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CheckForOutOfRange(
             int var,
-            string varName,
             int minimum,
-            int maximum)
+            int maximum,
+            [CallerArgumentExpression("var")] string varName = null)
         {
             if (var < minimum || var > maximum)
                 throw new ArgumentOutOfRangeException(varName, (object)var, "OutOfRange");
@@ -126,9 +121,9 @@
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CheckForOutOfRange(
             long var,
-            string varName,
             long minimum,
-            long maximum)
+            long maximum,
+            [CallerArgumentExpression("var")] string varName = null)
         {
             if (var < minimum || var > maximum)
                 throw new ArgumentOutOfRangeException(varName, (object)var, "OutOfRange");
@@ -136,18 +131,12 @@
 
         public static void CheckForDateTimeRange(
             DateTime var,
-            string varName,
             DateTime minimum,
-            DateTime maximum)
+            DateTime maximum,
+            [CallerArgumentExpression("var")] string varName = null)
         {
             if (var < minimum || var > maximum)
                 throw new ArgumentOutOfRangeException(varName, (object)var, "OutOfRange");
-        }
-
-        public static void EnsureIsNull(object var, string varName)
-        {
-            if (var != null)
-                throw new ArgumentException("NullValueNecessary");
         }
     }
 }

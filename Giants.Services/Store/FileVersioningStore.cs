@@ -3,9 +3,14 @@
     using System;
     using System.Threading.Tasks;
 
-    public class FileUpdaterStore : IUpdaterStore
+    public class FileVersioningStore : IVersioningStore
     {
         public Task<VersionInfo> GetVersionInfo(string appName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateVersionInfo(VersionInfo versionInfo)
         {
             throw new NotImplementedException();
         }
