@@ -4,15 +4,9 @@
     ".NETFramework,Version=v4.7.2": {
       "Newtonsoft.Json": {
         "type": "Direct",
-        "requested": "[13.0.1, )",
+        "requested": "[13.0.1, 13.0.1]",
         "resolved": "13.0.1",
         "contentHash": "ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A=="
-      },
-      "NSwag.MSBuild": {
-        "type": "Direct",
-        "requested": "[13.16.1, )",
-        "resolved": "13.16.1",
-        "contentHash": "P5qkQRW7Vfu3YvbFs5K92/vsId1eXgL6VF/es9xugELKQZuhDMUwY9TkmkPMloEuEnLeau9qt7fLbxxP/ChQpg=="
       }
     }
   }

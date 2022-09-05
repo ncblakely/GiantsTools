@@ -4,9 +4,9 @@
     "net6.0": {
       "Newtonsoft.Json": {
         "type": "Direct",
-        "requested": "[12.0.3, )",
-        "resolved": "12.0.3",
-        "contentHash": "6mgjfnRB4jKMlzHSl+VD+oUc1IebOZabkbyWj2RiTgWwYPPuaK1H97G1sHqGwPlS5npiF5Q0OrxN1wni2n5QWg=="
+        "requested": "[13.0.1, )",
+        "resolved": "13.0.1",
+        "contentHash": "ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A=="
       },
       "System.CommandLine": {
         "type": "Direct",
@@ -35,8 +35,8 @@
       },
       "NLog": {
         "type": "Transitive",
-        "resolved": "4.7.4",
-        "contentHash": "gSGX/ur0P3jp17H37HW7ycXR6L1578tQbilf4HLX1t2viCDFgtwEsfHMPf0/jcuf7/qqGgoU/vKgyQ9hzxuOEQ=="
+        "resolved": "5.0.4",
+        "contentHash": "hMyC7jq1m7c339DZXTRz96b+0YsIYSwAUB8sAWMtqXd2uwJjYe+y1k74fbItODPqDuE/krd6A4mxew9gLMS+PQ=="
       },
       "System.CommandLine.Rendering": {
         "type": "Transitive",
@@ -54,8 +54,8 @@
       "giants.bintools": {
         "type": "Project",
         "dependencies": {
-          "NLog": "[4.7.4, )",
-          "Newtonsoft.Json": "[12.0.3, )"
+          "NLog": "[5.0.4, )",
+          "Newtonsoft.Json": "[13.0.1, )"
         }
       }
     }
