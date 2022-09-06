@@ -47,8 +47,6 @@ namespace Giants.Web
 
             services.AddApplicationInsightsTelemetry();
 
-            IdentityModelEventSource.ShowPII = true;
-
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
               .AddMicrosoftIdentityWebApi(options =>
               {
@@ -94,14 +92,17 @@ namespace Giants.Web
             IMapper mapper = Services.Mapper.GetMapper();
             services.AddSingleton(mapper);
 
+            services.AddHealthChecks();
+
             builder.Logging.AddEventSourceLogger();
+            builder.Logging.AddApplicationInsights();
         }
 
         private static void ConfigureApplication(WebApplication app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
-                Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
+                IdentityModelEventSource.ShowPII = true;
                 app.UseDeveloperExceptionPage();
                 app.UseOpenApi();
             }
@@ -113,11 +114,12 @@ namespace Giants.Web
             app.UseAuthentication();
             app.UseAuthorization();
 
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
+            app.MapHealthChecks("/health");
         }
     }
 }
