@@ -1,37 +1,75 @@
 ﻿namespace Giants.Services
 {
-    using System;
-    using System.Net.Http.Headers;
+    using Autofac;
     using Giants.Services.Core;
     using Giants.Services.Services;
     using Giants.Services.Store;
+    using Giants.Services.Utility;
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
+    using System;
 
-    public static class ServicesModule
+    public class ServicesModule : Module
     {
-        public static void RegisterServices(IServiceCollection services, IConfiguration configuration)
+        private readonly IConfiguration configuration;
+
+        public ServicesModule(IConfiguration configuration)
         {
-            services.AddSingleton<IServerRegistryService, ServerRegistryService>();
-            services.AddSingleton<IServerRegistryStore, CosmosDbServerRegistryStore>();
-            services.AddSingleton<IDateTimeProvider, DefaultDateTimeProvider>();
-            services.AddSingleton<IMemoryCache, MemoryCache>();
-            services.AddSingleton<IVersioningStore, CosmosDbVersioningStore>();
-            services.AddSingleton<IVersioningService, VersioningService>();
-            services.AddSingleton<ICommunityService, CommunityService>();
-            services.AddSingleton<ICrashReportService, CrashReportService>();
+            this.configuration = configuration;
+        }
 
-            services.AddHostedService<InitializerService>();
-            services.AddHostedService<ServerRegistryCleanupService>();
+        protected override void Load(ContainerBuilder builder)
+        {
+            builder.RegisterType<ServerRegistryService>()
+                .As<IServerRegistryService>()
+                .SingleInstance();
+            builder.RegisterType<CosmosDbServerRegistryStore>()
+                .As<IServerRegistryStore>()
+                .SingleInstance();
+            builder.RegisterType<DefaultDateTimeProvider>()
+                .As<IDateTimeProvider>()
+                .SingleInstance();
+            builder.RegisterType<MemoryCache>()
+                .As<IMemoryCache>()
+                .SingleInstance();
+            builder.RegisterType<CosmosDbVersioningStore>()
+                .As<IVersioningStore>()
+                .SingleInstance();
+            builder.RegisterType<VersioningService>()
+                .As<IVersioningService>()
+                .SingleInstance();
+            builder.RegisterType<CommunityService>()
+                .As<ICommunityService>()
+                .SingleInstance();
+            builder.RegisterType<CrashReportService>()
+                .As<ICrashReportService>()
+                .SingleInstance();
 
-            services.AddHttpClient("Sentry", c =>
+            var cosmosClient = new CosmosDbClient(
+                connectionString: this.configuration["CosmosDbEndpoint"],
+                authKeyOrResourceToken: this.configuration["CosmosDbKey"],
+                databaseId: this.configuration["DatabaseId"],
+                containerId: this.configuration["ContainerId"]);
+
+            cosmosClient.Initialize().GetAwaiter().GetResult();
+
+            builder.RegisterInstance(cosmosClient).SingleInstance();
+
+            builder.Register<ISimpleMemoryCache<VersionInfo>>(icc =>
             {
-                c.BaseAddress = new Uri(configuration["SentryBaseUri"]);
+                var versionStore = icc.Resolve<IVersioningStore>();
 
-                string sentryAuthenticationToken = configuration["SentryAuthenticationToken"];
-                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sentryAuthenticationToken);
-            });
+                return new SimpleMemoryCache<VersionInfo>(
+                    expirationPeriod: TimeSpan.FromMinutes(5),
+                    memoryCache: icc.Resolve<IMemoryCache>(),
+                    cacheKey: CacheKeys.VersionInfo,
+                    getAllItems: async (cacheEntry) =>
+                    {
+                        return await versionStore.GetVersions();
+                    });
+            })
+            .AsSelf()
+            .SingleInstance();
         }
     }
 }

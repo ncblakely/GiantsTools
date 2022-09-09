@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
     using System.Windows.Forms;
     using Newtonsoft.Json;
@@ -34,14 +35,17 @@
             }
         }
 
-        public string GetString(string section, string key)
+        public bool TryGetObject(string section, string key, object defaultValue, out object value)
         {
+            value = defaultValue;
+
             if (this.userConfig.ContainsKey(section))
             {
                 dynamic sectionObject = this.userConfig[section];
                 if (sectionObject != null && sectionObject.ContainsKey(key))
                 {
-                    return (string)sectionObject[key];
+                    value = sectionObject[key];
+                    return true;
                 }
             }
 
@@ -50,14 +54,38 @@
                 dynamic sectionObject = this.defaultConfig[section];
                 if (sectionObject != null && sectionObject.ContainsKey(key))
                 {
-                    return (string)sectionObject[key];
+                    value = sectionObject[key];
+                    return true;
                 }
             }
 
-            return string.Empty;
+            return false;
         }
 
-        // TODO: other accessors unimplemented as we only need master server host name for now
+        public bool TryGetString(string section, string key, string defaultValue, out string value)
+        {
+            value = defaultValue;
+
+            if (this.TryGetObject(section, key, defaultValue, out object objValue))
+            {
+                value = objValue.ToString();
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool TryGetBool(string section, string key, bool defaultValue, out bool value)
+        {
+            value = defaultValue;
+
+            if (this.TryGetObject(section, key, defaultValue, out object objValue))
+            {
+                return bool.TryParse(objValue.ToString(), out value);
+            }
+
+            return false;
+        }
 
         private static IDictionary<string, dynamic> ReadConfig(string filePath)
         {

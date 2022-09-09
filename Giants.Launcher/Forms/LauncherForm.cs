@@ -21,13 +21,15 @@ namespace Giants.Launcher
 		private const string RegistryValue = "DestDir";
 
 		private readonly HttpClient httpClient;
-        private readonly VersionClient versionHttpClient;
+		private readonly BranchesClient branchHttpClient;
+		private readonly VersionClient versionHttpClient;
         private readonly CommunityClient communityHttpClient;
 
         private string commandLine;
 		private string gamePath = null;
 		private Updater updater;
-		private Config config;
+		private readonly Config config;
+		private string branchName;
         private string communityAppUri;
 
         public LauncherForm()
@@ -43,13 +45,21 @@ namespace Giants.Launcher
 			this.config = new Config();
 			this.config.Read();
 
-			string baseUrl = this.config.GetString(ConfigSections.Network, ConfigKeys.MasterServerHostName);
+			this.config.TryGetString(ConfigSections.Network, ConfigKeys.MasterServerHostName, ConfigDefaults.MasterServerHostNameDefault, out string baseUrl);
+            this.config.TryGetString(ConfigSections.Update, ConfigKeys.BranchName, defaultValue: ConfigDefaults.BranchNameDefault, out string branchName);
 
-			this.httpClient = new HttpClient(
+			this.branchName = branchName;
+
+            this.httpClient = new HttpClient(
 				new HttpClientHandler() 
 				{ 
 					UseProxy = false
 				});
+			this.branchHttpClient = new BranchesClient(this.httpClient)
+			{
+				BaseUrl = baseUrl,
+				
+			};
             this.versionHttpClient = new VersionClient(this.httpClient)
             {
                 BaseUrl = baseUrl
@@ -96,7 +106,13 @@ namespace Giants.Launcher
 
         private void btnOptions_Click(object sender, EventArgs e)
         {
-            OptionsForm form = new OptionsForm(Resources.AppName + " Options", this.gamePath);
+            OptionsForm form = new OptionsForm(
+				title: Resources.AppName + " Options",
+				gamePath: this.gamePath,
+				appName: ApplicationNames.Giants,
+				branchName: this.branchName,
+				config: this.config,
+				branchesClient: this.branchHttpClient);
 
 			form.StartPosition = FormStartPosition.CenterParent;
 			form.ShowDialog();
@@ -172,23 +188,13 @@ namespace Giants.Launcher
             updateCompletedCallback: this.LauncherForm_DownloadCompletedCallback,
             updateProgressCallback: this.LauncherForm_DownloadProgressCallback);
 
-            Task<VersionInfo> gameVersionInfo = this.GetVersionInfo(
+            VersionInfo gameVersionInfo = await this.GetVersionInfo(
 				GetApplicationName(ApplicationType.Game));
-            Task<VersionInfo> launcherVersionInfo = this.GetVersionInfo(
-				GetApplicationName(ApplicationType.Launcher));
 
-            await Task.WhenAll(gameVersionInfo, launcherVersionInfo);
-
-			if (this.updater.IsUpdateRequired(ApplicationType.Game, gameVersionInfo.Result))
+			if (this.updater.IsUpdateRequired(ApplicationType.Game, gameVersionInfo))
 			{
 				this.btnPlay.Enabled = false;
-				await this.updater.UpdateApplication(ApplicationType.Game, gameVersionInfo.Result);
-			}
-
-			if (this.updater.IsUpdateRequired(ApplicationType.Launcher, launcherVersionInfo.Result))
-			{
-				this.btnPlay.Enabled = false;
-				await this.updater.UpdateApplication(ApplicationType.Launcher, launcherVersionInfo.Result);
+				await this.updater.UpdateApplication(ApplicationType.Game, gameVersionInfo);
 			}
         }
 
@@ -197,17 +203,7 @@ namespace Giants.Launcher
 			switch (applicationType)
             {
 				case ApplicationType.Game:
-#if BETA
-					return ApplicationNames.GiantsBeta;
-#else
 					return ApplicationNames.Giants;
-#endif
-				case ApplicationType.Launcher:
-#if BETA
-					return ApplicationNames.GiantsLauncherBeta;
-#else
-					return ApplicationNames.GiantsLauncher;
-#endif
             }
 
 			throw new ArgumentOutOfRangeException();
@@ -218,7 +214,7 @@ namespace Giants.Launcher
 			VersionInfo versionInfo;
 			try
 			{
-				versionInfo = await this.versionHttpClient.GetVersionInfoAsync(appName);
+				versionInfo = await this.versionHttpClient.GetVersionInfoAsync(appName, this.branchName);
 				return versionInfo;
 			}
 			catch (ApiException ex)
@@ -233,7 +229,27 @@ namespace Giants.Launcher
 			}
 		}
 
-		private void LauncherForm_MouseDown(object sender, MouseEventArgs e)
+        private async Task<VersionInfo> GetBranches(string appName)
+        {
+            VersionInfo versionInfo;
+            try
+            {
+                versionInfo = await this.versionHttpClient.GetVersionInfoAsync(appName, this.branchName);
+                return versionInfo;
+            }
+            catch (ApiException ex)
+            {
+                MessageBox.Show($"Exception retrieving branch information: {ex.StatusCode}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Exception retrieving branch information: {ex.Message}");
+                return null;
+            }
+        }
+
+        private void LauncherForm_MouseDown(object sender, MouseEventArgs e)
 		{
 			// Force window to be draggable even though we have no menu bar
 			if (e.Button == MouseButtons.Left)

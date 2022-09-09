@@ -4,6 +4,7 @@ using Giants.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
+using System;
 using System.Threading.Tasks;
 
 namespace Giants.WebApi.Controllers
@@ -31,7 +32,29 @@ namespace Giants.WebApi.Controllers
         {
             ArgumentUtility.CheckStringForNullOrEmpty(appName);
 
-            Services.VersionInfo versionInfo = await this.versioningService.GetVersionInfo(appName);
+            VersionInfo versionInfo = await this.versioningService.GetVersionInfo(appName, BranchConstants.DefaultBranchName);
+
+            if (versionInfo == null)
+            {
+                throw new ArgumentException($"No version information for {appName} found.", appName);
+            }
+
+            return this.mapper.Map<DataContract.V1.VersionInfo>(versionInfo);
+        }
+
+        [HttpGet]
+        [MapToApiVersion("1.1")]
+        public async Task<DataContract.V1.VersionInfo> GetVersionInfo(string appName, string branchName)
+        {
+            ArgumentUtility.CheckStringForNullOrEmpty(appName);
+            ArgumentUtility.CheckStringForNullOrEmpty(branchName);
+
+            VersionInfo versionInfo = await this.versioningService.GetVersionInfo(appName, branchName);
+
+            if (versionInfo == null)
+            {
+                throw new ArgumentException($"No version information for {appName} ({branchName}) found.", appName);
+            }
 
             return this.mapper.Map<DataContract.V1.VersionInfo>(versionInfo);
         }
@@ -44,7 +67,12 @@ namespace Giants.WebApi.Controllers
         {
             ArgumentUtility.CheckForNull(versionInfoUpdate);
 
-            await this.versioningService.UpdateVersionInfo(versionInfoUpdate.AppName, versionInfoUpdate.AppVersion, versionInfoUpdate.FileName);
+            await this.versioningService.UpdateVersionInfo(
+                appName: versionInfoUpdate.AppName,
+                appVersion: versionInfoUpdate.AppVersion,
+                fileName: versionInfoUpdate.FileName,
+                branchName: versionInfoUpdate.BranchName,
+                force: versionInfoUpdate.ForceUpdate);
         }
     }
 }

@@ -1,5 +1,8 @@
 namespace Giants.Web
 {
+    using Autofac;
+    using Autofac.Core;
+    using Autofac.Extensions.DependencyInjection;
     using AutoMapper;
     using Giants.Services;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,8 +17,10 @@ namespace Giants.Web
     using Microsoft.Extensions.Logging;
     using Microsoft.Identity.Web;
     using Microsoft.IdentityModel.Logging;
+    using NSwag.Generation.Processors;
     using System;
     using System.Linq;
+    using System.Net.Http.Headers;
     using System.Threading.Tasks;
 
     public class Program
@@ -26,7 +31,11 @@ namespace Giants.Web
 
             ConfigureServices(builder);
 
-            var app = builder.Build();
+            builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+            builder.Host.ConfigureContainer<ContainerBuilder>((containerBuilder) => ConfigureAutofacServices(containerBuilder, builder.Configuration));
+
+            var app = builder
+                .Build();
             ConfigureApplication(app, app.Environment);
 
             app.Run();
@@ -87,15 +96,38 @@ namespace Giants.Web
             services.AddHttpContextAccessor();
             services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
-            ServicesModule.RegisterServices(services, builder.Configuration);
-
             IMapper mapper = Services.Mapper.GetMapper();
             services.AddSingleton(mapper);
 
             services.AddHealthChecks();
 
+            RegisterHttpClients(services, builder.Configuration);
+
+            RegisterHostedServices(services);
+
             builder.Logging.AddEventSourceLogger();
             builder.Logging.AddApplicationInsights();
+        }
+
+        private static void ConfigureAutofacServices(ContainerBuilder containerBuilder, IConfiguration configuration)
+        {
+            containerBuilder.RegisterModule(new ServicesModule(configuration));
+        }
+
+        private static void RegisterHttpClients(IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddHttpClient("Sentry", c =>
+            {
+                c.BaseAddress = new Uri(configuration["SentryBaseUri"]);
+
+                string sentryAuthenticationToken = configuration["SentryAuthenticationToken"];
+                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sentryAuthenticationToken);
+            });
+        }
+
+        private static void RegisterHostedServices(IServiceCollection services)
+        {
+            services.AddHostedService<ServerRegistryCleanupService>();
         }
 
         private static void ConfigureApplication(WebApplication app, IWebHostEnvironment env)

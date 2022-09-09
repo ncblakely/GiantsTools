@@ -7,8 +7,6 @@
 
     public interface IServerRegistryStore
     {
-        Task Initialize();
-
         Task DeleteServer(string id, string partitionKey = null);
 
         Task DeleteServers(IEnumerable<string> ids, string partitionKey = null);

@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Giants.WebApi.Clients;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Giants.Launcher
@@ -9,16 +11,34 @@ namespace Giants.Launcher
     public partial class OptionsForm : Form
 	{
         private readonly string gamePath = null;
+		private readonly string appName;
+		private readonly Config config;
+		private readonly string branchName;
+		private readonly bool enableBranchSelection;
+		private readonly BranchesClient branchesClient;
 
-		public OptionsForm(string title, string gamePath)
+		public OptionsForm(
+			string title, 
+			string gamePath, 
+			string appName,
+			Config config,
+			string branchName,
+			BranchesClient branchesClient)
 		{
             this.InitializeComponent();
 
 			this.Text = title;
 			this.gamePath = gamePath;
-		}
+			this.appName = appName;
+			this.config = config;
+			this.branchName = branchName;
+			this.branchesClient = branchesClient;
 
-		private void OptionsForm_Load(object sender, EventArgs e)
+            this.config.TryGetBool(ConfigSections.Update, ConfigKeys.EnableBranchSelection, defaultValue: false, out bool enableBranchSelection);
+            this.enableBranchSelection = enableBranchSelection;
+        }
+
+		private async void OptionsForm_Load(object sender, EventArgs e)
 		{
 			// Must come first as other options depend on it
 			this.PopulateRenderers();
@@ -28,7 +48,22 @@ namespace Giants.Launcher
 			this.PopulateAnisotropy();
 			this.PopulateAntialiasing();
 
+            await this.PopulateBranches();
+
             this.SetOptions();
+		}
+
+		private async Task PopulateBranches()
+		{
+			if (this.enableBranchSelection)
+			{
+				var branches = await this.branchesClient.GetBranchesAsync(this.appName);
+
+				cmbBranch.Items.AddRange(branches.ToArray());
+
+				BranchGroupBox.Visible = true;
+				cmbBranch.Visible = true;
+			}
 		}
 
 		private void PopulateRenderers()
@@ -72,6 +107,11 @@ namespace Giants.Launcher
                 this.cmbAntialiasing.SelectedIndex = 0;
 
             this.chkUpdates.Checked = GameSettings.Get<int>(RegistryKeys.NoAutoUpdate) != 1;
+
+			if (this.enableBranchSelection)
+			{
+				this.cmbBranch.SelectedItem = this.branchName;
+			}
 		}
 
 		private void PopulateAntialiasing()

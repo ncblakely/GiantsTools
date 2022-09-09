@@ -2,6 +2,25 @@
   "version": 1,
   "dependencies": {
     "net6.0": {
+      "Autofac": {
+        "type": "Direct",
+        "requested": "[6.4.0, )",
+        "resolved": "6.4.0",
+        "contentHash": "tkFxl6wAPuwVhrlN8wuNADnd+k2tv4ReP7ZZSL0vjfcN0RcfC9v25ogxK6b03HC7D4NwWjSLf1G/zTG8Bw43wQ==",
+        "dependencies": {
+          "System.Diagnostics.DiagnosticSource": "4.7.1"
+        }
+      },
+      "Autofac.Extensions.DependencyInjection": {
+        "type": "Direct",
+        "requested": "[8.0.0, )",
+        "resolved": "8.0.0",
+        "contentHash": "nGrXNpQX2FiZpIBydK9cxZnnoqP/cUd3k/53uRERYEqLtWzKtE15R6L+j5q5ax5Rv/+3wAIkOaPePkahfqrwjg==",
+        "dependencies": {
+          "Autofac": "6.4.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0"
+        }
+      },
       "AutoMapper": {
         "type": "Direct",
         "requested": "[11.0.1, )",
@@ -1908,6 +1927,7 @@
         "type": "Project",
         "dependencies": {
           "AutoMapper": "[11.0.1, )",
+          "Autofac": "[6.4.0, )",
           "Azure.Storage.Blobs": "[12.13.1, )",
           "Giants.DataContract": "[1.0.0, )",
           "Microsoft.Azure.Cosmos": "[3.30.1, )",

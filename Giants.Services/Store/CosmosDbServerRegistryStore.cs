@@ -18,8 +18,8 @@
         private readonly IConfiguration configuration;
         private readonly IMemoryCache memoryCache;
         private readonly IDateTimeProvider dateTimeProvider;
+        private readonly CosmosDbClient client;
         private readonly TimeSpan timeoutPeriod;
-        private CosmosDbClient client;
 
         private const int ServerRefreshIntervalInMinutes = 1;
         
@@ -27,12 +27,14 @@
             ILogger<CosmosDbServerRegistryStore> logger,
             IConfiguration configuration,
             IMemoryCache memoryCache,
-            IDateTimeProvider dateTimeProvider)
+            IDateTimeProvider dateTimeProvider,
+            CosmosDbClient client)
         {
             this.logger = logger;
             this.configuration = configuration;
             this.memoryCache = memoryCache;
             this.dateTimeProvider = dateTimeProvider;
+            this.client = client;
             this.timeoutPeriod = TimeSpan.FromMinutes(Convert.ToDouble(this.configuration["ServerTimeoutPeriodInMinutes"]));
         }
 
@@ -174,17 +176,6 @@
 
                 await this.DeleteServer(id, partitionKey);
             }
-        }
-
-        public async Task Initialize()
-        {
-            this.client = new CosmosDbClient(
-                connectionString: this.configuration["CosmosDbEndpoint"],
-                authKeyOrResourceToken: this.configuration["CosmosDbKey"],
-                databaseId: this.configuration["DatabaseId"],
-                containerId: this.configuration["ContainerId"]);
-
-            await this.client.Initialize();
         }
 
         private async Task<ConcurrentDictionary<string, IList<ServerInfo>>> PopulateCache(ICacheEntry entry)
