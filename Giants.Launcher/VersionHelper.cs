@@ -15,6 +15,10 @@
             }
             catch (Exception)
             {
+                string message = string.Format(Resources.AppNotFound, Resources.AppName);
+                MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+
                 return null;
             }
         }

@@ -28,26 +28,9 @@ namespace Giants.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<DataContract.V1.VersionInfo> GetVersionInfo(string appName)
-        {
-            ArgumentUtility.CheckStringForNullOrEmpty(appName);
-
-            VersionInfo versionInfo = await this.versioningService.GetVersionInfo(appName, BranchConstants.DefaultBranchName);
-
-            if (versionInfo == null)
-            {
-                throw new ArgumentException($"No version information for {appName} found.", appName);
-            }
-
-            return this.mapper.Map<DataContract.V1.VersionInfo>(versionInfo);
-        }
-
-        [HttpGet]
-        [MapToApiVersion("1.1")]
         public async Task<DataContract.V1.VersionInfo> GetVersionInfo(string appName, string branchName)
         {
             ArgumentUtility.CheckStringForNullOrEmpty(appName);
-            ArgumentUtility.CheckStringForNullOrEmpty(branchName);
 
             VersionInfo versionInfo = await this.versioningService.GetVersionInfo(appName, branchName);
 

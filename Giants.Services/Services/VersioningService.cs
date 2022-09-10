@@ -39,7 +39,9 @@ namespace Giants.Services
             var versions = await this.versionCache.GetItems();
 
             return versions
-                .Where(x => x.AppName.Equals(appName, StringComparison.Ordinal) && x.BranchName.Equals(branchName, StringComparison.OrdinalIgnoreCase))
+                .Where(x => x.AppName.Equals(appName, StringComparison.Ordinal) 
+                && !string.IsNullOrEmpty(x.BranchName)
+                && x.BranchName.Equals(branchName, StringComparison.OrdinalIgnoreCase))
                 .FirstOrDefault();
         }
 

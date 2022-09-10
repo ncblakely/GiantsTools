@@ -41,8 +41,12 @@ namespace Giants.Launcher
 			// Set window title
 			this.SetTitle();
 
-			// Read newer file-based game settings
-			this.config = new Config();
+            this.updater = new Updater(
+            updateCompletedCallback: this.LauncherForm_DownloadCompletedCallback,
+            updateProgressCallback: this.LauncherForm_DownloadProgressCallback);
+
+            // Read newer file-based game settings
+            this.config = new Config();
 			this.config.Read();
 
 			this.config.TryGetString(ConfigSections.Network, ConfigKeys.MasterServerHostName, ConfigDefaults.MasterServerHostNameDefault, out string baseUrl);
@@ -72,12 +76,14 @@ namespace Giants.Launcher
 
         private void btnExit_Click(object sender, EventArgs e)
         {
+            this.config.Write();
             Application.Exit();
         }
 
 		private void btnPlay_Click(object sender, EventArgs e)
 		{
 			GameSettings.Save();
+			this.config.Write();
 
 			foreach (string c in Environment.GetCommandLineArgs())
 			{
@@ -97,25 +103,44 @@ namespace Giants.Launcher
 				gameProcess.Start();
 				Application.Exit();
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				MessageBox.Show(string.Format("Failed to launch game process at: {0}. {1}", this.gamePath, ex.Message),
 					"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 
-        private void btnOptions_Click(object sender, EventArgs e)
+        private async void btnOptions_Click(object sender, EventArgs e)
         {
-            OptionsForm form = new OptionsForm(
+			OptionsForm form = new OptionsForm(
 				title: Resources.AppName + " Options",
 				gamePath: this.gamePath,
 				appName: ApplicationNames.Giants,
-				branchName: this.branchName,
+				currentBranchName: this.branchName,
 				config: this.config,
-				branchesClient: this.branchHttpClient);
+				branchesClient: this.branchHttpClient)
+			{
+				StartPosition = FormStartPosition.CenterParent
+			};
 
-			form.StartPosition = FormStartPosition.CenterParent;
 			form.ShowDialog();
+
+            this.config.TryGetBool(ConfigSections.Update, ConfigKeys.EnableBranchSelection, defaultValue: false, out bool enableBranchSelection);
+			if (enableBranchSelection)
+			{
+				this.config.TryGetString(ConfigSections.Update, ConfigKeys.BranchName, defaultValue: ConfigDefaults.BranchNameDefault, out string branchName);
+
+				if (!this.branchName.Equals(branchName))
+				{
+					this.branchName = branchName;
+
+                    VersionInfo gameVersionInfo = await this.GetVersionInfo(
+						GetApplicationName(ApplicationType.Game), this.branchName);
+
+                    this.btnPlay.Enabled = false;
+                    await this.updater.UpdateApplication(ApplicationType.Game, gameVersionInfo);
+				}
+			}
         }
 
         private async void LauncherForm_Load(object sender, EventArgs e)
@@ -142,30 +167,15 @@ namespace Giants.Launcher
 			GameSettings.Load(this.gamePath);
 
 			if (GameSettings.Get<int>("NoAutoUpdate") == 0)
-            {
-                Version gameVersion = VersionHelper.GetGameVersion(this.gamePath);
-                if (gameVersion == null)
-                {
-                    string message = string.Format(Resources.AppNotFound, Resources.AppName);
-                    MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Application.Exit();
-                }
+			{
+                Task updateTask = this.CheckForUpdates();
+                Task discordTask = this.UpdateDiscordStatus();
 
-                var appVersions = new Dictionary<ApplicationType, Version>()
-                {
-                    [ApplicationType.Game] = gameVersion,
-                    [ApplicationType.Launcher] = VersionHelper.GetLauncherVersion()
-                };
+                await Task.WhenAll(updateTask, discordTask);
+			}
+		}
 
-                // Check for updates
-                Task updateTask = this.CheckForUpdates(appVersions);
-				Task discordTask = this.CheckDiscordStatus();
-
-				await Task.WhenAll(updateTask, discordTask);
-            }
-        }
-
-		private async Task CheckDiscordStatus()
+		private async Task UpdateDiscordStatus()
         {
 			try
 			{
@@ -181,21 +191,30 @@ namespace Giants.Launcher
             }
         }
 
-		private async Task CheckForUpdates(Dictionary<ApplicationType, Version> appVersions)
+		private async Task CheckForUpdates()
         {
-            this.updater = new Updater(
-            appVersions: appVersions,
-            updateCompletedCallback: this.LauncherForm_DownloadCompletedCallback,
-            updateProgressCallback: this.LauncherForm_DownloadProgressCallback);
+            Task<VersionInfo> gameVersionInfo = this.GetVersionInfo(
+				GetApplicationName(ApplicationType.Game), this.branchName);
 
-            VersionInfo gameVersionInfo = await this.GetVersionInfo(
-				GetApplicationName(ApplicationType.Game));
+            Task<VersionInfo> launcherVersionInfo = this.GetVersionInfo(
+                GetApplicationName(ApplicationType.Launcher), this.branchName);
 
-			if (this.updater.IsUpdateRequired(ApplicationType.Game, gameVersionInfo))
+            Version localGameVersion = VersionHelper.GetGameVersion(this.gamePath);
+            Version localLauncherVersion = VersionHelper.GetLauncherVersion();
+
+            await Task.WhenAll(gameVersionInfo, launcherVersionInfo);
+
+            if (this.updater.IsUpdateRequired(ApplicationType.Game, gameVersionInfo.Result, localGameVersion))
 			{
 				this.btnPlay.Enabled = false;
-				await this.updater.UpdateApplication(ApplicationType.Game, gameVersionInfo);
+				await this.updater.UpdateApplication(ApplicationType.Game, gameVersionInfo.Result);
 			}
+
+            if (this.updater.IsUpdateRequired(ApplicationType.Launcher, launcherVersionInfo.Result, localLauncherVersion))
+            {
+                this.btnPlay.Enabled = false;
+                await this.updater.UpdateApplication(ApplicationType.Launcher, launcherVersionInfo.Result);
+            }
         }
 
 		private static string GetApplicationName(ApplicationType applicationType)
@@ -204,17 +223,19 @@ namespace Giants.Launcher
             {
 				case ApplicationType.Game:
 					return ApplicationNames.Giants;
+                case ApplicationType.Launcher:
+                    return ApplicationNames.GiantsLauncher;
             }
 
-			throw new ArgumentOutOfRangeException();
+            throw new ArgumentOutOfRangeException();
         }
 
-        private async Task<VersionInfo> GetVersionInfo(string appName)
+        private async Task<VersionInfo> GetVersionInfo(string appName, string branchName)
         {
 			VersionInfo versionInfo;
 			try
 			{
-				versionInfo = await this.versionHttpClient.GetVersionInfoAsync(appName, this.branchName);
+				versionInfo = await this.versionHttpClient.GetVersionInfoAsync(appName, branchName);
 				return versionInfo;
 			}
 			catch (ApiException ex)
@@ -228,26 +249,6 @@ namespace Giants.Launcher
 				return null;
 			}
 		}
-
-        private async Task<VersionInfo> GetBranches(string appName)
-        {
-            VersionInfo versionInfo;
-            try
-            {
-                versionInfo = await this.versionHttpClient.GetVersionInfoAsync(appName, this.branchName);
-                return versionInfo;
-            }
-            catch (ApiException ex)
-            {
-                MessageBox.Show($"Exception retrieving branch information: {ex.StatusCode}");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Exception retrieving branch information: {ex.Message}");
-                return null;
-            }
-        }
 
         private void LauncherForm_MouseDown(object sender, MouseEventArgs e)
 		{
@@ -314,6 +315,14 @@ namespace Giants.Launcher
 
 				updaterProcess.Start();
 
+                this.config.TryGetBool(ConfigSections.Update, ConfigKeys.EnableBranchSelection, defaultValue: false, out bool enableBranchSelection);
+                if (enableBranchSelection)
+				{
+                    this.config.SetValue(ConfigSections.Update, ConfigKeys.BranchName, this.branchName);
+                }
+
+				this.config.Write();
+
 				Application.Exit();
 				return;
 			}
@@ -350,15 +359,6 @@ namespace Giants.Launcher
 		private void SetTitle()
         {
 			string title = Resources.AppName;
-
-#if DEBUG
-			title += " DEBUG";
-#endif
-
-#if BETA
-			title += " BETA";
-#endif
-
 			this.Text = title;
         }
     }

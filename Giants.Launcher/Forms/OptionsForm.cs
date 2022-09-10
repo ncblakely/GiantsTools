@@ -13,7 +13,7 @@ namespace Giants.Launcher
         private readonly string gamePath = null;
 		private readonly string appName;
 		private readonly Config config;
-		private readonly string branchName;
+		private readonly string currentBranchName;
 		private readonly bool enableBranchSelection;
 		private readonly BranchesClient branchesClient;
 
@@ -22,7 +22,7 @@ namespace Giants.Launcher
 			string gamePath, 
 			string appName,
 			Config config,
-			string branchName,
+			string currentBranchName,
 			BranchesClient branchesClient)
 		{
             this.InitializeComponent();
@@ -31,7 +31,7 @@ namespace Giants.Launcher
 			this.gamePath = gamePath;
 			this.appName = appName;
 			this.config = config;
-			this.branchName = branchName;
+			this.currentBranchName = currentBranchName;
 			this.branchesClient = branchesClient;
 
             this.config.TryGetBool(ConfigSections.Update, ConfigKeys.EnableBranchSelection, defaultValue: false, out bool enableBranchSelection);
@@ -57,12 +57,21 @@ namespace Giants.Launcher
 		{
 			if (this.enableBranchSelection)
 			{
-				var branches = await this.branchesClient.GetBranchesAsync(this.appName);
+				try
+				{
+					var branches = await this.branchesClient.GetBranchesAsync(this.appName);
 
-				cmbBranch.Items.AddRange(branches.ToArray());
+                    cmbBranch.Items.AddRange(branches.ToArray());
 
-				BranchGroupBox.Visible = true;
-				cmbBranch.Visible = true;
+					cmbBranch.SelectedItem = this.currentBranchName;
+
+                    BranchGroupBox.Visible = true;
+                    cmbBranch.Visible = true;
+                }
+				catch (Exception e)
+				{
+					MessageBox.Show($"Unhandled exception retrieving branch information from the server: {e.Message}");
+				}
 			}
 		}
 
@@ -110,14 +119,16 @@ namespace Giants.Launcher
 
 			if (this.enableBranchSelection)
 			{
-				this.cmbBranch.SelectedItem = this.branchName;
+				this.cmbBranch.SelectedItem = this.currentBranchName;
 			}
 		}
 
 		private void PopulateAntialiasing()
 		{
-			var antialiasingOptions = new List<KeyValuePair<string, int>>();
-			antialiasingOptions.Add(new KeyValuePair<string, int>(Resources.OptionNone, 0));
+			var antialiasingOptions = new List<KeyValuePair<string, int>>
+			{
+				new KeyValuePair<string, int>(Resources.OptionNone, 0)
+			};
 
 			var renderer = (RendererInfo)this.cmbRenderer.SelectedItem;
 			if (renderer != null)
@@ -267,6 +278,15 @@ namespace Giants.Launcher
 			GameSettings.Modify(RegistryKeys.NoAutoUpdate, this.chkUpdates.Checked == false ? 1 : 0);
 
 			GameSettings.Save();
+
+			if (this.enableBranchSelection)
+			{
+				string newBranch = this.cmbBranch.SelectedItem?.ToString();
+				if (!string.IsNullOrEmpty(newBranch) && !newBranch.Equals(this.currentBranchName, StringComparison.OrdinalIgnoreCase))
+				{
+					this.config.SetValue(ConfigSections.Update, ConfigKeys.BranchName, newBranch);
+				}
+			}
 
 			this.Close();
 		}

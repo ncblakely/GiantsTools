@@ -239,6 +239,7 @@
             // 
             // cmbBranch
             // 
+            this.cmbBranch.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbBranch.FormattingEnabled = true;
             this.cmbBranch.Location = new System.Drawing.Point(27, 17);
             this.cmbBranch.Name = "cmbBranch";

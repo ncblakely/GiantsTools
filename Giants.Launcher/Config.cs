@@ -11,6 +11,7 @@
     {
         private const string defaultConfigFileName = "GiantsDefault.config";
         private const string playerConfigFileName = "Giants.config";
+        private bool dirty = false;
 
         private IDictionary<string, dynamic> defaultConfig = new Dictionary<string, dynamic>();
         private IDictionary<string, dynamic> userConfig = new Dictionary<string, dynamic>();
@@ -32,6 +33,34 @@
             if (File.Exists(userConfigFilePath))
             {
                 this.userConfig = ReadConfig(userConfigFilePath);
+            }
+        }
+
+        public void Write()
+        {
+            if (!this.dirty)
+            {
+                return;
+            }
+
+            try
+            {
+                string userConfigFilePath = this.GetUserConfigPath();
+
+                Directory.CreateDirectory(Path.GetDirectoryName(userConfigFilePath));
+
+                using (var file = File.OpenWrite(userConfigFilePath))
+                using (var streamWriter = new StreamWriter(file))
+                {
+                    string serializedConfig = JsonConvert.SerializeObject(this.userConfig, Formatting.Indented);
+                    streamWriter.Write(serializedConfig);
+                }
+
+                this.dirty = false;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show($"Unhandled exception saving updated configuration: {e}");
             }
         }
 
@@ -85,6 +114,26 @@
             }
 
             return false;
+        }
+
+        public void SetValue(string section, string key, dynamic value)
+        {
+            if (!this.userConfig.ContainsKey(section))
+            {
+                this.userConfig.Add(section, new Dictionary<string, dynamic>());
+            }
+
+            dynamic sectionObject = this.userConfig[section];
+            if (sectionObject != null && sectionObject.ContainsKey(key))
+            {
+                sectionObject[key] = value;
+            }
+            else
+            {
+                sectionObject.Add(key, value);
+            }
+
+            this.dirty = true;
         }
 
         private static IDictionary<string, dynamic> ReadConfig(string filePath)

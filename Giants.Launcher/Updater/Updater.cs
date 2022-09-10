@@ -1,38 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Giants.WebApi.Clients;
+using System;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Giants.WebApi.Clients;
 
 namespace Giants.Launcher
 {
     public class Updater
     {
-        private readonly IDictionary<ApplicationType, Version> appVersions;
         private readonly AsyncCompletedEventHandler updateCompletedCallback;
         private readonly DownloadProgressChangedEventHandler updateProgressCallback;
 
         public Updater(
-            IDictionary<ApplicationType, Version> appVersions,
             AsyncCompletedEventHandler updateCompletedCallback,
             DownloadProgressChangedEventHandler updateProgressCallback)
         {
-            this.appVersions = appVersions;
             this.updateCompletedCallback = updateCompletedCallback;
             this.updateProgressCallback = updateProgressCallback;
         }
 
-        public bool IsUpdateRequired(ApplicationType applicationType, VersionInfo versionInfo)
+        public bool IsUpdateRequired(ApplicationType applicationType, VersionInfo remoteVersionInfo, Version localVersion)
         {
-            if (versionInfo != null && this.ToVersion(versionInfo.Version) > this.appVersions[applicationType])
+            if (remoteVersionInfo?.InstallerUri != null 
+                && this.ToVersion(remoteVersionInfo.Version) > localVersion)
             {
                 // Display update prompt
                 string updateMsg = applicationType == ApplicationType.Game ?
-                                    string.Format(Resources.UpdateAvailableText, this.ToVersion(versionInfo.Version).ToString()) :
-                                    string.Format(Resources.LauncherUpdateAvailableText, this.ToVersion(versionInfo.Version).ToString());
+                                    string.Format(Resources.UpdateAvailableText, this.ToVersion(remoteVersionInfo.Version).ToString()) :
+                                    string.Format(Resources.LauncherUpdateAvailableText, this.ToVersion(remoteVersionInfo.Version).ToString());
 
                 if (MessageBox.Show(updateMsg, Resources.UpdateAvailableTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
                 {
