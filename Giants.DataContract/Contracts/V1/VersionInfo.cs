@@ -13,5 +13,8 @@
 
         [Required]
         public Uri InstallerUri { get; set; }
+
+        [Required]
+        public string BranchName { get; set;}
     }
 }

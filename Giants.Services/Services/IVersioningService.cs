@@ -1,12 +1,15 @@
 ﻿namespace Giants.Services
 {
     using Giants.DataContract.V1;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
     public interface IVersioningService
     {
-        Task<VersionInfo> GetVersionInfo(string appName);
+        Task<IEnumerable<string>> GetBranches(string appName);
 
-        Task UpdateVersionInfo(string appName, AppVersion appVersion, string fileName);
+        Task<VersionInfo> GetVersionInfo(string appName, string branchName);
+
+        Task UpdateVersionInfo(string appName, AppVersion appVersion, string fileName, string branchName, bool force);
     }
 }

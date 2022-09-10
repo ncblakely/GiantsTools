@@ -2,6 +2,8 @@
 {
     public enum ApplicationType
     {
+        None = 0,
+
         Launcher,
         Game,
     }

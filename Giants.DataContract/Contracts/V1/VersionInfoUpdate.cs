@@ -2,5 +2,5 @@
 
 namespace Giants.DataContract.Contracts.V1
 {
-    public record VersionInfoUpdate(string AppName, AppVersion AppVersion, string FileName);
+    public record VersionInfoUpdate(string AppName, AppVersion AppVersion, string FileName, string BranchName, bool ForceUpdate);
 }

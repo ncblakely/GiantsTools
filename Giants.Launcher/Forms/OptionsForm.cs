@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Giants.WebApi.Clients;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Giants.Launcher
@@ -9,16 +11,34 @@ namespace Giants.Launcher
     public partial class OptionsForm : Form
 	{
         private readonly string gamePath = null;
+		private readonly string appName;
+		private readonly Config config;
+		private readonly string currentBranchName;
+		private readonly bool enableBranchSelection;
+		private readonly BranchesClient branchesClient;
 
-		public OptionsForm(string title, string gamePath)
+		public OptionsForm(
+			string title, 
+			string gamePath, 
+			string appName,
+			Config config,
+			string currentBranchName,
+			BranchesClient branchesClient)
 		{
             this.InitializeComponent();
 
 			this.Text = title;
 			this.gamePath = gamePath;
-		}
+			this.appName = appName;
+			this.config = config;
+			this.currentBranchName = currentBranchName;
+			this.branchesClient = branchesClient;
 
-		private void OptionsForm_Load(object sender, EventArgs e)
+            this.config.TryGetBool(ConfigSections.Update, ConfigKeys.EnableBranchSelection, defaultValue: false, out bool enableBranchSelection);
+            this.enableBranchSelection = enableBranchSelection;
+        }
+
+		private async void OptionsForm_Load(object sender, EventArgs e)
 		{
 			// Must come first as other options depend on it
 			this.PopulateRenderers();
@@ -28,7 +48,31 @@ namespace Giants.Launcher
 			this.PopulateAnisotropy();
 			this.PopulateAntialiasing();
 
+            await this.PopulateBranches();
+
             this.SetOptions();
+		}
+
+		private async Task PopulateBranches()
+		{
+			if (this.enableBranchSelection)
+			{
+				try
+				{
+					var branches = await this.branchesClient.GetBranchesAsync(this.appName);
+
+                    cmbBranch.Items.AddRange(branches.ToArray());
+
+					cmbBranch.SelectedItem = this.currentBranchName;
+
+                    BranchGroupBox.Visible = true;
+                    cmbBranch.Visible = true;
+                }
+				catch (Exception e)
+				{
+					MessageBox.Show($"Unhandled exception retrieving branch information from the server: {e.Message}");
+				}
+			}
 		}
 
 		private void PopulateRenderers()
@@ -72,12 +116,19 @@ namespace Giants.Launcher
                 this.cmbAntialiasing.SelectedIndex = 0;
 
             this.chkUpdates.Checked = GameSettings.Get<int>(RegistryKeys.NoAutoUpdate) != 1;
+
+			if (this.enableBranchSelection)
+			{
+				this.cmbBranch.SelectedItem = this.currentBranchName;
+			}
 		}
 
 		private void PopulateAntialiasing()
 		{
-			var antialiasingOptions = new List<KeyValuePair<string, int>>();
-			antialiasingOptions.Add(new KeyValuePair<string, int>(Resources.OptionNone, 0));
+			var antialiasingOptions = new List<KeyValuePair<string, int>>
+			{
+				new KeyValuePair<string, int>(Resources.OptionNone, 0)
+			};
 
 			var renderer = (RendererInfo)this.cmbRenderer.SelectedItem;
 			if (renderer != null)
@@ -227,6 +278,15 @@ namespace Giants.Launcher
 			GameSettings.Modify(RegistryKeys.NoAutoUpdate, this.chkUpdates.Checked == false ? 1 : 0);
 
 			GameSettings.Save();
+
+			if (this.enableBranchSelection)
+			{
+				string newBranch = this.cmbBranch.SelectedItem?.ToString();
+				if (!string.IsNullOrEmpty(newBranch) && !newBranch.Equals(this.currentBranchName, StringComparison.OrdinalIgnoreCase))
+				{
+					this.config.SetValue(ConfigSections.Update, ConfigKeys.BranchName, newBranch);
+				}
+			}
 
 			this.Close();
 		}
