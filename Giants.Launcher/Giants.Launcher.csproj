@@ -186,6 +186,7 @@
   <Target Name="PostBuild" AfterTargets="Build">
     <Copy Condition="$(GameImagePath) != ''" SourceFiles="$(TargetPath)" DestinationFolder="$(GameImagePath)" SkipUnchangedFiles="true" />
     <Copy Condition="$(GameImagePath) != ''" SourceFiles="@(ReferenceCopyLocalPaths)" DestinationFolder="$(GameImagePath)" SkipUnchangedFiles="true" />
+    <Copy Condition="$(GameImagePath) != ''" SourceFiles="@(_ThisProjectItemsToCopyToOutputDirectory)" DestinationFolder="$(GameImagePath)" SkipUnchangedFiles="true" />
     <CallTarget Condition="$(GIANTS_PATH) != ''" Targets="CopyTargetToGameFolder" />
   </Target>
 </Project>
