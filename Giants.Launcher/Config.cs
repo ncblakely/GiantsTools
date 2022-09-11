@@ -49,8 +49,7 @@
 
                 Directory.CreateDirectory(Path.GetDirectoryName(userConfigFilePath));
 
-                using (var file = File.OpenWrite(userConfigFilePath))
-                using (var streamWriter = new StreamWriter(file))
+                using (var streamWriter = new StreamWriter(userConfigFilePath, append: false))
                 {
                     string serializedConfig = JsonConvert.SerializeObject(this.userConfig, Formatting.Indented);
                     streamWriter.Write(serializedConfig);
