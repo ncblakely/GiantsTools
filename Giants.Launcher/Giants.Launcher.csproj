@@ -187,6 +187,7 @@
     <Copy Condition="$(GameImagePath) != ''" SourceFiles="$(TargetPath)" DestinationFolder="$(GameImagePath)" SkipUnchangedFiles="true" />
     <Copy Condition="$(GameImagePath) != ''" SourceFiles="@(ReferenceCopyLocalPaths)" DestinationFolder="$(GameImagePath)" SkipUnchangedFiles="true" />
     <Copy Condition="$(GameImagePath) != ''" SourceFiles="@(_ThisProjectItemsToCopyToOutputDirectory)" DestinationFolder="$(GameImagePath)" SkipUnchangedFiles="true" />
+    <Copy Condition="$(GameImagePath) != ''" SourceFiles="@(AppConfigWithTargetPath)" DestinationFiles="@(AppConfigWithTargetPath->'$(GameImagePath)\%(TargetPath)')" SkipUnchangedFiles="true" />
     <CallTarget Condition="$(GIANTS_PATH) != ''" Targets="CopyTargetToGameFolder" />
   </Target>
 </Project>
