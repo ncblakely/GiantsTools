@@ -1,7 +1,6 @@
 namespace Giants.Web
 {
     using Autofac;
-    using Autofac.Core;
     using Autofac.Extensions.DependencyInjection;
     using AutoMapper;
     using Giants.Services;
@@ -17,28 +16,37 @@ namespace Giants.Web
     using Microsoft.Extensions.Logging;
     using Microsoft.Identity.Web;
     using Microsoft.IdentityModel.Logging;
-    using NSwag.Generation.Processors;
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http.Headers;
     using System.Threading.Tasks;
 
     public class Program
     {
+        private static readonly List<Module> AdditionalRegistrationModules = new();
+
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            ConfigureServices(builder);
-
             builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
             builder.Host.ConfigureContainer<ContainerBuilder>((containerBuilder) => ConfigureAutofacServices(containerBuilder, builder.Configuration));
+
+            ConfigureServices(builder);
 
             var app = builder
                 .Build();
             ConfigureApplication(app, app.Environment);
 
             app.Run();
+        }
+
+        public static void AddAdditionalRegistrations(IList<Module> modules)
+        {
+            // Hack: ConfigureTestServices doesn't work with Autofac containers in .NET 6.
+            // Add test registrations to a static list, to be registered last.
+            AdditionalRegistrationModules.AddRange(modules);
         }
 
         private static void ConfigureServices(WebApplicationBuilder builder)
@@ -112,6 +120,11 @@ namespace Giants.Web
         private static void ConfigureAutofacServices(ContainerBuilder containerBuilder, IConfiguration configuration)
         {
             containerBuilder.RegisterModule(new ServicesModule(configuration));
+
+            foreach (var module in AdditionalRegistrationModules)
+            {
+                containerBuilder.RegisterModule(module);
+            }
         }
 
         private static void RegisterHttpClients(IServiceCollection services, IConfiguration configuration)

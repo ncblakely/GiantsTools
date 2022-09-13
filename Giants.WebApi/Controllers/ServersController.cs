@@ -97,7 +97,7 @@ namespace Giants.Web.Controllers
 
         private string GetRequestIpAddress()
         {
-            return this.httpContextAccessor.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+            return this.httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "<no ip>";
         }
     }
 }
