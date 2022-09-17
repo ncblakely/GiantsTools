@@ -99,8 +99,7 @@
       <ImportLibrary>$(OutDir)GiantsImp.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>copy "$(TargetPath)" "$(ADSK_3DSMAX_x64_2021)\stdplugs\$(TargetName).dli</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -113,7 +112,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>
@@ -135,8 +134,7 @@
       </DataExecutionPrevention>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>copy "$(TargetPath)" "$(ADSK_3DSMAX_x64_2021)\stdplugs\$(TargetName).dli</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -169,14 +167,17 @@
       <ImportLibrary>$(OutDir)GiantsImp.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>copy "$(TargetPath)" "$(ADSK_3DSMAX_x64_2021)\stdplugs\$(TargetName).dli</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DLLEntry.cpp" />
+    <ClCompile Include="Gb2Data.cpp" />
+    <ClCompile Include="Gb2Importer.cpp" />
     <ClCompile Include="GbsData.cpp" />
+    <ClCompile Include="GbsImporter.cpp" />
     <ClCompile Include="Importer.cpp" />
+    <ClCompile Include="ImporterFactory.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Hybrid|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -184,8 +185,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Gb2Data.h" />
+    <ClInclude Include="Gb2Importer.h" />
     <ClInclude Include="GbsData.h" />
+    <ClInclude Include="GbsImporter.h" />
+    <ClInclude Include="IGiantsImporter.h" />
     <ClInclude Include="Importer.h" />
+    <ClInclude Include="ImporterFactory.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StdUtil.h" />
   </ItemGroup>

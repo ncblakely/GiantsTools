@@ -1,10 +1,15 @@
 #pragma once
 
 #include "GbsData.h"
+#include "Gb2Data.h"
+
+#define GBXFlagNormals	0x0001
+#define GBXFlagUVs		0x0002
+#define GBXFlagRGBs		0x0004
 
 #define GIANTSIMP_CLASSID	Class_ID(0x552cac79, 0x46f2d727)
 
-class GbsImporter : public SceneImport 
+class GiantsImporter : public SceneImport 
 {
 public:
 	static HWND hParams;
@@ -19,21 +24,10 @@ public:
 	const MCHAR*	OtherMessage2();			// Other message #2
 	unsigned int	Version();					// Version number * 100 (i.e. v3.01 = 301)
 	void			ShowAbout(HWND hWnd);		// Show DLL's "About..." box
-	int				DoImport(const MCHAR *name,ImpInterface *i,Interface *gi, BOOL suppressPrompts=FALSE);	// Import file
+	int				DoImport(const MCHAR* name, ImpInterface* ii, Interface* i, BOOL suppressPrompts);	// Import file
 
 	//Constructor/Destructor
 	BOOL SupportsOptions(int Ext,DWORD Options);
-
-private:
-	GbsData ReadGbsFile(const MCHAR* Name);
-	Mtl* BuildParentMaterial(SubObject& obj, int numSubMaterials);
-	Mtl* BuildMaterial(SubObject& obj, Mtl* parentMaterial);
-	int GetLocalVertex(Point3* avert, const Mesh& mesh);
-	void BuildMeshes(ImpInterface* EI);
-	bool EvaluateTriData(unsigned short** pTriData, unsigned short* pTriIdx, unsigned short* acount, int* pV1, int* pV2, int* pV3);
-
-	FILE* m_OpenFile{};
-	GbsData m_gbsData;
 };
 
 extern HINSTANCE hInstance;
