@@ -17,6 +17,8 @@ namespace Giants.Launcher
 		private readonly bool enableBranchSelection;
 		private readonly BranchesClient branchesClient;
 
+		public string SelectedBranch { get; set; }
+
 		public OptionsForm(
 			string title, 
 			string gamePath, 
@@ -284,7 +286,7 @@ namespace Giants.Launcher
 				string newBranch = this.cmbBranch.SelectedItem?.ToString();
 				if (!string.IsNullOrEmpty(newBranch) && !newBranch.Equals(this.currentBranchName, StringComparison.OrdinalIgnoreCase))
 				{
-					this.config.SetValue(ConfigSections.Update, ConfigKeys.BranchName, newBranch);
+					this.SelectedBranch = newBranch;
 				}
 			}
 

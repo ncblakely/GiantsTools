@@ -29,6 +29,7 @@ namespace Giants.Launcher
 		private string gamePath = null;
 		private Updater updater;
 		private readonly Config config;
+		private Version localGameVersion;
 		private string branchName;
         private string communityAppUri;
 
@@ -50,9 +51,6 @@ namespace Giants.Launcher
 			this.config.Read();
 
 			this.config.TryGetString(ConfigSections.Network, ConfigKeys.MasterServerHostName, ConfigDefaults.MasterServerHostNameDefault, out string baseUrl);
-            this.config.TryGetString(ConfigSections.Update, ConfigKeys.BranchName, defaultValue: ConfigDefaults.BranchNameDefault, out string branchName);
-
-			this.branchName = branchName;
 
             this.httpClient = new HttpClient(
 				new HttpClientHandler() 
@@ -125,14 +123,11 @@ namespace Giants.Launcher
 
 			form.ShowDialog();
 
-            this.config.TryGetBool(ConfigSections.Update, ConfigKeys.EnableBranchSelection, defaultValue: false, out bool enableBranchSelection);
-			if (enableBranchSelection)
+			if (!string.IsNullOrEmpty(form.SelectedBranch))
 			{
-				this.config.TryGetString(ConfigSections.Update, ConfigKeys.BranchName, defaultValue: ConfigDefaults.BranchNameDefault, out string branchName);
-
-				if (!this.branchName.Equals(branchName))
+				if (!this.branchName.Equals(form.SelectedBranch))
 				{
-					this.branchName = branchName;
+					this.branchName = form.SelectedBranch;
 
                     VersionInfo gameVersionInfo = await this.GetVersionInfo(
 						GetApplicationName(ApplicationType.Game), this.branchName);
@@ -163,8 +158,18 @@ namespace Giants.Launcher
                 }
             }
 
-			// Read game settings from registry
-			GameSettings.Load(this.gamePath);
+            if (!VersionHelper.TryGetGameVersion(this.gamePath, out Version localGameVersion, out string branch))
+            {
+                string message = string.Format(Resources.AppNotFound, Resources.AppName);
+                MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+            }
+
+            this.localGameVersion = localGameVersion;
+            this.branchName = branch;
+
+            // Read game settings from registry
+            GameSettings.Load(this.gamePath);
 
 			if (GameSettings.Get<int>("NoAutoUpdate") == 0)
 			{
@@ -199,7 +204,6 @@ namespace Giants.Launcher
             Task<VersionInfo> launcherVersionInfo = this.GetVersionInfo(
                 GetApplicationName(ApplicationType.Launcher), this.branchName);
 
-            Version localGameVersion = VersionHelper.GetGameVersion(this.gamePath);
             Version localLauncherVersion = VersionHelper.GetLauncherVersion();
 
             await Task.WhenAll(gameVersionInfo, launcherVersionInfo);
@@ -314,12 +318,6 @@ namespace Giants.Launcher
 				}
 
 				updaterProcess.Start();
-
-                this.config.TryGetBool(ConfigSections.Update, ConfigKeys.EnableBranchSelection, defaultValue: false, out bool enableBranchSelection);
-                if (enableBranchSelection)
-				{
-                    this.config.SetValue(ConfigSections.Update, ConfigKeys.BranchName, this.branchName);
-                }
 
 				this.config.Write();
 

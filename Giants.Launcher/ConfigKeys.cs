@@ -3,7 +3,6 @@
     public static class ConfigKeys
     {
         // Update
-        public const string BranchName = "branchName";
         public const string EnableBranchSelection = "enableBranchSelection";
 
         // Network
