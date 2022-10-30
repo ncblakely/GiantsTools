@@ -29,6 +29,10 @@ namespace Giants.Launcher
         /// <returns>True if the given renderer is supported by the system.</returns>
         public static bool GetRendererCapabilities(string dllPath, ref GFXCapabilityInfo capabilities)
         {
+            string currentDirectory = Directory.GetCurrentDirectory();
+
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(dllPath));
+
             bool rendererSupported = false;
             IntPtr pDll = NativeMethods.LoadLibrary(dllPath);
             if (pDll == IntPtr.Zero)
@@ -42,6 +46,8 @@ namespace Giants.Launcher
             rendererSupported = prcGetCapabilities(ref capabilities);
 
             NativeMethods.FreeLibrary(pDll);
+
+            Directory.SetCurrentDirectory(currentDirectory);
 
             return rendererSupported;
         }

@@ -31,7 +31,9 @@
             this.cmbRenderer = new System.Windows.Forms.ComboBox();
             this.cmbResolution = new System.Windows.Forms.ComboBox();
             this.cmbAntialiasing = new System.Windows.Forms.ComboBox();
+            this.cmbAnisotropy = new System.Windows.Forms.ComboBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -43,13 +45,12 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnResetDefaults = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.chkUpdates = new System.Windows.Forms.CheckBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.cmbBranch = new System.Windows.Forms.ComboBox();
-            this.BranchGroupBox = new System.Windows.Forms.GroupBox();
+            this.chkUpdates = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
-            this.BranchGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // cmbRenderer
@@ -83,11 +84,22 @@
             this.cmbAntialiasing.Size = new System.Drawing.Size(335, 24);
             this.cmbAntialiasing.TabIndex = 2;
             // 
+            // cmbAnisotropy
+            // 
+            this.cmbAnisotropy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbAnisotropy.FormattingEnabled = true;
+            this.cmbAnisotropy.Location = new System.Drawing.Point(165, 133);
+            this.cmbAnisotropy.Name = "cmbAnisotropy";
+            this.cmbAnisotropy.Size = new System.Drawing.Size(335, 24);
+            this.cmbAnisotropy.TabIndex = 3;
+            // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Controls.Add(this.cmbAnisotropy);
             this.groupBox1.Controls.Add(this.cmbRenderer);
             this.groupBox1.Controls.Add(this.cmbResolution);
             this.groupBox1.Controls.Add(this.cmbAntialiasing);
@@ -95,10 +107,19 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox1.Size = new System.Drawing.Size(509, 143);
+            this.groupBox1.Size = new System.Drawing.Size(509, 176);
             this.groupBox1.TabIndex = 4;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Graphics Settings";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(26, 138);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(127, 16);
+            this.label4.TabIndex = 7;
+            this.label4.Text = "Anisotropic Filtering:";
             // 
             // label3
             // 
@@ -135,7 +156,7 @@
             this.groupBox2.Controls.Add(this.cmbMode);
             this.groupBox2.Controls.Add(this.chkTripleBuffering);
             this.groupBox2.Controls.Add(this.chkVSync);
-            this.groupBox2.Location = new System.Drawing.Point(16, 170);
+            this.groupBox2.Location = new System.Drawing.Point(16, 199);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(4);
@@ -160,8 +181,8 @@
             // 
             // chkTripleBuffering
             // 
-            this.chkTripleBuffering.AutoSize = true;
-            this.chkTripleBuffering.Location = new System.Drawing.Point(16, 79);
+            this.chkTripleBuffering.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.chkTripleBuffering.Location = new System.Drawing.Point(13, 79);
             this.chkTripleBuffering.Margin = new System.Windows.Forms.Padding(4);
             this.chkTripleBuffering.Name = "chkTripleBuffering";
             this.chkTripleBuffering.Size = new System.Drawing.Size(119, 20);
@@ -171,18 +192,18 @@
             // 
             // chkVSync
             // 
-            this.chkVSync.AutoSize = true;
-            this.chkVSync.Location = new System.Drawing.Point(16, 53);
+            this.chkVSync.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.chkVSync.Location = new System.Drawing.Point(13, 53);
             this.chkVSync.Margin = new System.Windows.Forms.Padding(4);
             this.chkVSync.Name = "chkVSync";
-            this.chkVSync.Size = new System.Drawing.Size(107, 20);
+            this.chkVSync.Size = new System.Drawing.Size(119, 20);
             this.chkVSync.TabIndex = 1;
             this.chkVSync.Text = "Vertical Sync";
             this.chkVSync.UseVisualStyleBackColor = true;
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(317, 272);
+            this.btnOK.Location = new System.Drawing.Point(317, 304);
             this.btnOK.Margin = new System.Windows.Forms.Padding(4);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(100, 28);
@@ -194,7 +215,7 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(425, 272);
+            this.btnCancel.Location = new System.Drawing.Point(425, 304);
             this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(100, 28);
@@ -205,7 +226,7 @@
             // 
             // btnResetDefaults
             // 
-            this.btnResetDefaults.Location = new System.Drawing.Point(400, 170);
+            this.btnResetDefaults.Location = new System.Drawing.Point(400, 205);
             this.btnResetDefaults.Margin = new System.Windows.Forms.Padding(4);
             this.btnResetDefaults.Name = "btnResetDefaults";
             this.btnResetDefaults.Size = new System.Drawing.Size(125, 28);
@@ -216,46 +237,46 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.label5);
+            this.groupBox3.Controls.Add(this.cmbBranch);
             this.groupBox3.Controls.Add(this.chkUpdates);
-            this.groupBox3.Location = new System.Drawing.Point(181, 167);
+            this.groupBox3.Location = new System.Drawing.Point(181, 199);
             this.groupBox3.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox3.Size = new System.Drawing.Size(169, 54);
+            this.groupBox3.Size = new System.Drawing.Size(211, 97);
             this.groupBox3.TabIndex = 6;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Other";
+            this.groupBox3.Text = "Updates";
             // 
-            // chkUpdates
+            // label5
             // 
-            this.chkUpdates.AutoSize = true;
-            this.chkUpdates.Location = new System.Drawing.Point(11, 24);
-            this.chkUpdates.Margin = new System.Windows.Forms.Padding(4);
-            this.chkUpdates.Name = "chkUpdates";
-            this.chkUpdates.Size = new System.Drawing.Size(140, 20);
-            this.chkUpdates.TabIndex = 1;
-            this.chkUpdates.Text = "Check for Updates";
-            this.chkUpdates.UseVisualStyleBackColor = true;
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(8, 54);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(52, 16);
+            this.label5.TabIndex = 10;
+            this.label5.Text = "Branch:";
             // 
             // cmbBranch
             // 
             this.cmbBranch.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbBranch.FormattingEnabled = true;
-            this.cmbBranch.Location = new System.Drawing.Point(27, 17);
+            this.cmbBranch.Location = new System.Drawing.Point(66, 49);
             this.cmbBranch.Name = "cmbBranch";
             this.cmbBranch.Size = new System.Drawing.Size(124, 24);
             this.cmbBranch.TabIndex = 9;
             // 
-            // BranchGroupBox
+            // chkUpdates
             // 
-            this.BranchGroupBox.Controls.Add(this.cmbBranch);
-            this.BranchGroupBox.Location = new System.Drawing.Point(181, 222);
-            this.BranchGroupBox.Name = "BranchGroupBox";
-            this.BranchGroupBox.Size = new System.Drawing.Size(169, 49);
-            this.BranchGroupBox.TabIndex = 10;
-            this.BranchGroupBox.TabStop = false;
-            this.BranchGroupBox.Text = "Branch";
-            this.BranchGroupBox.Visible = false;
+            this.chkUpdates.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.chkUpdates.Location = new System.Drawing.Point(8, 25);
+            this.chkUpdates.Margin = new System.Windows.Forms.Padding(4);
+            this.chkUpdates.Name = "chkUpdates";
+            this.chkUpdates.Size = new System.Drawing.Size(182, 20);
+            this.chkUpdates.TabIndex = 1;
+            this.chkUpdates.Text = "Check for Updates";
+            this.chkUpdates.UseVisualStyleBackColor = true;
             // 
             // OptionsForm
             // 
@@ -264,9 +285,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(541, 316);
+            this.ClientSize = new System.Drawing.Size(541, 346);
             this.ControlBox = false;
-            this.Controls.Add(this.BranchGroupBox);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.btnResetDefaults);
             this.Controls.Add(this.btnCancel);
@@ -286,10 +306,8 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
-            this.BranchGroupBox.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -299,7 +317,9 @@
         private System.Windows.Forms.ComboBox cmbRenderer;
         private System.Windows.Forms.ComboBox cmbResolution;
         private System.Windows.Forms.ComboBox cmbAntialiasing;
+        private System.Windows.Forms.ComboBox cmbAnisotropy;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
@@ -313,6 +333,6 @@
         private System.Windows.Forms.CheckBox chkUpdates;
         private System.Windows.Forms.ComboBox cmbMode;
         private System.Windows.Forms.ComboBox cmbBranch;
-        private System.Windows.Forms.GroupBox BranchGroupBox;
+        private System.Windows.Forms.Label label5;
     }
 }

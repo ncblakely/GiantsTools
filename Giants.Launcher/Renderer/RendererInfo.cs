@@ -30,6 +30,23 @@ namespace Giants.Launcher
             this.Flags = (RendererFlag)gfxCaps.flags;
             this.Priority = gfxCaps.priority;
             this.Name = gfxCaps.rendererName;
+
+            if (this.Flags.HasFlag(RendererFlag.MSAA16x))
+            {
+                this.MaxAntialiasing = 16;
+            }
+            else if (this.Flags.HasFlag(RendererFlag.MSAA8x))
+            {
+                this.MaxAntialiasing = 8;
+            }
+            else if (this.Flags.HasFlag(RendererFlag.MSAA4x))
+            {
+                this.MaxAntialiasing = 4;
+            }
+            else if (this.Flags.HasFlag(RendererFlag.MSAA2x))
+            {
+                this.MaxAntialiasing = 2;
+            }
         }
 
         public override string ToString()
@@ -54,6 +71,7 @@ namespace Giants.Launcher
                    this.FilePath == info.FilePath &&
                    this.FileName == info.FileName &&
                    this.MaxAnisotropy == info.MaxAnisotropy &&
+                   this.MaxAntialiasing == info.MaxAntialiasing &&
                    this.Flags == info.Flags &&
                    this.Priority == info.Priority &&
                    this.Name == info.Name;
@@ -65,6 +83,7 @@ namespace Giants.Launcher
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(this.FilePath);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(this.FileName);
             hashCode = hashCode * -1521134295 + this.MaxAnisotropy.GetHashCode();
+            hashCode = hashCode * -1521134295 + this.MaxAntialiasing.GetHashCode();
             hashCode = hashCode * -1521134295 + this.Flags.GetHashCode();
             hashCode = hashCode * -1521134295 + this.Priority.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(this.Name);
@@ -74,6 +93,7 @@ namespace Giants.Launcher
         public string FilePath { get; private set; }
         public string FileName { get; private set; }
         public int MaxAnisotropy { get; private set; }
+        public int MaxAntialiasing { get; private set; }
         public RendererFlag Flags { get; private set; }
         public int Priority { get; private set; }
         public string Name { get; set; }
