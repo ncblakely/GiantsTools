@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <array>
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Basic game data types and macros
