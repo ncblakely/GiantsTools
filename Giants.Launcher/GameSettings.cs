@@ -46,14 +46,12 @@ namespace Giants.Launcher
             Settings[RegistryKeys.Renderer] = "gg_dx9r.dll";
             Settings[RegistryKeys.Antialiasing] = 0;
             Settings[RegistryKeys.AnisotropicFiltering] = 0;
-            Settings[RegistryKeys.VideoDepth] = 32;
             Settings[RegistryKeys.Windowed] = 1;
-            Settings[RegistryKeys.BorderlessWindow] = 1;
             Settings[RegistryKeys.VerticalSync] = 1;
             Settings[RegistryKeys.TripleBuffering] = 1;
             Settings[RegistryKeys.NoAutoUpdate] = 0;
 
-            // Set the current desktop resolution, leaving bit depth at the default 32:
+            // Set the current desktop resolution
             Settings[RegistryKeys.VideoWidth] = Screen.PrimaryScreen.Bounds.Width;
             Settings[RegistryKeys.VideoHeight] = Screen.PrimaryScreen.Bounds.Height;
 
@@ -93,7 +91,6 @@ namespace Giants.Launcher
                     Settings[RegistryKeys.AnisotropicFiltering] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.AnisotropicFiltering, Settings[RegistryKeys.AnisotropicFiltering], typeof(int));
                     Settings[RegistryKeys.VideoWidth] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VideoWidth, Settings[RegistryKeys.VideoWidth], typeof(int));
                     Settings[RegistryKeys.VideoHeight] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VideoHeight, Settings[RegistryKeys.VideoHeight], typeof(int));
-                    Settings[RegistryKeys.VideoDepth] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VideoDepth, Settings[RegistryKeys.VideoDepth], typeof(int));
                     Settings[RegistryKeys.Windowed] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.Windowed, Settings[RegistryKeys.Windowed], typeof(int));
                     Settings[RegistryKeys.VerticalSync] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VerticalSync, Settings[RegistryKeys.VerticalSync], typeof(int));
                     Settings[RegistryKeys.TripleBuffering] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.TripleBuffering, Settings[RegistryKeys.TripleBuffering], typeof(int));
@@ -120,9 +117,7 @@ namespace Giants.Launcher
                 Registry.SetValue(RegistryKey, RegistryKeys.AnisotropicFiltering, Settings[RegistryKeys.AnisotropicFiltering], RegistryValueKind.DWord);
                 Registry.SetValue(RegistryKey, RegistryKeys.VideoWidth, Settings[RegistryKeys.VideoWidth], RegistryValueKind.DWord);
                 Registry.SetValue(RegistryKey, RegistryKeys.VideoHeight, Settings[RegistryKeys.VideoHeight], RegistryValueKind.DWord);
-                Registry.SetValue(RegistryKey, RegistryKeys.VideoDepth, Settings[RegistryKeys.VideoDepth], RegistryValueKind.DWord);
                 Registry.SetValue(RegistryKey, RegistryKeys.Windowed, Settings[RegistryKeys.Windowed], RegistryValueKind.DWord);
-                Registry.SetValue(RegistryKey, RegistryKeys.BorderlessWindow, Settings[RegistryKeys.BorderlessWindow], RegistryValueKind.DWord);
                 Registry.SetValue(RegistryKey, RegistryKeys.VerticalSync, Settings[RegistryKeys.VerticalSync], RegistryValueKind.DWord);
                 Registry.SetValue(RegistryKey, RegistryKeys.TripleBuffering, Settings[RegistryKeys.TripleBuffering], RegistryValueKind.DWord);
                 Registry.SetValue(RegistryKey, RegistryKeys.NoAutoUpdate, Settings[RegistryKeys.NoAutoUpdate], RegistryValueKind.DWord);

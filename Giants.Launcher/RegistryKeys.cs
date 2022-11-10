@@ -11,7 +11,6 @@
         public const string VerticalSync = "VerticalSync";
         public const string VideoWidth = "VideoWidth";
         public const string VideoHeight = "VideoHeight";
-        public const string VideoDepth = "VideoDepth";
         public const string Windowed = "Windowed";
     }
 }

@@ -19,7 +19,7 @@ namespace Giants.Launcher {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -182,6 +182,15 @@ namespace Giants.Launcher {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Fullscreen.
+        /// </summary>
+        internal static string Fullscreen {
+            get {
+                return ResourceManager.GetString("Fullscreen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Download complete. The launcher will now close to apply the update..
         /// </summary>
         internal static string LauncherClosingText {
@@ -337,6 +346,15 @@ namespace Giants.Launcher {
         internal static string UpdateDownloadFailedTitle {
             get {
                 return ResourceManager.GetString("UpdateDownloadFailedTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Windowed.
+        /// </summary>
+        internal static string Windowed {
+            get {
+                return ResourceManager.GetString("Windowed", resourceCulture);
             }
         }
     }
