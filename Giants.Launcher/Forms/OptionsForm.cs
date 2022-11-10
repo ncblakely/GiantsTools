@@ -237,17 +237,7 @@ namespace Giants.Launcher
 
 		private void cmbRenderer_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			bool windowed = GameSettings.Get<int>(RegistryKeys.Windowed) == 1;
-			if (windowed)
-			{
-				bool borderless = GameSettings.Get<int>(RegistryKeys.BorderlessWindow) == 1;
-				if (borderless)
-                    this.cmbMode.SelectedIndex = 2;
-				else
-                    this.cmbMode.SelectedIndex = 1;
-			}
-			else
-                this.cmbMode.SelectedIndex = 0;
+			this.cmbMode.SelectedIndex = GameSettings.Get<int>(RegistryKeys.Windowed) == 1 ? 1 : 0;
 
 			var renderer = (RendererInfo)this.cmbRenderer.SelectedItem;
 
@@ -294,10 +284,8 @@ namespace Giants.Launcher
 
 			GameSettings.Modify(RegistryKeys.Antialiasing, this.cmbAntialiasing.SelectedValue);
 			GameSettings.Modify(RegistryKeys.AnisotropicFiltering, this.cmbAnisotropy.SelectedValue);
-			bool windowed = (WindowType)this.cmbMode.SelectedIndex == WindowType.Windowed || (WindowType)this.cmbMode.SelectedIndex == WindowType.Borderless;
-			GameSettings.Modify(RegistryKeys.Windowed, windowed  == true ? 1 : 0);
-			bool borderless = (WindowType)this.cmbMode.SelectedIndex == WindowType.Borderless;
-			GameSettings.Modify(RegistryKeys.BorderlessWindow, borderless == true ? 1 : 0);
+            bool windowed = (WindowType)this.cmbMode.SelectedIndex == WindowType.Windowed;
+            GameSettings.Modify(RegistryKeys.Windowed, windowed  == true ? 1 : 0);
 			GameSettings.Modify(RegistryKeys.VerticalSync, this.chkVSync.Checked == true ? 1 : 0);
 			GameSettings.Modify(RegistryKeys.TripleBuffering, this.chkTripleBuffering.Checked == true ? 1 : 0);
 			GameSettings.Modify(RegistryKeys.NoAutoUpdate, this.chkUpdates.Checked == false ? 1 : 0);

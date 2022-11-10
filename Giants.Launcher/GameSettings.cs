@@ -95,7 +95,6 @@ namespace Giants.Launcher
                     Settings[RegistryKeys.VideoHeight] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VideoHeight, Settings[RegistryKeys.VideoHeight], typeof(int));
                     Settings[RegistryKeys.VideoDepth] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VideoDepth, Settings[RegistryKeys.VideoDepth], typeof(int));
                     Settings[RegistryKeys.Windowed] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.Windowed, Settings[RegistryKeys.Windowed], typeof(int));
-                    Settings[RegistryKeys.BorderlessWindow] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.BorderlessWindow, Settings[RegistryKeys.BorderlessWindow], typeof(int));
                     Settings[RegistryKeys.VerticalSync] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VerticalSync, Settings[RegistryKeys.VerticalSync], typeof(int));
                     Settings[RegistryKeys.TripleBuffering] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.TripleBuffering, Settings[RegistryKeys.TripleBuffering], typeof(int));
                     Settings[RegistryKeys.NoAutoUpdate] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.NoAutoUpdate, Settings[RegistryKeys.NoAutoUpdate], typeof(int));
