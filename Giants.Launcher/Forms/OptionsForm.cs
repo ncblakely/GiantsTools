@@ -46,6 +46,7 @@ namespace Giants.Launcher
             this.PopulateResolution();
             this.PopulateAnisotropy();
             this.PopulateAntialiasing();
+			this.PopulateMode();
 
             this.SetOptions();
         }
@@ -176,7 +177,35 @@ namespace Giants.Launcher
                 this.cmbAntialiasing.SelectedIndex = 0;
 		}
 
-		private bool IsPowerOfTwo(int x)
+        private void PopulateMode()
+        {
+            var modeOptions = new List<KeyValuePair<string, int>>();
+
+            var renderer = (RendererInfo)this.cmbRenderer.SelectedItem;
+            if (renderer != null && renderer.Flags.HasFlag(RendererInfo.RendererFlag.Fullscreen))
+                modeOptions.Add(new KeyValuePair<string, int>(Resources.Fullscreen, 0));
+
+                modeOptions.Add(new KeyValuePair<string, int>(Resources.Windowed, 1));
+
+            // Try to keep current selection when repopulating
+            int? currentValue = null;
+            if (this.cmbMode.SelectedValue != null)
+            {
+                currentValue = (int)this.cmbMode.SelectedValue;
+            }
+
+            this.cmbMode.DataSource = modeOptions;
+            this.cmbMode.DisplayMember = "Key";
+            this.cmbMode.ValueMember = "Value";
+
+            if (currentValue != null)
+                this.cmbMode.SelectedValue = currentValue;
+
+            if (this.cmbMode.SelectedValue == null)
+                this.cmbMode.SelectedIndex = 0;
+        }
+
+        private bool IsPowerOfTwo(int x)
 		{
 			return (x != 0) && ((x & (x - 1)) == 0);
 		}
@@ -237,8 +266,6 @@ namespace Giants.Launcher
 
 		private void cmbRenderer_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			this.cmbMode.SelectedIndex = GameSettings.Get<int>(RegistryKeys.Windowed) == 1 ? 1 : 0;
-
 			var renderer = (RendererInfo)this.cmbRenderer.SelectedItem;
 
 			if ((renderer.Flags & RendererInfo.RendererFlag.VSync) != RendererInfo.RendererFlag.VSync)
@@ -264,6 +291,7 @@ namespace Giants.Launcher
 			}
 
 			this.PopulateAntialiasing();
+			this.PopulateMode();
 			this.PopulateAnisotropy();
 		}
 

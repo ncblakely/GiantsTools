@@ -9,7 +9,9 @@ namespace Giants.Launcher
         [Flags]
         public enum RendererFlag
         {
-            LowBitDepthAllowed = 0x1,
+            None = 0x0,
+
+            Unused = 0x1,
 
             // Multisampling support flags:
             MSAA2x = 0x2,
@@ -20,6 +22,7 @@ namespace Giants.Launcher
             // Other options:
             VSync = 0x20,
             TripleBuffer = 0x40,
+            Fullscreen = 0x80,
         };
 
         public RendererInfo(string filePath, ref RendererInterop.GFXCapabilityInfo gfxCaps)

@@ -169,10 +169,6 @@
             // 
             this.cmbMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbMode.FormattingEnabled = true;
-            this.cmbMode.Items.AddRange(new object[] {
-            "Fullscreen",
-            "Windowed",
-            "Borderless"});
             this.cmbMode.Location = new System.Drawing.Point(16, 23);
             this.cmbMode.Margin = new System.Windows.Forms.Padding(4);
             this.cmbMode.Name = "cmbMode";
@@ -185,7 +181,7 @@
             this.chkTripleBuffering.Location = new System.Drawing.Point(13, 79);
             this.chkTripleBuffering.Margin = new System.Windows.Forms.Padding(4);
             this.chkTripleBuffering.Name = "chkTripleBuffering";
-            this.chkTripleBuffering.Size = new System.Drawing.Size(119, 20);
+            this.chkTripleBuffering.Size = new System.Drawing.Size(136, 27);
             this.chkTripleBuffering.TabIndex = 2;
             this.chkTripleBuffering.Text = "Triple Buffering";
             this.chkTripleBuffering.UseVisualStyleBackColor = true;
@@ -196,7 +192,7 @@
             this.chkVSync.Location = new System.Drawing.Point(13, 53);
             this.chkVSync.Margin = new System.Windows.Forms.Padding(4);
             this.chkVSync.Name = "chkVSync";
-            this.chkVSync.Size = new System.Drawing.Size(119, 20);
+            this.chkVSync.Size = new System.Drawing.Size(136, 20);
             this.chkVSync.TabIndex = 1;
             this.chkVSync.Text = "Vertical Sync";
             this.chkVSync.UseVisualStyleBackColor = true;
@@ -226,10 +222,10 @@
             // 
             // btnResetDefaults
             // 
-            this.btnResetDefaults.Location = new System.Drawing.Point(400, 205);
+            this.btnResetDefaults.Location = new System.Drawing.Point(410, 205);
             this.btnResetDefaults.Margin = new System.Windows.Forms.Padding(4);
             this.btnResetDefaults.Name = "btnResetDefaults";
-            this.btnResetDefaults.Size = new System.Drawing.Size(125, 28);
+            this.btnResetDefaults.Size = new System.Drawing.Size(115, 28);
             this.btnResetDefaults.TabIndex = 8;
             this.btnResetDefaults.Text = "Reset Defaults";
             this.btnResetDefaults.UseVisualStyleBackColor = true;
@@ -240,11 +236,11 @@
             this.groupBox3.Controls.Add(this.label5);
             this.groupBox3.Controls.Add(this.cmbBranch);
             this.groupBox3.Controls.Add(this.chkUpdates);
-            this.groupBox3.Location = new System.Drawing.Point(181, 199);
+            this.groupBox3.Location = new System.Drawing.Point(185, 199);
             this.groupBox3.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox3.Size = new System.Drawing.Size(211, 97);
+            this.groupBox3.Size = new System.Drawing.Size(221, 97);
             this.groupBox3.TabIndex = 6;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Updates";
