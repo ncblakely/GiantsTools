@@ -312,7 +312,7 @@ namespace Giants.Launcher
 
 			GameSettings.Modify(RegistryKeys.Antialiasing, this.cmbAntialiasing.SelectedValue);
 			GameSettings.Modify(RegistryKeys.AnisotropicFiltering, this.cmbAnisotropy.SelectedValue);
-            bool windowed = (WindowType)this.cmbMode.SelectedIndex == WindowType.Windowed;
+            bool windowed = (WindowType)this.cmbMode.SelectedValue == WindowType.Windowed;
             GameSettings.Modify(RegistryKeys.Windowed, windowed  == true ? 1 : 0);
 			GameSettings.Modify(RegistryKeys.VerticalSync, this.chkVSync.Checked == true ? 1 : 0);
 			GameSettings.Modify(RegistryKeys.TripleBuffering, this.chkTripleBuffering.Checked == true ? 1 : 0);
