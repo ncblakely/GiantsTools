@@ -4,7 +4,6 @@
     {
         public const string Antialiasing = "Antialiasing";
         public const string AnisotropicFiltering = "AnisotropicFiltering";
-        public const string BorderlessWindow = "BorderlessWindow";
         public const string GameOptionsVersion = "GameOptionsVersion";
         public const string NoAutoUpdate = "NoAutoUpdate";
         public const string Renderer = "Renderer";

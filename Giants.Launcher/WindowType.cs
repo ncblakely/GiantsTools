@@ -4,6 +4,5 @@
     {
         Fullscreen = 0,
         Windowed = 1,
-        Borderless = 2,
     }
 }

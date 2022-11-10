@@ -43,15 +43,19 @@ namespace Giants.Launcher
         public static void SetDefaults(string gamePath)
         {
             // Set default settings:
-            Settings[RegistryKeys.Renderer] = "gg_dx7r.dll";
+            Settings[RegistryKeys.Renderer] = "gg_dx9r.dll";
             Settings[RegistryKeys.Antialiasing] = 0;
             Settings[RegistryKeys.AnisotropicFiltering] = 0;
             Settings[RegistryKeys.VideoDepth] = 32;
-            Settings[RegistryKeys.Windowed] = 0;
-            Settings[RegistryKeys.BorderlessWindow] = 0;
+            Settings[RegistryKeys.Windowed] = 1;
+            Settings[RegistryKeys.BorderlessWindow] = 1;
             Settings[RegistryKeys.VerticalSync] = 1;
             Settings[RegistryKeys.TripleBuffering] = 1;
             Settings[RegistryKeys.NoAutoUpdate] = 0;
+
+            // Set the current desktop resolution, leaving bit depth at the default 32:
+            Settings[RegistryKeys.VideoWidth] = Screen.PrimaryScreen.Bounds.Width;
+            Settings[RegistryKeys.VideoHeight] = Screen.PrimaryScreen.Bounds.Height;
 
             // Get a list of renderers compatible with the user's system
             if (!CompatibleRenderers.Any())
@@ -64,18 +68,16 @@ namespace Giants.Launcher
                         caption: Resources.Error,
                         buttons: MessageBoxButtons.OK,
                         icon: MessageBoxIcon.Error);
+
+                    return;
                 }
             }
 
             // Select the highest priority renderer
-            if (CompatibleRenderers.Any())
-            {
-                Settings[RegistryKeys.Renderer] = Path.GetFileName(CompatibleRenderers.Max().FilePath);
-            }
-
-            // Set the current desktop resolution, leaving bit depth at the default 32:
-            Settings[RegistryKeys.VideoWidth] = Screen.PrimaryScreen.Bounds.Width;
-            Settings[RegistryKeys.VideoHeight] = Screen.PrimaryScreen.Bounds.Height;
+            var bestRenderer = CompatibleRenderers.Max();
+            Settings[RegistryKeys.Renderer] = Path.GetFileName(bestRenderer.FilePath);
+            Settings[RegistryKeys.AnisotropicFiltering] = bestRenderer.MaxAnisotropy;
+            Settings[RegistryKeys.Antialiasing] = bestRenderer.MaxAntialiasing;
         }
 
         public static void Load(string gamePath)
@@ -93,7 +95,6 @@ namespace Giants.Launcher
                     Settings[RegistryKeys.VideoHeight] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VideoHeight, Settings[RegistryKeys.VideoHeight], typeof(int));
                     Settings[RegistryKeys.VideoDepth] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VideoDepth, Settings[RegistryKeys.VideoDepth], typeof(int));
                     Settings[RegistryKeys.Windowed] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.Windowed, Settings[RegistryKeys.Windowed], typeof(int));
-                    Settings[RegistryKeys.BorderlessWindow] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.BorderlessWindow, Settings[RegistryKeys.BorderlessWindow], typeof(int));
                     Settings[RegistryKeys.VerticalSync] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.VerticalSync, Settings[RegistryKeys.VerticalSync], typeof(int));
                     Settings[RegistryKeys.TripleBuffering] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.TripleBuffering, Settings[RegistryKeys.TripleBuffering], typeof(int));
                     Settings[RegistryKeys.NoAutoUpdate] = RegistryExtensions.GetValue(RegistryKey, RegistryKeys.NoAutoUpdate, Settings[RegistryKeys.NoAutoUpdate], typeof(int));
