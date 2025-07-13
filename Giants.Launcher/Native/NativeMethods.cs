@@ -19,6 +19,9 @@ namespace Giants.Launcher
         [DllImport("kernel32.dll")]
         public static extern bool FreeLibrary(IntPtr hModule);
 
+        [DllImport("kernel32.dll")]
+        public static extern uint GetLastError();
+
         [DllImport("user32.dll")]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
 
