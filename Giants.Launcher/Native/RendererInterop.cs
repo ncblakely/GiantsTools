@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -32,7 +33,14 @@ namespace Giants.Launcher
             bool rendererSupported = false;
             IntPtr pDll = NativeMethods.LoadLibrary(dllPath);
             if (pDll == IntPtr.Zero)
-                throw new System.Exception(string.Format("LoadLibrary() for {0} failed", dllPath));
+            {
+                uint errorCode = NativeMethods.GetLastError();
+                
+                string detailedError = $"LoadLibrary() failed for '{dllPath}'\n" +
+                                     $"Error Description: {GetWin32ErrorMessage(errorCode)}";
+                
+                throw new System.Exception(detailedError);
+            }
 
             IntPtr pAddressOfFunctionToCall = NativeMethods.GetProcAddress(pDll, "GFXGetCapabilities");
             if (pAddressOfFunctionToCall == IntPtr.Zero)
@@ -46,6 +54,22 @@ namespace Giants.Launcher
             return rendererSupported;
         }
 
+        /// <summary>
+        /// Gets a human-readable error message for a Win32 error code.
+        /// </summary>
+        /// <param name="errorCode">The Win32 error code.</param>
+        /// <returns>A descriptive error message.</returns>
+        private static string GetWin32ErrorMessage(uint errorCode)
+        {
+            try
+            {
+                return new Win32Exception((int)errorCode).Message;
+            }
+            catch
+            {
+                return $"Unknown error code: {errorCode}";
+            }
+        }
 
         public static List<RendererInfo> GetCompatibleRenderers(string gamePath)
         {
