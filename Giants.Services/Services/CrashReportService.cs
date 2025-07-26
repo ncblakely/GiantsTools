@@ -50,15 +50,29 @@
             }
 
             using var dumpStream = zipEntry.Open();
+            using var compressedStream = new MemoryStream();
+            
+            // Compress the minidump using gzip
+            using (var gzipStream = new GZipStream(compressedStream, CompressionMode.Compress, leaveOpen: true))
+            {
+                await dumpStream.CopyToAsync(gzipStream).ConfigureAwait(false);
+            }
+            
+            // Reset position to read from the beginning
+            compressedStream.Position = 0;
+            
             using var formData = new MultipartFormDataContent
             {
-                { new StreamContent(dumpStream), SentryMinidumpUploadFileKey, fileName }
+                { new StreamContent(compressedStream), SentryMinidumpUploadFileKey, fileName }
             };
             var response = await httpClient.PostAsync(minidumpUri, formData).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new InvalidOperationException();
+                string responseContent = await response.Content.ReadAsStringAsync();
+                this.logger.LogError("Sentry upload failed. Status: {StatusCode}, Content: {ResponseContent}",
+                    response.StatusCode, responseContent);
+                throw new InvalidOperationException($"Sentry upload failed with status {response.StatusCode}: {responseContent}");
             }
         }
 
