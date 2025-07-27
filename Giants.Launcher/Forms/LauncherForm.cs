@@ -20,20 +20,24 @@ namespace Giants.Launcher
 		private const string RegistryKey = @"HKEY_CURRENT_USER\Software\PlanetMoon\Giants";
 		private const string RegistryValue = "DestDir";
 
+		// HTTP clients
 		private readonly HttpClient httpClient;
 		private readonly BranchesClient branchHttpClient;
 		private readonly VersionClient versionHttpClient;
 		private readonly CommunityClient communityHttpClient;
 
-		private string commandLine;
-		private string gamePath = null;
-		private Updater updater;
-		private readonly Config config;
-		private Version localGameVersion;
-		private string branchName;
-		private string communityAppUri;
+        // Configuration
+        private string commandLine;
+        private readonly Config config;
+        private string gamePath = null;
+        private Version localGameVersion;
+        private string branchName;
+        private string communityAppUri;
 
-		public LauncherForm()
+		// Auto-update
+        private Updater updater;
+
+        public LauncherForm()
 		{
 			this.InitializeComponent();
 			this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
@@ -42,17 +46,19 @@ namespace Giants.Launcher
 			// Set window title
 			this.SetTitle();
 
-			this.updater = new Updater(
-			updateCompletedCallback: this.LauncherForm_DownloadCompletedCallback,
-			updateProgressCallback: this.LauncherForm_DownloadProgressCallback);
+            // Read newer file-based game settings
+            this.config = new Config();
+            this.config.Read();
 
-			// Read newer file-based game settings
-			this.config = new Config();
-			this.config.Read();
+            this.config.TryGetString(ConfigSections.Network, ConfigKeys.MasterServerHostName, ConfigDefaults.MasterServerHostNameDefault, out string baseUrl);
+            this.config.TryGetString(ConfigSections.Network, ConfigKeys.PatchServerHostName, ConfigDefaults.PatchServerHostNameDefault, out string patchServerHostName);
 
-			this.config.TryGetString(ConfigSections.Network, ConfigKeys.MasterServerHostName, ConfigDefaults.MasterServerHostNameDefault, out string baseUrl);
+            this.updater = new Updater(
+				updateCompletedCallback: this.LauncherForm_DownloadCompletedCallback,
+				updateProgressCallback: this.LauncherForm_DownloadProgressCallback,
+				patchServerHostName);
 
-			this.httpClient = new HttpClient(
+            this.httpClient = new HttpClient(
 				new HttpClientHandler()
 				{
 					UseProxy = false
@@ -208,16 +214,17 @@ namespace Giants.Launcher
 
 			await Task.WhenAll(gameVersionInfo, launcherVersionInfo);
 
-			if (this.updater.IsUpdateRequired(ApplicationType.Game, gameVersionInfo.Result, localGameVersion))
+            if (this.updater.IsUpdateRequired(ApplicationType.Launcher, launcherVersionInfo.Result, localLauncherVersion))
+            {
+                this.btnPlay.Enabled = false;
+                await this.updater.UpdateApplication(ApplicationType.Launcher, launcherVersionInfo.Result);
+				return;
+            }
+
+            if (this.updater.IsUpdateRequired(ApplicationType.Game, gameVersionInfo.Result, localGameVersion))
 			{
 				this.btnPlay.Enabled = false;
 				await this.updater.UpdateApplication(ApplicationType.Game, gameVersionInfo.Result);
-			}
-
-			if (this.updater.IsUpdateRequired(ApplicationType.Launcher, launcherVersionInfo.Result, localLauncherVersion))
-			{
-				this.btnPlay.Enabled = false;
-				await this.updater.UpdateApplication(ApplicationType.Launcher, launcherVersionInfo.Result);
 			}
 		}
 

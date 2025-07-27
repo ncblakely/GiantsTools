@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -20,17 +21,22 @@ namespace Giants.Launcher
 
     public class Updater : IDisposable
     {
+        private const int DownloadBufferSize = 8192;
+
         private readonly AsyncCompletedEventHandler updateCompletedCallback;
         private readonly Action<DownloadProgressInfo> updateProgressCallback;
+        private readonly string patchServerHostName;
         private readonly HttpClient httpClient;
         private bool disposed = false;
 
         public Updater(
             AsyncCompletedEventHandler updateCompletedCallback,
-            Action<DownloadProgressInfo> updateProgressCallback)
+            Action<DownloadProgressInfo> updateProgressCallback,
+            string patchServerHostName)
         {
             this.updateCompletedCallback = updateCompletedCallback;
             this.updateProgressCallback = updateProgressCallback;
+            this.patchServerHostName = patchServerHostName;
 
             var handler = new HttpClientHandler
             {
@@ -122,7 +128,14 @@ namespace Giants.Launcher
 
         private async Task StartApplicationUpdate(ApplicationType applicationType, VersionInfo versionInfo)
         {
-            string patchFileName = Path.GetFileName(versionInfo.InstallerUri.AbsoluteUri);
+            String absoluteUri = versionInfo.InstallerUri.AbsoluteUri;
+            string patchFileName = Path.GetFileName(absoluteUri);
+
+            if (!IsValidPatchUri(absoluteUri))
+            {
+                throw new SecurityException($"Invalid patch download URL detected: {patchFileName}");
+            }
+
             string localPath = Path.Combine(Path.GetTempPath(), patchFileName);
 
             // Delete the file locally if it already exists, just to be safe
@@ -159,9 +172,9 @@ namespace Giants.Launcher
                     var canReportProgress = totalBytes != -1 && this.updateProgressCallback != null;
 
                     using (var contentStream = await response.Content.ReadAsStreamAsync())
-                    using (var fileStream = new FileStream(localPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                    using (var fileStream = new FileStream(localPath, FileMode.Create, FileAccess.Write, FileShare.None, DownloadBufferSize, true))
                     {
-                        var buffer = new byte[8192];
+                        var buffer = new byte[DownloadBufferSize];
                         var totalBytesRead = 0L;
                         var lastReportedPercentage = -1;
                         int bytesRead;
@@ -188,12 +201,7 @@ namespace Giants.Launcher
                                         UserState = updateInfo
                                     };
 
-                                    System.Diagnostics.Debug.WriteLine($"Download progress: {progressPercentage}% ({totalBytesRead}/{totalBytes})");
-
-                                    if (this.updateProgressCallback != null)
-                                    {
-                                        this.updateProgressCallback(progressInfo);
-                                    }
+                                    this.updateProgressCallback(progressInfo);
                                 }
                             }
                         }
@@ -232,6 +240,27 @@ namespace Giants.Launcher
             {
                 File.Delete(localPath);
             }
+        }
+
+        private bool IsValidPatchUri(string absoluteUri)
+        {
+            // Download location should be from a known domain
+            if (!absoluteUri.StartsWith(this.patchServerHostName))
+                return false;
+
+            // Reject local file system paths
+            if (Path.IsPathRooted(absoluteUri))
+                return false;
+
+            string fileName = Path.GetFileName(absoluteUri);
+
+            // Check file extension
+            string extension = Path.GetExtension(fileName).ToLowerInvariant();
+            string[] AllowedExtensions = { ".exe", ".msi" };
+            if (!Array.Exists(AllowedExtensions, ext => ext == extension))
+                return false;
+
+            return true;
         }
     }
 }

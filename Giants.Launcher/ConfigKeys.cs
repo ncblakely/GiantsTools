@@ -7,6 +7,7 @@
 
         // Network
         public const string MasterServerHostName = "masterServerHostName";
+        public const string PatchServerHostName = "patchServerHostName";
         public const string BannedPlayers = "bannedPlayers";
     }
 }

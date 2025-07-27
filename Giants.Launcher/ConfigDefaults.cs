@@ -4,5 +4,6 @@
     {
         public const string BranchNameDefault = "Release";
         public const string MasterServerHostNameDefault = "https://giants.azurewebsites.net/";
+        public const string PatchServerHostNameDefault = "https://giants.blob.core.windows.net";
     }
 }
