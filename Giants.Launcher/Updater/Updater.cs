@@ -3,27 +3,72 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Giants.Launcher
 {
-    public class Updater
+    public class DownloadProgressInfo
+    {
+        public long BytesReceived { get; set; }
+        public long TotalBytes { get; set; }
+        public int ProgressPercentage { get; set; }
+        public object UserState { get; set; }
+    }
+
+    public class Updater : IDisposable
     {
         private readonly AsyncCompletedEventHandler updateCompletedCallback;
-        private readonly DownloadProgressChangedEventHandler updateProgressCallback;
+        private readonly Action<DownloadProgressInfo> updateProgressCallback;
+        private readonly HttpClient httpClient;
+        private bool disposed = false;
 
         public Updater(
             AsyncCompletedEventHandler updateCompletedCallback,
-            DownloadProgressChangedEventHandler updateProgressCallback)
+            Action<DownloadProgressInfo> updateProgressCallback)
         {
             this.updateCompletedCallback = updateCompletedCallback;
             this.updateProgressCallback = updateProgressCallback;
+
+            var handler = new HttpClientHandler
+            {
+                CheckCertificateRevocationList = true
+            };
+
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+            this.httpClient = new HttpClient(handler)
+            {
+                Timeout = Timeout.InfiniteTimeSpan
+            };
+
+            // Add security headers
+            this.httpClient.DefaultRequestHeaders.Add("User-Agent", "Giants.Launcher");
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed && disposing)
+            {
+                if (this.httpClient != null)
+                {
+                    this.httpClient.Dispose();
+                }
+                disposed = true;
+            }
         }
 
         public bool IsUpdateRequired(ApplicationType applicationType, VersionInfo remoteVersionInfo, Version localVersion)
         {
-            if (remoteVersionInfo?.InstallerUri != null 
+            if (remoteVersionInfo != null && remoteVersionInfo.InstallerUri != null
                 && this.ToVersion(remoteVersionInfo.Version) > localVersion)
             {
                 // Display update prompt
@@ -40,11 +85,31 @@ namespace Giants.Launcher
             return false;
         }
 
-        public Task UpdateApplication(ApplicationType applicationType, VersionInfo versionInfo)
+        public async Task UpdateApplication(ApplicationType applicationType, VersionInfo versionInfo)
         {
             try
             {
-                this.StartApplicationUpdate(applicationType, versionInfo);
+                await this.StartApplicationUpdate(applicationType, versionInfo);
+            }
+            catch (Exception e)
+            {
+                string errorMsg = string.Format(Resources.UpdateDownloadFailedText, e.Message);
+                MessageBox.Show(errorMsg, Resources.UpdateDownloadFailedTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async Task<int> GetHttpFileSize(Uri uri)
+        {
+            try
+            {
+                using (var request = new HttpRequestMessage(HttpMethod.Head, uri))
+                using (var response = await this.httpClient.SendAsync(request))
+                {
+                    if (response.IsSuccessStatusCode && response.Content.Headers.ContentLength.HasValue)
+                    {
+                        return (int)response.Content.Headers.ContentLength.Value;
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -52,39 +117,18 @@ namespace Giants.Launcher
                 MessageBox.Show(errorMsg, Resources.UpdateDownloadFailedTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            return Task.CompletedTask;
-        }
-
-        private int GetHttpFileSize(Uri uri)
-        {
-            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);
-            req.Proxy = null;
-            req.Method = "HEAD";
-            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
-
-            if (resp.StatusCode == HttpStatusCode.OK && int.TryParse(resp.Headers.Get("Content-Length"), out int contentLength))
-            {
-                resp.Close();
-                return contentLength;
-            }
-
-            resp.Close();
             return -1;
-
         }
 
-        private void StartApplicationUpdate(ApplicationType applicationType, VersionInfo versionInfo)
+        private async Task StartApplicationUpdate(ApplicationType applicationType, VersionInfo versionInfo)
         {
             string patchFileName = Path.GetFileName(versionInfo.InstallerUri.AbsoluteUri);
             string localPath = Path.Combine(Path.GetTempPath(), patchFileName);
 
             // Delete the file locally if it already exists, just to be safe
-            if (File.Exists(localPath))
-            {
-                File.Delete(localPath);
-            }
+            DeleteFileIfExists(localPath);
 
-            int fileSize = this.GetHttpFileSize(versionInfo.InstallerUri);
+            int fileSize = await this.GetHttpFileSize(versionInfo.InstallerUri);
             if (fileSize == -1)
             {
                 string errorMsg = string.Format(Resources.UpdateDownloadFailedText, "File not found on server.");
@@ -100,16 +144,94 @@ namespace Giants.Launcher
             };
 
             // Download the update
-            // TODO: Super old code, replace this with async HttpClient
-            WebClient client = new WebClient();
-            client.DownloadFileAsync(versionInfo.InstallerUri, localPath, updateInfo);
-            client.DownloadFileCompleted += this.updateCompletedCallback;
-            client.DownloadProgressChanged += this.updateProgressCallback;
+            await DownloadFileWithProgress(versionInfo.InstallerUri, localPath, updateInfo);
+        }
+
+        private async Task DownloadFileWithProgress(Uri downloadUri, string localPath, UpdateInfo updateInfo)
+        {
+            try
+            {
+                using (var response = await this.httpClient.GetAsync(downloadUri, HttpCompletionOption.ResponseHeadersRead))
+                {
+                    response.EnsureSuccessStatusCode();
+
+                    var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+                    var canReportProgress = totalBytes != -1 && this.updateProgressCallback != null;
+
+                    using (var contentStream = await response.Content.ReadAsStreamAsync())
+                    using (var fileStream = new FileStream(localPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                    {
+                        var buffer = new byte[8192];
+                        var totalBytesRead = 0L;
+                        var lastReportedPercentage = -1;
+                        int bytesRead;
+
+                        while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                        {
+                            await fileStream.WriteAsync(buffer, 0, bytesRead);
+                            totalBytesRead += bytesRead;
+
+                            if (canReportProgress)
+                            {
+                                var progressPercentage = (int)((totalBytesRead * 100L) / totalBytes);
+
+                                // Only report progress when percentage changes to avoid overwhelming UI thread
+                                if (progressPercentage != lastReportedPercentage)
+                                {
+                                    lastReportedPercentage = progressPercentage;
+
+                                    var progressInfo = new DownloadProgressInfo
+                                    {
+                                        BytesReceived = totalBytesRead,
+                                        TotalBytes = totalBytes,
+                                        ProgressPercentage = progressPercentage,
+                                        UserState = updateInfo
+                                    };
+
+                                    System.Diagnostics.Debug.WriteLine($"Download progress: {progressPercentage}% ({totalBytesRead}/{totalBytes})");
+
+                                    if (this.updateProgressCallback != null)
+                                    {
+                                        this.updateProgressCallback(progressInfo);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Notify completion
+                var completedArgs = new AsyncCompletedEventArgs(null, false, updateInfo);
+                if (this.updateCompletedCallback != null)
+                {
+                    this.updateCompletedCallback(this, completedArgs);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Clean up partial download
+                DeleteFileIfExists(localPath);
+
+                // Notify completion with error
+                var errorArgs = new AsyncCompletedEventArgs(ex, false, updateInfo);
+                if (this.updateCompletedCallback != null)
+                {
+                    this.updateCompletedCallback(this, errorArgs);
+                }
+            }
         }
 
         private Version ToVersion(AppVersion version)
         {
             return new Version(version.Major, version.Minor, version.Build, version.Revision);
+        }
+
+        private static void DeleteFileIfExists(string localPath)
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+            }
         }
     }
 }
