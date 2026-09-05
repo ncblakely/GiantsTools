@@ -1423,6 +1423,15 @@ namespace Giants.WebApi.Clients
         [System.ComponentModel.DataAnnotations.Required]
         public System.Uri InstallerUri { get; set; }
 
+        [Newtonsoft.Json.JsonProperty("installerPath", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string InstallerPath { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("installerSha256", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string InstallerSha256 { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("installerSignature", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string InstallerSignature { get; set; }
+
         [Newtonsoft.Json.JsonProperty("branchName", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string BranchName { get; set; }
@@ -1446,6 +1455,12 @@ namespace Giants.WebApi.Clients
 
         [Newtonsoft.Json.JsonProperty("forceUpdate", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool ForceUpdate { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("installerSha256", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string InstallerSha256 { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("installerSignature", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string InstallerSignature { get; set; }
 
     }
 

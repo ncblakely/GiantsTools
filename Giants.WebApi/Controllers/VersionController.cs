@@ -55,7 +55,9 @@ namespace Giants.WebApi.Controllers
                 appVersion: versionInfoUpdate.AppVersion,
                 fileName: versionInfoUpdate.FileName,
                 branchName: versionInfoUpdate.BranchName,
-                force: versionInfoUpdate.ForceUpdate);
+                force: versionInfoUpdate.ForceUpdate,
+                installerSha256: versionInfoUpdate.InstallerSha256,
+                installerSignature: versionInfoUpdate.InstallerSignature);
         }
     }
 }

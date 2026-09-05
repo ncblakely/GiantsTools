@@ -421,6 +421,18 @@
             "format": "uri",
             "minLength": 1
           },
+          "installerPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "installerSha256": {
+            "type": "string",
+            "nullable": true
+          },
+          "installerSignature": {
+            "type": "string",
+            "nullable": true
+          },
           "branchName": {
             "type": "string",
             "minLength": 1
@@ -453,6 +465,14 @@
           },
           "forceUpdate": {
             "type": "boolean"
+          },
+          "installerSha256": {
+            "type": "string",
+            "nullable": true
+          },
+          "installerSignature": {
+            "type": "string",
+            "nullable": true
           }
         }
       }

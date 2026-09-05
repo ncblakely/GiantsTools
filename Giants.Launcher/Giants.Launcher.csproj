@@ -111,6 +111,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScreenResolution.cs" />
+    <Compile Include="Updater\InstallerValidation.cs" />
+    <Compile Include="Updater\InstallerSignatureValidation.cs" />
     <Compile Include="Updater\UpdateInfo.cs" />
     <EmbeddedResource Include="Forms\LauncherForm.resx">
       <DependentUpon>LauncherForm.cs</DependentUpon>
@@ -118,7 +120,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\OptionsForm.resx">
       <DependentUpon>OptionsForm.cs</DependentUpon>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

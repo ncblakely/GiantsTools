@@ -10,6 +10,13 @@
 
         Task<VersionInfo> GetVersionInfo(string appName, string branchName);
 
-        Task UpdateVersionInfo(string appName, AppVersion appVersion, string fileName, string branchName, bool force);
+        Task UpdateVersionInfo(
+            string appName,
+            AppVersion appVersion,
+            string fileName,
+            string branchName,
+            bool force,
+            string installerSha256 = null,
+            string installerSignature = null);
     }
 }
