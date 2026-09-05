@@ -15,18 +15,57 @@
 class NavMeshGenerator
 {
 public:
-    NavMeshGenerator(std::shared_ptr<InputGeom> geom, std::shared_ptr<RecastContext> context);
+    /// <summary>
+    /// Creates a generator that owns the supplied Recast/Detour build state and
+    /// uses sourcePath only for deterministic source identity and content hashing.
+    /// </summary>
+    NavMeshGenerator(std::shared_ptr<InputGeom> geom, std::shared_ptr<RecastContext> context,
+        const std::filesystem::path& sourcePath = {});
+    /// <summary>Releases all native Recast and Detour allocations owned by this generator.</summary>
     virtual ~NavMeshGenerator();
 
+    /// <summary>
+    /// Builds the in-memory tiled navmesh; returns false for any allocation,
+    /// Recast, Detour, or zero-tile failure and leaves no serializable partial mesh.
+    /// </summary>
     bool BuildNavMesh();
-    bool Serialize(const std::filesystem::path& path, bool saveStatistics = true);
+    /// <summary>
+    /// Writes a complete GNAV artifact, replacing path only after serialization succeeds;
+    /// returns false with the failure reason available through GetLastError().
+    /// </summary>
+    bool Serialize(const std::filesystem::path& path, bool saveStatistics = false);
+    /// <summary>Returns the most recent build or serialization failure, or an empty string on success.</summary>
+    const std::string& GetLastError() const { return m_lastError; }
 private:
-    void BuildAllTiles();
+    enum class TileBuildStatus
+    {
+        Built,
+        Empty,
+        Failed
+    };
+
+    struct TileBuildResult
+    {
+        TileBuildStatus status{TileBuildStatus::Failed};
+        unsigned char* data{};
+        int dataSize{};
+        std::uint64_t triangleCount{};
+        std::uint64_t memoryBytes{};
+    };
+
+    // Builds every tile, preserving Empty as a valid result and propagating
+    // all allocation, Recast, and Detour failures.
+    bool BuildAllTiles();
     void CalculateTileSize();
     void Cleanup();
     bool WriteStatistics(const std::filesystem::path& path);
+    std::filesystem::path m_sourcePath;
+    std::string m_lastError;
+    bool m_buildSucceeded{};
 
-    unsigned char* BuildTileMesh(const int tx, const int ty, const float* bmin, const float* bmax, int& dataSize);
+    // Returns Built with owned Detour data, Empty for geometry-free tiles, or
+    // Failed with m_lastError populated.
+    TileBuildResult BuildTileMesh(const int tx, const int ty, const float* bmin, const float* bmax);
 
     std::shared_ptr<InputGeom> m_geom;
     std::unique_ptr<dtNavMesh, NavMeshDeleter> m_navMesh;
@@ -74,5 +113,8 @@ private:
     float m_tileMemUsage{};
     float m_tileBuildTime{};
     int m_tileTriCount{};
+    std::uint32_t m_totalTileCount{};
+    std::uint64_t m_totalTileTriCount{};
+    std::uint64_t m_totalTileMemoryBytes{};
     
 };

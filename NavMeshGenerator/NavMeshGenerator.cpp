@@ -5,8 +5,84 @@
 #include "Recast.h"
 #include "RecastContext.h"
 
+#include <array>
+#include <Windows.h>
+#include <new>
+
 using namespace nlohmann;
 using namespace std::filesystem;
+
+namespace
+{
+    bool ReadSourceIdentity(const path& sourcePath, std::uint64_t& digest, std::uint64_t& size,
+        std::string& error)
+    {
+        // GNAV uses the same FNV-1a-64 algorithm as chunk checksums. Read in
+        // bounded blocks so source identity never scales with OBJ size.
+        std::ifstream input(sourcePath, std::ios::binary | std::ios::ate);
+        if (!input)
+        {
+            error = "unable to open source geometry";
+            return false;
+        }
+        const std::streamsize sourceSize = input.tellg();
+        if (sourceSize < 0)
+        {
+            error = "unable to determine source geometry length";
+            return false;
+        }
+        size = static_cast<std::uint64_t>(sourceSize);
+        input.seekg(0);
+        digest = 14695981039346656037ull;
+        std::array<std::uint8_t, 64 * 1024> buffer{};
+        while (input)
+        {
+            input.read(reinterpret_cast<char*>(buffer.data()), buffer.size());
+            const auto count = input.gcount();
+            if (count > 0)
+                GiantsNav::HashBytesUpdate(digest, buffer.data(), static_cast<std::size_t>(count));
+        }
+        if (!input.eof())
+        {
+            error = "unable to read source geometry";
+            return false;
+        }
+        return true;
+    }
+
+    std::vector<std::uint8_t> BuildMsetPayload(const dtNavMesh& navMesh)
+    {
+        GiantsNav::NavMeshSetHeader header{};
+        header.magic = GiantsNav::NAVMESHSET_MAGIC;
+        header.version = GiantsNav::NAVMESHSET_VERSION;
+        for (int i = 0; i < navMesh.getMaxTiles(); ++i)
+        {
+            const dtMeshTile* tile = navMesh.getTile(i);
+            if (tile && tile->header && tile->dataSize)
+                ++header.numTiles;
+        }
+        std::memcpy(&header.params, navMesh.getParams(), sizeof(header.params));
+
+        std::vector<std::uint8_t> payload(sizeof(header));
+        std::memcpy(payload.data(), &header, sizeof(header));
+        for (int i = 0; i < navMesh.getMaxTiles(); ++i)
+        {
+            const dtMeshTile* tile = navMesh.getTile(i);
+            if (!tile || !tile->header || !tile->dataSize)
+                continue;
+            GiantsNav::NavMeshTileHeader tileHeader{};
+            tileHeader.tileRef = navMesh.getTileRef(tile);
+            tileHeader.dataSize = tile->dataSize;
+            const auto oldSize = payload.size();
+            payload.resize(oldSize + sizeof(tileHeader) + static_cast<std::size_t>(tileHeader.dataSize));
+            std::memcpy(payload.data() + oldSize, &tileHeader, sizeof(tileHeader));
+            std::memcpy(payload.data() + oldSize + sizeof(tileHeader), tile->data,
+                static_cast<std::size_t>(tileHeader.dataSize));
+        }
+        return payload;
+    }
+
+}
 
 inline unsigned int nextPow2(unsigned int v)
 {
@@ -32,11 +108,13 @@ inline unsigned int ilog2(unsigned int v)
 	return r;
 }
 
-NavMeshGenerator::NavMeshGenerator(std::shared_ptr<InputGeom> geom, std::shared_ptr<RecastContext> context)
+NavMeshGenerator::NavMeshGenerator(std::shared_ptr<InputGeom> geom, std::shared_ptr<RecastContext> context,
+    const std::filesystem::path& sourcePath)
     : m_geom(geom),
     m_navMeshQuery(dtAllocNavMeshQuery()),
     m_navMesh(dtAllocNavMesh()),
-    m_ctx(context)
+    m_ctx(context),
+    m_sourcePath(sourcePath)
 {
 }
 
@@ -63,6 +141,20 @@ void NavMeshGenerator::Cleanup()
 
 bool NavMeshGenerator::BuildNavMesh()
 {
+	m_lastError.clear();
+	m_buildSucceeded = false;
+	m_totalTileCount = 0;
+	m_totalTileTriCount = 0;
+	m_totalTileMemoryBytes = 0;
+
+	m_navMesh.reset(dtAllocNavMesh());
+	m_navMeshQuery.reset(dtAllocNavMeshQuery());
+	if (!m_navMesh || !m_navMeshQuery)
+	{
+		m_lastError = "out of memory allocating Detour build state";
+		return false;
+	}
+
 	CalculateTileSize();
 
     dtNavMeshParams params{};
@@ -75,6 +167,9 @@ bool NavMeshGenerator::BuildNavMesh()
     dtStatus status = m_navMesh->init(&params);
     if (dtStatusFailed(status))
     {
+		m_lastError = "Detour navmesh initialization failed";
+		m_navMeshQuery.reset();
+		m_navMesh.reset();
         return false;
     }
 
@@ -82,10 +177,29 @@ bool NavMeshGenerator::BuildNavMesh()
     if (dtStatusFailed(status))
     {
         //m_ctx->log(RC_LOG_ERROR, "buildTiledNavigation: Could not init Detour navmesh query");
+		m_lastError = "Detour navmesh query initialization failed";
+		m_navMeshQuery.reset();
+		m_navMesh.reset();
         return false;
     }
 
-    BuildAllTiles();
+    if (!BuildAllTiles())
+    {
+		Cleanup();
+		m_navMeshQuery.reset();
+		m_navMesh.reset();
+		return false;
+    }
+	if (m_totalTileCount == 0)
+	{
+		m_lastError = "navmesh build produced zero tiles";
+		Cleanup();
+		m_navMeshQuery.reset();
+		m_navMesh.reset();
+		return false;
+	}
+
+	m_buildSucceeded = true;
 	return true;
 }
 
@@ -110,7 +224,7 @@ void NavMeshGenerator::CalculateTileSize()
 	m_maxPolysPerTile = 1 << polyBits;
 }
 
-void NavMeshGenerator::BuildAllTiles()
+bool NavMeshGenerator::BuildAllTiles()
 {
     const float* bmin = m_geom->getNavMeshBoundsMin();
     const float* bmax = m_geom->getNavMeshBoundsMax();
@@ -122,6 +236,9 @@ void NavMeshGenerator::BuildAllTiles()
     const int th = (gh + ts - 1) / ts;
     const float tcs = m_tileSize * m_cellSize;
 
+	m_totalTileCount = 0;
+	m_totalTileTriCount = 0;
+	m_totalTileMemoryBytes = 0;
     m_ctx->startTimer(RC_TIMER_TEMP);
 
     for (int y = 0; y < th; ++y)
@@ -136,32 +253,88 @@ void NavMeshGenerator::BuildAllTiles()
             m_lastBuiltTileBmax[1] = bmax[1];
             m_lastBuiltTileBmax[2] = bmin[2] + (y + 1) * tcs;
 
-            int dataSize = 0;
-            unsigned char* data = BuildTileMesh(x, y, m_lastBuiltTileBmin, m_lastBuiltTileBmax, dataSize);
-            if (data)
+            const TileBuildResult result = BuildTileMesh(
+				x, y, m_lastBuiltTileBmin, m_lastBuiltTileBmax);
+            if (result.status == TileBuildStatus::Failed)
             {
+				m_ctx->stopTimer(RC_TIMER_TEMP);
+				Cleanup();
+				return false;
+            }
+            if (result.status == TileBuildStatus::Built)
+            {
+				if (!result.data || result.dataSize <= 0)
+				{
+					m_lastError = "tile (" + std::to_string(x) + "," + std::to_string(y) +
+						"): tile build returned invalid Detour data";
+					m_ctx->stopTimer(RC_TIMER_TEMP);
+					Cleanup();
+					return false;
+				}
                 // Remove any previous data (navmesh owns and deletes the data).
-                m_navMesh->removeTile(m_navMesh->getTileRefAt(x, y, 0), 0, 0);
+                const dtTileRef previousRef = m_navMesh->getTileRefAt(x, y, 0);
+                if (previousRef != 0 &&
+                    dtStatusFailed(m_navMesh->removeTile(previousRef, 0, 0)))
+                {
+					dtFree(result.data);
+					m_lastError = "tile (" + std::to_string(x) + "," + std::to_string(y) +
+						"): Detour removeTile failed";
+					m_ctx->stopTimer(RC_TIMER_TEMP);
+					Cleanup();
+					return false;
+                }
                 // Let the navmesh own the data.
-                dtStatus status = m_navMesh->addTile(data, dataSize, DT_TILE_FREE_DATA, 0, 0);
+                dtStatus status = m_navMesh->addTile(
+					result.data, result.dataSize, DT_TILE_FREE_DATA, 0, 0);
                 if (dtStatusFailed(status))
-                    dtFree(data);
+                {
+					dtFree(result.data);
+					m_lastError = "tile (" + std::to_string(x) + "," + std::to_string(y) +
+						"): Detour addTile failed";
+					m_ctx->stopTimer(RC_TIMER_TEMP);
+					Cleanup();
+					return false;
+                }
+				++m_totalTileCount;
+				m_totalTileTriCount += result.triangleCount;
+				m_totalTileMemoryBytes += result.memoryBytes;
             }
         }
     }
 
     // Start the build process.	
     m_ctx->stopTimer(RC_TIMER_TEMP);
+	Cleanup();
 
     //m_totalBuildTimeMs = m_ctx->getAccumulatedTime(RC_TIMER_TEMP) / 1000.0f;
+	return true;
 }
 
-unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const float* bmin, const float* bmax, int& dataSize)
+NavMeshGenerator::TileBuildResult NavMeshGenerator::BuildTileMesh(
+	const int tx, const int ty, const float* bmin, const float* bmax)
 {
+	bool totalTimerStarted = false;
+	auto fail = [&](const char* message)
+	{
+		m_lastError = "tile (" + std::to_string(tx) + "," + std::to_string(ty) +
+			"): " + message;
+		if (totalTimerStarted)
+			m_ctx->stopTimer(RC_TIMER_TOTAL);
+		Cleanup();
+		return TileBuildResult{};
+	};
+	auto empty = [&]()
+	{
+		if (totalTimerStarted)
+			m_ctx->stopTimer(RC_TIMER_TOTAL);
+		Cleanup();
+		return TileBuildResult{TileBuildStatus::Empty};
+	};
+
 	if (!m_geom || !m_geom->getMesh() || !m_geom->getChunkyMesh())
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildNavigation: Input mesh is not specified.");
-		return 0;
+		return fail("input mesh is not specified");
 	}
 
 	m_tileMemUsage = 0;
@@ -227,6 +400,7 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 
 	// Start the build process.
 	m_ctx->startTimer(RC_TIMER_TOTAL);
+	totalTimerStarted = true;
 
 	m_ctx->log(RC_LOG_PROGRESS, "Building navigation:");
 	m_ctx->log(RC_LOG_PROGRESS, " - %d x %d cells", m_cfg.width, m_cfg.height);
@@ -237,22 +411,22 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 	if (!m_solid)
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'solid'.");
-		return 0;
+		return fail("unable to allocate solid heightfield");
 	}
 	if (!rcCreateHeightfield(m_ctx.get(), *m_solid, m_cfg.width, m_cfg.height, m_cfg.bmin, m_cfg.bmax, m_cfg.cs, m_cfg.ch))
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not create solid heightfield.");
-		return 0;
+		return fail("could not create solid heightfield");
 	}
 
 	// Allocate array that can hold triangle flags.
 	// If you have multiple meshes you need to process, allocate
 	// and array which can hold the max number of triangles you need to process.
-	m_triareas = new unsigned char[chunkyMesh->maxTrisPerChunk];
+	m_triareas = new (std::nothrow) unsigned char[chunkyMesh->maxTrisPerChunk];
 	if (!m_triareas)
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'm_triareas' (%d).", chunkyMesh->maxTrisPerChunk);
-		return 0;
+		return fail("unable to allocate triangle areas");
 	}
 
 	float tbmin[2], tbmax[2];
@@ -260,10 +434,15 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 	tbmin[1] = m_cfg.bmin[2];
 	tbmax[0] = m_cfg.bmax[0];
 	tbmax[1] = m_cfg.bmax[2];
-	int cid[512];// TODO: Make grow when returning too many items.
-	const int ncid = rcGetChunksOverlappingRect(chunkyMesh, tbmin, tbmax, cid, 512);
+	if (chunkyMesh->nnodes <= 0)
+		return empty();
+	std::unique_ptr<int[]> cid(new (std::nothrow) int[chunkyMesh->nnodes]);
+	if (!cid)
+		return fail("unable to allocate overlapping chunk index list");
+	const int ncid = rcGetChunksOverlappingRect(
+		chunkyMesh, tbmin, tbmax, cid.get(), chunkyMesh->nnodes);
 	if (!ncid)
-		return 0;
+		return empty();
 
 	m_tileTriCount = 0;
 
@@ -280,7 +459,7 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 			verts, nverts, ctris, nctris, m_triareas);
 
 		if (!rcRasterizeTriangles(m_ctx.get(), verts, nverts, ctris, m_triareas, nctris, *m_solid, m_cfg.walkableClimb))
-			return 0;
+			return fail("could not rasterize triangles");
 	}
 
 	if (!m_keepInterResults)
@@ -306,12 +485,12 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 	if (!m_chf)
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'chf'.");
-		return 0;
+		return fail("unable to allocate compact heightfield");
 	}
 	if (!rcBuildCompactHeightfield(m_ctx.get(), m_cfg.walkableHeight, m_cfg.walkableClimb, *m_solid, *m_chf))
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build compact data.");
-		return 0;
+		return fail("could not build compact heightfield");
 	}
 
 	if (!m_keepInterResults)
@@ -324,7 +503,7 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 	if (!rcErodeWalkableArea(m_ctx.get(), m_cfg.walkableRadius, *m_chf))
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not erode.");
-		return 0;
+		return fail("could not erode walkable area");
 	}
 
 	// (Optional) Mark areas.
@@ -365,14 +544,14 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 		if (!rcBuildDistanceField(m_ctx.get(), *m_chf))
 		{
 			m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build distance field.");
-			return 0;
+			return fail("could not build distance field");
 		}
 
 		// Partition the walkable surface into simple regions without holes.
 		if (!rcBuildRegions(m_ctx.get(), *m_chf, m_cfg.borderSize, m_cfg.minRegionArea, m_cfg.mergeRegionArea))
 		{
 			m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build watershed regions.");
-			return 0;
+			return fail("could not build watershed regions");
 		}
 	}
 	else if (m_partitionType == SAMPLE_PARTITION_MONOTONE)
@@ -382,7 +561,7 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 		if (!rcBuildRegionsMonotone(m_ctx.get(), *m_chf, m_cfg.borderSize, m_cfg.minRegionArea, m_cfg.mergeRegionArea))
 		{
 			m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build monotone regions.");
-			return 0;
+			return fail("could not build monotone regions");
 		}
 	}
 	else // SAMPLE_PARTITION_LAYERS
@@ -391,7 +570,7 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 		if (!rcBuildLayerRegions(m_ctx.get(), *m_chf, m_cfg.borderSize, m_cfg.minRegionArea))
 		{
 			m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not build layer regions.");
-			return 0;
+			return fail("could not build layer regions");
 		}
 	}
 
@@ -400,17 +579,17 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 	if (!m_cset)
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'cset'.");
-		return 0;
+		return fail("unable to allocate contour set");
 	}
 	if (!rcBuildContours(m_ctx.get(), *m_chf, m_cfg.maxSimplificationError, m_cfg.maxEdgeLen, *m_cset))
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not create contours.");
-		return 0;
+		return fail("could not create contours");
 	}
 
 	if (m_cset->nconts == 0)
 	{
-		return 0;
+		return empty();
 	}
 
 	// Build polygon navmesh from the contours.
@@ -418,20 +597,22 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 	if (!m_pmesh)
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'pmesh'.");
-		return 0;
+		return fail("unable to allocate polygon mesh");
 	}
 	if (!rcBuildPolyMesh(m_ctx.get(), *m_cset, m_cfg.maxVertsPerPoly, *m_pmesh))
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could not triangulate contours.");
-		return 0;
+		return fail("could not triangulate contours");
 	}
+	if (m_pmesh->npolys == 0)
+		return empty();
 
 	// Build detail mesh.
 	m_dmesh = rcAllocPolyMeshDetail();
 	if (!m_dmesh)
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildNavigation: Out of memory 'dmesh'.");
-		return 0;
+		return fail("unable to allocate detail mesh");
 	}
 
 	if (!rcBuildPolyMeshDetail(m_ctx.get(), *m_pmesh, *m_chf,
@@ -439,7 +620,7 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 		*m_dmesh))
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildNavigation: Could build polymesh detail.");
-		return 0;
+		return fail("could not build polygon detail mesh");
 	}
 
 	if (!m_keepInterResults)
@@ -458,7 +639,7 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 		{
 			// The vertex indices are ushorts, and cannot point to more than 0xffff vertices.
 			m_ctx->log(RC_LOG_ERROR, "Too many vertices per tile %d (max: %d).", m_pmesh->nverts, 0xffff);
-			return 0;
+			return fail("tile contains too many vertices");
 		}
 
 		// Update poly flags from areas.
@@ -518,12 +699,15 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 		if (!dtCreateNavMeshData(&params, &navData, &navDataSize))
 		{
 			m_ctx->log(RC_LOG_ERROR, "Could not build Detour navmesh.");
-			return 0;
+			if (navData)
+				dtFree(navData);
+			return fail("could not create Detour tile data");
 		}
 	}
 	m_tileMemUsage = navDataSize / 1024.0f;
 
 	m_ctx->stopTimer(RC_TIMER_TOTAL);
+	totalTimerStarted = false;
 
 	// Show performance stats.
 	duLogBuildTimes(*m_ctx, m_ctx->getAccumulatedTime(RC_TIMER_TOTAL));
@@ -531,58 +715,140 @@ unsigned char* NavMeshGenerator::BuildTileMesh(const int tx, const int ty, const
 
 	m_tileBuildTime = m_ctx->getAccumulatedTime(RC_TIMER_TOTAL) / 1000.0f;
 
-	dataSize = navDataSize;
-	return navData;
+	return TileBuildResult{
+		TileBuildStatus::Built, navData, navDataSize,
+		static_cast<std::uint64_t>(m_tileTriCount),
+		static_cast<std::uint64_t>(navDataSize)};
 }
 
 bool NavMeshGenerator::Serialize(const std::filesystem::path& path, bool saveStatistics)
 {
-	if (!m_navMesh) 
-		return false;
-
-	FILE* fp = fopen(path.string().c_str(), "wb");
-	if (!fp)
-		return false;
-
-	// Store header.
-	NavMeshSetHeader header;
-	header.magic = NAVMESHSET_MAGIC;
-	header.version = NAVMESHSET_VERSION;
-	header.numTiles = 0;
-	for (int i = 0; i < m_navMesh->getMaxTiles(); ++i)
+	m_lastError.clear();
+	if (!m_buildSucceeded || !m_navMesh)
 	{
-		const dtNavMesh* navMesh = m_navMesh.get();
-		const dtMeshTile* tile = navMesh->getTile(i);
-		if (!tile || !tile->header || !tile->dataSize) continue;
-		header.numTiles++;
-	}
-	memcpy(&header.params, m_navMesh->getParams(), sizeof(dtNavMeshParams));
-	fwrite(&header, sizeof(NavMeshSetHeader), 1, fp);
-
-	// Store tiles.
-	for (int i = 0; i < m_navMesh->getMaxTiles(); ++i)
-	{
-		const dtNavMesh* navMesh = m_navMesh.get();
-		const dtMeshTile* tile = navMesh->getTile(i);
-		if (!tile || !tile->header || !tile->dataSize) continue;
-
-		NavMeshTileHeader tileHeader;
-		tileHeader.tileRef = m_navMesh->getTileRef(tile);
-		tileHeader.dataSize = tile->dataSize;
-		fwrite(&tileHeader, sizeof(tileHeader), 1, fp);
-
-		fwrite(tile->data, tile->dataSize, 1, fp);
+		m_lastError = "navmesh was not built";
+		return false;
 	}
 
-	fclose(fp);
+	const std::vector<std::uint8_t> mset = BuildMsetPayload(*m_navMesh);
+	if (mset.size() <= sizeof(GiantsNav::NavMeshSetHeader))
+	{
+		m_lastError = "navmesh contains no tiles";
+		return false;
+	}
+	GiantsNav::NavMeshMetadata metadata;
+	metadata.sourceIdentity = m_sourcePath.empty() ?
+		std::string{} : m_sourcePath.lexically_normal().filename().generic_string();
+	std::string sourceError;
+	if (!ReadSourceIdentity(m_sourcePath, metadata.sourceDigest, metadata.sourceSize, sourceError))
+	{
+		m_lastError = sourceError;
+		return false;
+	}
+	metadata.staticGeometryDigest = metadata.sourceDigest;
+	metadata.msetDigest = GiantsNav::HashBytes(mset.data(), mset.size());
+	metadata.settings.cellSize = m_cellSize;
+	metadata.settings.cellHeight = m_cellHeight;
+	metadata.settings.agentHeight = m_agentHeight;
+	metadata.settings.agentRadius = m_agentRadius;
+	metadata.settings.agentMaxClimb = m_agentMaxClimb;
+	metadata.settings.agentMaxSlope = m_agentMaxSlope;
+	metadata.settings.regionMinSize = m_regionMinSize;
+	metadata.settings.regionMergeSize = m_regionMergeSize;
+	metadata.settings.edgeMaxLen = m_edgeMaxLen;
+	metadata.settings.edgeMaxError = m_edgeMaxError;
+	metadata.settings.vertsPerPoly = m_vertsPerPoly;
+	metadata.settings.detailSampleDist = m_detailSampleDist;
+	metadata.settings.detailSampleMaxError = m_detailSampleMaxError;
+	metadata.settings.partitionType = static_cast<std::uint32_t>(m_partitionType);
+	metadata.settings.filterFlags = (m_filterLowHangingObstacles ? 1u : 0u) |
+		(m_filterLedgeSpans ? 2u : 0u) | (m_filterWalkableLowHeightSpans ? 4u : 0u);
+	metadata.settings.maxTiles = static_cast<std::uint32_t>(m_maxTiles);
+	metadata.settings.maxPolysPerTile = static_cast<std::uint32_t>(m_maxPolysPerTile);
+	metadata.settings.tileSize = m_tileSize;
+	if (m_geom)
+	{
+		std::copy(m_geom->getNavMeshBoundsMin(), m_geom->getNavMeshBoundsMin() + 3, metadata.boundsMin.begin());
+		std::copy(m_geom->getNavMeshBoundsMax(), m_geom->getNavMeshBoundsMax() + 3, metadata.boundsMax.begin());
+	}
+
+	std::vector<std::uint8_t> metadataBytes;
+	std::string error;
+	std::string metadataError;
+	if (!GiantsNav::SerializeMetadata(metadata, metadataBytes, metadataError))
+	{
+		m_lastError = metadataError;
+		return false;
+	}
+	std::vector<GiantsNav::ChunkPayload> chunks;
+	chunks.push_back({GiantsNav::ChunkMset, 1, GiantsNav::ChunkRequired, mset});
+	chunks.push_back({GiantsNav::ChunkMeta, 1, GiantsNav::ChunkRequired, std::move(metadataBytes)});
+	std::vector<std::uint8_t> polygonBytes;
+	std::vector<std::uint8_t> psetBytes;
+	std::vector<std::uint8_t> blockerBytes;
+	std::vector<std::uint8_t> entranceBytes;
+	if (!GiantsNav::SerializePolygons({}, polygonBytes, error) ||
+		!GiantsNav::SerializePset({}, psetBytes, error) ||
+		!GiantsNav::SerializeBlockers({}, blockerBytes, error) ||
+		!GiantsNav::SerializeEntrances({}, entranceBytes, error))
+	{
+		m_lastError = error;
+		return false;
+	}
+	chunks.push_back({GiantsNav::ChunkPoly, 1, GiantsNav::ChunkRequired,
+		std::move(polygonBytes)});
+	chunks.push_back({GiantsNav::ChunkPset, 1, GiantsNav::ChunkRequired,
+		std::move(psetBytes)});
+	chunks.push_back({GiantsNav::ChunkBlkr, 1, GiantsNav::ChunkRequired,
+		std::move(blockerBytes)});
+	chunks.push_back({GiantsNav::ChunkEntr, 1, GiantsNav::ChunkRequired,
+		std::move(entranceBytes)});
+	std::vector<std::uint8_t> statistics;
+	GiantsNav::AppendU32(statistics, GiantsNav::StatisticsSchemaVersion);
+	GiantsNav::AppendU32(statistics, m_totalTileCount);
+	GiantsNav::AppendU64(statistics, m_totalTileTriCount);
+	GiantsNav::AppendU64(statistics, m_totalTileMemoryBytes);
+	chunks.push_back({GiantsNav::ChunkStat, static_cast<std::uint16_t>(
+		GiantsNav::StatisticsSchemaVersion), GiantsNav::ChunkOptional, std::move(statistics)});
+
+	std::vector<std::uint8_t> output;
+	if (!GiantsNav::BuildContainer(std::move(chunks), output, error))
+	{
+		m_lastError = error;
+		return false;
+	}
+	auto temporaryPath = path;
+	temporaryPath += ".tmp";
+	std::ofstream outputFile(temporaryPath, std::ios::binary | std::ios::trunc);
+	if (!outputFile || (!output.empty() &&
+		!outputFile.write(reinterpret_cast<const char*>(output.data()), output.size())))
+	{
+		m_lastError = "unable to write GNAV output";
+		outputFile.close();
+		std::filesystem::remove(temporaryPath);
+		return false;
+	}
+	outputFile.close();
+	if (!MoveFileExW(temporaryPath.wstring().c_str(), path.wstring().c_str(),
+		MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH))
+	{
+		const auto systemError = std::error_code(
+			static_cast<int>(::GetLastError()), std::system_category());
+		m_lastError = "unable to atomically replace GNAV output: " + systemError.message();
+		std::filesystem::remove(temporaryPath);
+		return false;
+	}
 
 	if (saveStatistics)
 	{
-		std::filesystem::path statsPath = path;
-		statsPath = statsPath.replace_extension(".navstats");
-		WriteStatistics(statsPath);
+		auto statsPath = path;
+		statsPath.replace_extension(".navstats");
+		if (!WriteStatistics(statsPath))
+		{
+			m_lastError = "unable to write requested statistics sidecar";
+			return false;
+		}
 	}
-
 	return true;
 }
 

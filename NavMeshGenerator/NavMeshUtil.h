@@ -21,22 +21,4 @@ struct NavMeshQueryDeleter
     }
 };
 
-//////////////////////////////////////////////////////////
-// Serialization logic
-// Note: identical to Recast's demo app so it can be loaded by it
-struct NavMeshSetHeader
-{
-    int magic;
-    int version;
-    int numTiles;
-    dtNavMeshParams params;
-};
-
-struct NavMeshTileHeader
-{
-    dtTileRef tileRef;
-    int dataSize;
-};
-
-static const int NAVMESHSET_MAGIC = 'M' << 24 | 'S' << 16 | 'E' << 8 | 'T'; //'MSET';
-static const int NAVMESHSET_VERSION = 1;
+#include "../../../cpp/Navigation/Private/NavMeshFormat.h"

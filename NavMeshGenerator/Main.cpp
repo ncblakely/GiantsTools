@@ -11,60 +11,99 @@ int main(int argc, char** argv)
     path outputPath;
     path outputPath2;
     bool enableLogging = false;
+    bool saveStatistics = false;
 
     for (int i = 1; i < argc; ++i)
     {
         if (!_stricmp(argv[i], "--input"))
         {
+            if (i + 1 >= argc || argv[i + 1][0] == '\0')
+            {
+                printf("Error: --input requires a non-empty path.\n");
+                return 1;
+            }
             inputPath = argv[++i];
         }
         else if (!_stricmp(argv[i], "--output"))
         {
+            if (i + 1 >= argc || argv[i + 1][0] == '\0')
+            {
+                printf("Error: --output requires a non-empty path.\n");
+                return 1;
+            }
             outputPath = argv[++i];
         }
         else if (!_stricmp(argv[i], "--output2"))
         {
+            if (i + 1 >= argc || argv[i + 1][0] == '\0')
+            {
+                printf("Error: --output2 requires a non-empty path.\n");
+                return 1;
+            }
             outputPath2 = argv[++i];
         }
         else if (!_stricmp(argv[i], "--enableLogging"))
         {
             enableLogging = true;
         }
+        else if (!_stricmp(argv[i], "--saveStatistics"))
+        {
+            saveStatistics = true;
+        }
+        else
+        {
+            printf("Error: unknown argument '%s'.\n", argv[i]);
+            return 1;
+        }
+    }
+
+    if (inputPath.empty() || outputPath.empty())
+    {
+        printf("Error: both --input and --output are required.\n");
+        return 1;
     }
 
     const auto context = std::make_shared<RecastContext>(enableLogging);
 
     auto geom = std::make_shared<InputGeom>();
-    geom->load(context.get(), inputPath.string());
-
-    if (outputPath.empty())
+    if (!geom->load(context.get(), inputPath.string()))
     {
-        printf("Warning: no output path set, no file will be generated.\n");
+        printf("Error: unable to load input geometry '%s'.\n", inputPath.string().c_str());
+        return 1;
     }
 
-    
-    NavMeshGenerator generator(geom, context);
+    NavMeshGenerator generator(geom, context, inputPath);
     bool success = generator.BuildNavMesh();
 
     float totalTime = context->getAccumulatedTime(RC_TIMER_TOTAL) / 1000.0f;
 
-    printf("Success: %d\n", success);
     printf("Total time in milliseconds: %.2f\n", totalTime);
-
-    if (!outputPath.empty())
+    if (!success)
     {
-        generator.Serialize(outputPath);
-        
-        if (!outputPath2.empty())
+        const auto& error = generator.GetLastError();
+        printf("Error: navmesh build failed%s%s.\n",
+            error.empty() ? "" : ": ", error.empty() ? "" : error.c_str());
+        return 1;
+    }
+
+    if (!generator.Serialize(outputPath, saveStatistics))
+    {
+        printf("Error: unable to serialize GNAV output: %s.\n", generator.GetLastError().c_str());
+        return 1;
+    }
+
+    if (!outputPath2.empty())
+    {
+        std::error_code copyError;
+        copy_file(outputPath, outputPath2, copy_options::overwrite_existing, copyError);
+        if (copyError)
         {
-            try
-            {
-                copy_file(outputPath, outputPath2, copy_options::overwrite_existing);
-            }
-            catch (const filesystem_error& ex)
-            {
-                printf("Unable to copy output file to secondary path: %s.\n", ex.what());
-            }
+            printf("Error: unable to copy GNAV output to '%s': %s.\n",
+                outputPath2.string().c_str(), copyError.message().c_str());
+            return 1;
         }
     }
+
+    printf("Success: 1\n");
+    return 0;
 }

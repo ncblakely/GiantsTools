@@ -209,6 +209,7 @@
     </ClInclude>
     <ClInclude Include="NavMeshGenerator.h" />
     <ClInclude Include="NavMeshUtil.h" />
+    <ClInclude Include="..\..\..\cpp\Navigation\Private\NavMeshFormat.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RecastContext.h" />
   </ItemGroup>
