@@ -113,6 +113,7 @@
     <Compile Include="ScreenResolution.cs" />
     <Compile Include="Updater\InstallerValidation.cs" />
     <Compile Include="Updater\InstallerSignatureValidation.cs" />
+    <Compile Include="Updater\UpdateProgressEventArgs.cs" />
     <Compile Include="Updater\UpdateInfo.cs" />
     <EmbeddedResource Include="Forms\LauncherForm.resx">
       <DependentUpon>LauncherForm.cs</DependentUpon>

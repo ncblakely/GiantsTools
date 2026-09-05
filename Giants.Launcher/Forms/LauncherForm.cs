@@ -326,7 +326,7 @@ namespace Giants.Launcher
 			}
 		}
 
-		private void LauncherForm_DownloadProgressCallback(object sender, DownloadProgressChangedEventArgs e)
+		private void LauncherForm_DownloadProgressCallback(object sender, UpdateProgressEventArgs e)
 		{
             this.updateProgressBar.Visible = true;
             this.updateProgressBar.Value = e.ProgressPercentage;
