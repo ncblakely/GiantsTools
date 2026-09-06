@@ -97,6 +97,11 @@ class InputGeom
 	///@}
 	
 	bool loadMesh(class rcContext* ctx, const std::string& filepath);
+	/// <summary>
+	/// Converts a validated GTI grid into the runtime terrain triangle topology
+	/// and prepares the resulting mesh for the common Recast build pipeline.
+	/// </summary>
+	bool loadGti(class rcContext* ctx, const std::string& filepath);
 	bool loadGeomSet(class rcContext* ctx, const std::string& filepath);
 public:
 	InputGeom();

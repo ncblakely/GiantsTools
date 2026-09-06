@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstring>
+#include <limits>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -241,5 +242,65 @@ bool rcMeshLoaderObj::load(const std::string& filename)
 	}
 	
 	m_filename = filename;
+	return true;
+}
+
+bool rcMeshLoaderObj::load(const std::vector<float>& vertices,
+	const std::vector<int>& triangles, const std::string& filename)
+{
+	if (vertices.empty() || vertices.size() % 3 != 0 ||
+		triangles.empty() || triangles.size() % 3 != 0)
+	{
+		return false;
+	}
+
+	const auto vertexCount = vertices.size() / 3;
+	if (vertexCount > static_cast<std::size_t>(std::numeric_limits<int>::max()) ||
+		triangles.size() / 3 > static_cast<std::size_t>(std::numeric_limits<int>::max()))
+	{
+		return false;
+	}
+	for (const int index : triangles)
+	{
+		if (index < 0 || static_cast<std::size_t>(index) >= vertexCount)
+			return false;
+	}
+
+	delete[] m_verts;
+	delete[] m_normals;
+	delete[] m_tris;
+	m_verts = new float[vertices.size()];
+	m_tris = new int[triangles.size()];
+	m_normals = new float[triangles.size()];
+
+	memcpy(m_verts, vertices.data(), vertices.size() * sizeof(float));
+	memcpy(m_tris, triangles.data(), triangles.size() * sizeof(int));
+	m_vertCount = static_cast<int>(vertexCount);
+	m_triCount = static_cast<int>(triangles.size() / 3);
+	m_filename = filename;
+	m_scale = 1.0f;
+
+	for (int i = 0; i < m_triCount; ++i)
+	{
+		const int* triangle = &m_tris[i * 3];
+		const float* v0 = &m_verts[triangle[0] * 3];
+		const float* v1 = &m_verts[triangle[1] * 3];
+		const float* v2 = &m_verts[triangle[2] * 3];
+		float* normal = &m_normals[i * 3];
+		const float e0[3] = {v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2]};
+		const float e1[3] = {v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2]};
+		normal[0] = e0[1] * e1[2] - e0[2] * e1[1];
+		normal[1] = e0[2] * e1[0] - e0[0] * e1[2];
+		normal[2] = e0[0] * e1[1] - e0[1] * e1[0];
+		const float length = sqrtf(
+			normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+		if (length > 0.0f)
+		{
+			normal[0] /= length;
+			normal[1] /= length;
+			normal[2] /= length;
+		}
+	}
+
 	return true;
 }

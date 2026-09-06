@@ -30,6 +30,11 @@
 #include "RecastDebugDraw.h"
 #include "DetourNavMesh.h"
 #include "Sample.h"
+#include "../../../../cpp/Tools/Private/GtiFormat.h"
+
+#include <limits>
+#include <stdexcept>
+#include <vector>
 
 static bool intersectSegmentTriangle(const float* sp, const float* sq,
 									 const float* a, const float* b, const float* c,
@@ -161,6 +166,144 @@ bool InputGeom::loadMesh(rcContext* ctx, const std::string& filepath)
 	}		
 
 	return true;
+}
+
+bool InputGeom::loadGti(rcContext* ctx, const std::string& filepath)
+{
+	try
+	{
+		const GtiData gti = ReadGti(filepath);
+		const auto& header = gti.header;
+
+		// The runtime adds one sea point on every side before drawing cells.
+		if (header.gridNumX > std::numeric_limits<int>::max() - 2 ||
+			header.gridNumY > std::numeric_limits<int>::max() - 2)
+		{
+			ctx->log(RC_LOG_ERROR, "loadGti: grid dimensions overflow the runtime border.");
+			return false;
+		}
+		const int gridNumX = header.gridNumX + 2;
+		const int gridNumY = header.gridNumY + 2;
+		const std::size_t augmentedPointCount = static_cast<std::size_t>(gridNumX) *
+			static_cast<std::size_t>(gridNumY);
+		// The exporter examines augmented cell origins x=[0, gridNumX-3] and
+		// y=[0, gridNumY-2]. X includes the leading sea column because
+		// GridMaxX is augmented gridNumX-2; Y's final border row is omitted
+		// here because it cannot have a y+1 vertex and is always sea.
+		std::vector<GridPoint> grid(augmentedPointCount);
+		for (int y = 0; y < header.gridNumY; ++y)
+		{
+			for (int x = 0; x < header.gridNumX; ++x)
+				grid[static_cast<std::size_t>(y + 1) * gridNumX + x + 1] = gti.At(x, y);
+		}
+
+		// These indices are the runtime G_TrisXP local vertex offsets. Negative
+		// entries are relative to the next vertex index after a cell's four points.
+		static constexpr int tris[8][6] =
+		{
+			{0, 0, 0, 0, 0, 0},
+			{-2, -3, -4, 0, 0, 0},
+			{-3, -2, -1, 0, 0, 0},
+			{-1, -4, -2, 0, 0, 0},
+			{-4, -1, -3, 0, 0, 0},
+			{-4, -1, -3, -1, -4, -2},
+			{-2, -3, -4, -3, -2, -1},
+			{0, 0, 0, 0, 0, 0}
+		};
+
+		std::vector<float> vertices;
+		std::vector<int> triangles;
+		int vertexIndex = 0;
+		bool hasTerrain = false;
+
+		for (int y = 0; y < gridNumY - 1; ++y)
+		{
+			int lastCellIndex = -2;
+			int cellIndex = 0;
+			for (int x = 0; x < gridNumX - 2; ++x, ++cellIndex)
+			{
+				const GridPoint& cell = grid[static_cast<std::size_t>(y) * gridNumX + x];
+				const std::uint8_t connType = cell.connType & ConnTypeMask;
+				if (connType == ConnTypeNone || connType == ConnTypeExtra)
+					continue;
+
+				hasTerrain = true;
+				const float gameX = header.gridMinX + (x - 1) * header.gridStep;
+				const float gameY = header.gridMinY + (y - 1) * header.gridStep;
+				const float gameX1 = gameX + header.gridStep;
+				const float gameY1 = gameY + header.gridStep;
+				const auto addVertex = [&](float xPosition, float yPosition,
+					const GridPoint& point)
+				{
+					if (vertexIndex == std::numeric_limits<int>::max())
+						throw std::runtime_error("GTI terrain vertex index overflow");
+					// GridExporter emits sea sentinels as a zero-height surface.
+					const float height = point.z > GridSeaZ ? point.z : 0.0f;
+					// Match GameToGLPoint: (-game.x, game.z, game.y).
+					vertices.push_back(-xPosition);
+					vertices.push_back(height);
+					vertices.push_back(yPosition);
+					return vertexIndex++;
+				};
+
+				if (cellIndex - 1 != lastCellIndex)
+				{
+					addVertex(gameX, gameY, grid[static_cast<std::size_t>(y) * gridNumX + x]);
+					addVertex(gameX, gameY1,
+						grid[static_cast<std::size_t>(y + 1) * gridNumX + x]);
+				}
+				addVertex(gameX1, gameY,
+					grid[static_cast<std::size_t>(y) * gridNumX + x + 1]);
+				addVertex(gameX1, gameY1,
+					grid[static_cast<std::size_t>(y + 1) * gridNumX + x + 1]);
+				const int nextVertexIndex = vertexIndex;
+
+				const int* cellTris = tris[connType];
+				triangles.push_back(nextVertexIndex + cellTris[0]);
+				triangles.push_back(nextVertexIndex + cellTris[1]);
+				triangles.push_back(nextVertexIndex + cellTris[2]);
+				if (cellTris[3] < 0)
+				{
+					triangles.push_back(nextVertexIndex + cellTris[3]);
+					triangles.push_back(nextVertexIndex + cellTris[4]);
+					triangles.push_back(nextVertexIndex + cellTris[5]);
+				}
+				lastCellIndex = cellIndex;
+			}
+		}
+
+		if (!hasTerrain || triangles.empty())
+		{
+			ctx->log(RC_LOG_ERROR, "loadGti: GTI contains no terrain triangles.");
+			return false;
+		}
+		if (!m_mesh)
+			m_mesh = new rcMeshLoaderObj;
+		if (!m_mesh->load(vertices, triangles, filepath))
+		{
+			ctx->log(RC_LOG_ERROR, "loadGti: unable to create Recast input mesh.");
+			return false;
+		}
+
+		rcCalcBounds(m_mesh->getVerts(), m_mesh->getVertCount(), m_meshBMin, m_meshBMax);
+		delete m_chunkyMesh;
+		m_chunkyMesh = new rcChunkyTriMesh;
+		if (!m_chunkyMesh ||
+			!rcCreateChunkyTriMesh(m_mesh->getVerts(), m_mesh->getTris(),
+				m_mesh->getTriCount(), 256, m_chunkyMesh))
+		{
+			ctx->log(RC_LOG_ERROR, "loadGti: unable to build chunky terrain mesh.");
+			return false;
+		}
+		m_offMeshConCount = 0;
+		m_volumeCount = 0;
+		return true;
+	}
+	catch (const std::exception& exception)
+	{
+		ctx->log(RC_LOG_ERROR, "loadGti: %s", exception.what());
+		return false;
+	}
 }
 
 bool InputGeom::loadGeomSet(rcContext* ctx, const std::string& filepath)
@@ -310,6 +453,8 @@ bool InputGeom::load(rcContext* ctx, const std::string& filepath)
 		return loadGeomSet(ctx, filepath);
 	if (extension == ".obj")
 		return loadMesh(ctx, filepath);
+	if (extension == ".gti")
+		return loadGti(ctx, filepath);
 
 	return false;
 }

@@ -19,6 +19,7 @@
 #ifndef MESHLOADER_OBJ
 #define MESHLOADER_OBJ
 
+#include <vector>
 #include <string>
 
 class rcMeshLoaderObj
@@ -28,6 +29,9 @@ public:
 	~rcMeshLoaderObj();
 	
 	bool load(const std::string& fileName);
+	/// <summary>Loads an already converted triangle mesh without an intermediate file.</summary>
+	bool load(const std::vector<float>& vertices, const std::vector<int>& triangles,
+		const std::string& fileName);
 
 	const float* getVerts() const { return m_verts; }
 	const float* getNormals() const { return m_normals; }

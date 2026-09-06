@@ -14,6 +14,33 @@ using namespace std::filesystem;
 
 namespace
 {
+    constexpr std::uint64_t MaxDetourTileBits = 14;
+    constexpr std::uint64_t MaxDetourTiles = 1ull << MaxDetourTileBits;
+
+    std::string DescribeDetourStatus(const dtStatus status)
+    {
+        std::string details;
+        const auto append = [&details](const char* detail)
+        {
+            if (!details.empty())
+                details += ", ";
+            details += detail;
+        };
+        if (dtStatusDetail(status, DT_WRONG_MAGIC))
+            append("wrong magic");
+        if (dtStatusDetail(status, DT_WRONG_VERSION))
+            append("wrong version");
+        if (dtStatusDetail(status, DT_OUT_OF_MEMORY))
+            append("out of memory");
+        if (dtStatusDetail(status, DT_INVALID_PARAM))
+            append("invalid parameter");
+        if (dtStatusDetail(status, DT_ALREADY_OCCUPIED))
+            append("tile already occupied");
+        if (details.empty())
+            details = "unknown detail";
+        return std::format("0x{:08X} ({})", status, details);
+    }
+
     bool ReadSourceIdentity(const path& sourcePath, std::uint64_t& digest, std::uint64_t& size,
         std::string& error)
     {
@@ -155,7 +182,12 @@ bool NavMeshGenerator::BuildNavMesh()
 		return false;
 	}
 
-	CalculateTileSize();
+	if (!CalculateTileSize())
+	{
+	    m_navMeshQuery.reset();
+	    m_navMesh.reset();
+	    return false;
+	}
 
     dtNavMeshParams params{};
     rcVcopy(params.orig, m_geom->getNavMeshBoundsMin());
@@ -203,25 +235,78 @@ bool NavMeshGenerator::BuildNavMesh()
 	return true;
 }
 
-void NavMeshGenerator::CalculateTileSize()
+bool NavMeshGenerator::CalculateTileSize()
 {
 	const float* bmin = m_geom->getNavMeshBoundsMin();
 	const float* bmax = m_geom->getNavMeshBoundsMax();
 
 	int gw = 0, gh = 0;
 	rcCalcGridSize(bmin, bmax, m_cellSize, &gw, &gh);
-	const int ts = (int)m_tileSize;
-	const int tw = (gw + ts - 1) / ts;
-	const int th = (gh + ts - 1) / ts;
-	const float tcs = m_tileSize * m_cellSize;
+	if (gw <= 0 || gh <= 0 || m_tileSize < 1.0f)
+	{
+	    m_lastError = "invalid navigation grid or tile size";
+	    return false;
+	}
+
+	const auto calculateTileCounts = [&](const float tileSize, int& tw, int& th)
+	{
+	    const auto tileSizeInt = static_cast<int>(tileSize);
+	    tw = (gw + tileSizeInt - 1) / tileSizeInt;
+	    th = (gh + tileSizeInt - 1) / tileSizeInt;
+	};
+	int tw = 0;
+	int th = 0;
+	const float requestedTileSize = m_tileSize;
+	calculateTileCounts(m_tileSize, tw, th);
+	std::uint64_t tileCount = static_cast<std::uint64_t>(tw) *
+	    static_cast<std::uint64_t>(th);
+	const std::uint64_t requestedTileCount = tileCount;
+
+	// Detour has 14 tile-id bits in this build. Increase tile size only when
+	// necessary to keep every terrain tile representable; cell resolution is unchanged.
+	if (tileCount > MaxDetourTiles)
+	{
+	    const double scale = std::sqrt(
+	        static_cast<double>(tileCount) / static_cast<double>(MaxDetourTiles));
+	    m_tileSize = std::ceil(m_tileSize * static_cast<float>(scale));
+	    calculateTileCounts(m_tileSize, tw, th);
+	    tileCount = static_cast<std::uint64_t>(tw) * static_cast<std::uint64_t>(th);
+	    while (tileCount > MaxDetourTiles)
+	    {
+	        m_tileSize = std::ceil(m_tileSize + 1.0f);
+	        calculateTileCounts(m_tileSize, tw, th);
+	        tileCount = static_cast<std::uint64_t>(tw) * static_cast<std::uint64_t>(th);
+	    }
+	    m_ctx->log(RC_LOG_WARNING,
+	        "Terrain requires %llu tiles at size %.0f; using tile size %.0f "
+	        "to fit Detour's %llu-tile limit.",
+	        static_cast<unsigned long long>(requestedTileCount),
+	        requestedTileSize, m_tileSize,
+	        static_cast<unsigned long long>(MaxDetourTiles));
+	}
+
+	m_tileGridWidth = tw;
+	m_tileGridHeight = th;
+	m_tileGridCount = tileCount;
 
 	// Max tiles and max polys affect how the tile IDs are caculated.
 	// There are 22 bits available for identifying a tile and a polygon.
-	int tileBits = rcMin((int)ilog2(nextPow2(tw * th)), 14);
-	if (tileBits > 14) tileBits = 14;
+	const int tileBits = rcMin(
+	    static_cast<int>(ilog2(nextPow2(static_cast<unsigned int>(tileCount)))),
+	    static_cast<int>(MaxDetourTileBits));
 	int polyBits = 22 - tileBits;
 	m_maxTiles = 1 << tileBits;
 	m_maxPolysPerTile = 1 << polyBits;
+	if (m_tileGridCount > static_cast<std::uint64_t>(m_maxTiles))
+	{
+	    m_lastError = "navigation tile grid exceeds Detour tile capacity";
+	    return false;
+	}
+	m_ctx->log(RC_LOG_PROGRESS,
+	    "Tile layout: tw=%d th=%d count=%llu maxTiles=%d tileSize=%.0f cellSize=%.3f",
+	    m_tileGridWidth, m_tileGridHeight,
+	    static_cast<unsigned long long>(m_tileGridCount), m_maxTiles, m_tileSize, m_cellSize);
+	return true;
 }
 
 bool NavMeshGenerator::BuildAllTiles()
@@ -229,11 +314,6 @@ bool NavMeshGenerator::BuildAllTiles()
     const float* bmin = m_geom->getNavMeshBoundsMin();
     const float* bmax = m_geom->getNavMeshBoundsMax();
 
-    int gw = 0, gh = 0;
-    rcCalcGridSize(bmin, bmax, m_cellSize, &gw, &gh);
-    const int ts = (int)m_tileSize;
-    const int tw = (gw + ts - 1) / ts;
-    const int th = (gh + ts - 1) / ts;
     const float tcs = m_tileSize * m_cellSize;
 
 	m_totalTileCount = 0;
@@ -241,9 +321,9 @@ bool NavMeshGenerator::BuildAllTiles()
 	m_totalTileMemoryBytes = 0;
     m_ctx->startTimer(RC_TIMER_TEMP);
 
-    for (int y = 0; y < th; ++y)
+    for (int y = 0; y < m_tileGridHeight; ++y)
     {
-        for (int x = 0; x < tw; ++x)
+        for (int x = 0; x < m_tileGridWidth; ++x)
         {
             m_lastBuiltTileBmin[0] = bmin[0] + x * tcs;
             m_lastBuiltTileBmin[1] = bmin[1];
@@ -289,8 +369,12 @@ bool NavMeshGenerator::BuildAllTiles()
                 if (dtStatusFailed(status))
                 {
 					dtFree(result.data);
+					const auto tileOrdinal = static_cast<std::uint64_t>(y) *
+						static_cast<std::uint64_t>(m_tileGridWidth) +
+						static_cast<std::uint64_t>(x);
 					m_lastError = "tile (" + std::to_string(x) + "," + std::to_string(y) +
-						"): Detour addTile failed";
+						"), ordinal " + std::to_string(tileOrdinal) +
+						": Detour addTile failed: " + DescribeDetourStatus(status);
 					m_ctx->stopTimer(RC_TIMER_TEMP);
 					Cleanup();
 					return false;

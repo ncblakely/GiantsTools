@@ -56,7 +56,8 @@ private:
     // Builds every tile, preserving Empty as a valid result and propagating
     // all allocation, Recast, and Detour failures.
     bool BuildAllTiles();
-    void CalculateTileSize();
+    /// <summary>Calculates tile dimensions and adjusts oversized maps to Detour's tile-id budget.</summary>
+    bool CalculateTileSize();
     void Cleanup();
     bool WriteStatistics(const std::filesystem::path& path);
     std::filesystem::path m_sourcePath;
@@ -106,6 +107,9 @@ private:
     int m_maxTiles = 0;
     int m_maxPolysPerTile = 0;
     float m_tileSize = 96; //Sample: 32
+    int m_tileGridWidth{};
+    int m_tileGridHeight{};
+    std::uint64_t m_tileGridCount{};
 
     unsigned int m_tileCol{};
     float m_lastBuiltTileBmin[3]{};

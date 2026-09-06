@@ -43,6 +43,9 @@
     <Filter Include="Framework">
       <UniqueIdentifier>{c5ca75e6-1ec9-4c06-a733-4323f130f5c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tools">
+      <UniqueIdentifier>{d8be5f7d-47c1-4f26-a89f-f1eb0a94d57a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\External\recastnavigation\DebugUtils\Source\DebugDraw.cpp">
@@ -129,6 +132,9 @@
     <ClCompile Include="Framework\PerfTimer.cpp">
       <Filter>Framework</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\cpp\Tools\Private\GtiFormat.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="NavMeshGenerator.cpp" />
     <ClCompile Include="pch.cpp" />
@@ -206,6 +212,9 @@
     </ClInclude>
     <ClInclude Include="Framework\SampleInterfaces.h">
       <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\cpp\Tools\Private\GtiFormat.h">
+      <Filter>Tools</Filter>
     </ClInclude>
     <ClInclude Include="NavMeshGenerator.h" />
     <ClInclude Include="NavMeshUtil.h" />

@@ -8,6 +8,7 @@ using namespace std::filesystem;
 int main(int argc, char** argv)
 {
     path inputPath;
+    path gtiPath;
     path outputPath;
     path outputPath2;
     bool enableLogging = false;
@@ -23,6 +24,15 @@ int main(int argc, char** argv)
                 return 1;
             }
             inputPath = argv[++i];
+        }
+        else if (!_stricmp(argv[i], "--gti"))
+        {
+            if (i + 1 >= argc || argv[i + 1][0] == '\0')
+            {
+                printf("Error: --gti requires a non-empty path.\n");
+                return 1;
+            }
+            gtiPath = argv[++i];
         }
         else if (!_stricmp(argv[i], "--output"))
         {
@@ -57,22 +67,23 @@ int main(int argc, char** argv)
         }
     }
 
-    if (inputPath.empty() || outputPath.empty())
+    if (inputPath.empty() == gtiPath.empty() || outputPath.empty())
     {
-        printf("Error: both --input and --output are required.\n");
+        printf("Error: exactly one of --input or --gti, and --output, are required.\n");
         return 1;
     }
 
     const auto context = std::make_shared<RecastContext>(enableLogging);
+    const path sourcePath = gtiPath.empty() ? inputPath : gtiPath;
 
     auto geom = std::make_shared<InputGeom>();
-    if (!geom->load(context.get(), inputPath.string()))
+    if (!geom->load(context.get(), sourcePath.string()))
     {
-        printf("Error: unable to load input geometry '%s'.\n", inputPath.string().c_str());
+        printf("Error: unable to load input geometry '%s'.\n", sourcePath.string().c_str());
         return 1;
     }
 
-    NavMeshGenerator generator(geom, context, inputPath);
+    NavMeshGenerator generator(geom, context, sourcePath);
     bool success = generator.BuildNavMesh();
 
     float totalTime = context->getAccumulatedTime(RC_TIMER_TOTAL) / 1000.0f;
