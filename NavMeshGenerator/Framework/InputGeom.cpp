@@ -116,7 +116,6 @@ InputGeom::InputGeom() :
 	m_chunkyMesh(0),
 	m_mesh(0),
 	m_hasBuildSettings(false),
-	m_offMeshConCount(0),
 	m_volumeCount(0)
 {
 }
@@ -136,7 +135,7 @@ bool InputGeom::loadMesh(rcContext* ctx, const std::string& filepath)
 		delete m_mesh;
 		m_mesh = 0;
 	}
-	m_offMeshConCount = 0;
+	m_offMeshConnections.clear();
 	m_volumeCount = 0;
 	
 	m_mesh = new rcMeshLoaderObj;
@@ -295,7 +294,7 @@ bool InputGeom::loadGti(rcContext* ctx, const std::string& filepath)
 			ctx->log(RC_LOG_ERROR, "loadGti: unable to build chunky terrain mesh.");
 			return false;
 		}
-		m_offMeshConCount = 0;
+		m_offMeshConnections.clear();
 		m_volumeCount = 0;
 		return true;
 	}
@@ -345,7 +344,7 @@ bool InputGeom::loadGeomSet(rcContext* ctx, const std::string& filepath)
 		return false;
 	}
 	
-	m_offMeshConCount = 0;
+	m_offMeshConnections.clear();
 	m_volumeCount = 0;
 	delete m_mesh;
 	m_mesh = 0;
@@ -377,29 +376,28 @@ bool InputGeom::loadGeomSet(rcContext* ctx, const std::string& filepath)
 		else if (row[0] == 'c')
 		{
 			// Off-mesh connection
-			if (m_offMeshConCount < MAX_OFFMESH_CONNECTIONS)
 			{
-				const int connectionIndex = m_offMeshConCount;
-				float* v = &m_offMeshConVerts[connectionIndex*3*2];
+				OffMeshConnection connection;
 				int bidir, area = 0, flags = 0;
 				float rad;
 				unsigned int userId = 0;
 				const int parsed = sscanf(
 					row+1,
 					"%f %f %f  %f %f %f %f %d %d %d %u",
-					&v[0], &v[1], &v[2], &v[3], &v[4], &v[5],
+					&connection.Start[0], &connection.Start[1], &connection.Start[2],
+					&connection.End[0], &connection.End[1], &connection.End[2],
 					&rad, &bidir, &area, &flags, &userId);
 				if (parsed < 10)
 					continue;
 
-				m_offMeshConRads[connectionIndex] = rad;
-				m_offMeshConDirs[connectionIndex] = (unsigned char)bidir;
-				m_offMeshConAreas[connectionIndex] = (unsigned char)area;
-				m_offMeshConFlags[connectionIndex] = (unsigned short)flags;
-				m_offMeshConId[connectionIndex] = parsed == 11
+				connection.Radius = rad;
+				connection.Direction = static_cast<std::uint8_t>(bidir);
+				connection.Area = static_cast<std::uint8_t>(area);
+				connection.Flags = static_cast<std::uint16_t>(flags);
+				connection.UserId = parsed == 11
 					? userId
-					: 1000u + static_cast<unsigned int>(connectionIndex);
-				m_offMeshConCount++;
+					: 1000u + static_cast<unsigned int>(m_offMeshConnections.size());
+				m_offMeshConnections.push_back(connection);
 			}
 		}
 		else if (row[0] == 'v')
@@ -517,16 +515,15 @@ bool InputGeom::saveGeomSet(const BuildSettings* settings)
 	}
 	
 	// Store off-mesh links.
-	for (int i = 0; i < m_offMeshConCount; ++i)
+	for (const OffMeshConnection& connection : m_offMeshConnections)
 	{
-		const float* v = &m_offMeshConVerts[i*3*2];
-		const float rad = m_offMeshConRads[i];
-		const int bidir = m_offMeshConDirs[i];
-		const int area = m_offMeshConAreas[i];
-		const int flags = m_offMeshConFlags[i];
+		const int bidir = connection.Direction;
+		const int area = connection.Area;
+		const int flags = connection.Flags;
 		fprintf(fp, "c %f %f %f  %f %f %f  %f %d %d %d %u\n",
-				v[0], v[1], v[2], v[3], v[4], v[5], rad, bidir, area, flags,
-				m_offMeshConId[i]);
+				connection.Start[0], connection.Start[1], connection.Start[2],
+				connection.End[0], connection.End[1], connection.End[2],
+				connection.Radius, bidir, area, flags, connection.UserId);
 	}
 
 	// Convex volumes
@@ -634,7 +631,7 @@ void InputGeom::addOffMeshConnection(const float* spos, const float* epos, const
 		bidir,
 		area,
 		flags,
-		1000u + static_cast<unsigned int>(m_offMeshConCount));
+		1000u + static_cast<unsigned int>(m_offMeshConnections.size()));
 }
 
 bool InputGeom::addOffMeshConnectionWithId(
@@ -644,38 +641,34 @@ bool InputGeom::addOffMeshConnectionWithId(
 	unsigned char bidir,
 	unsigned char area,
 	unsigned short flags,
-	unsigned int userId)
+	unsigned int userId,
+	OffMeshConnectionSource source)
 {
-	if (!spos || !epos || m_offMeshConCount >= MAX_OFFMESH_CONNECTIONS ||
-		userId == 0)
+	if (!spos || !epos || userId == 0)
 	{
 		return false;
 	}
 
-	float* v = &m_offMeshConVerts[m_offMeshConCount*3*2];
-	m_offMeshConRads[m_offMeshConCount] = rad;
-	m_offMeshConDirs[m_offMeshConCount] = bidir;
-	m_offMeshConAreas[m_offMeshConCount] = area;
-	m_offMeshConFlags[m_offMeshConCount] = flags;
-	m_offMeshConId[m_offMeshConCount] = userId;
-	rcVcopy(&v[0], spos);
-	rcVcopy(&v[3], epos);
-	m_offMeshConCount++;
+	OffMeshConnection connection;
+	rcVcopy(connection.Start.data(), spos);
+	rcVcopy(connection.End.data(), epos);
+	connection.Radius = rad;
+	connection.Direction = bidir;
+	connection.Area = area;
+	connection.Flags = flags;
+	connection.UserId = userId;
+	connection.Source = source;
+	m_offMeshConnections.push_back(connection);
 	return true;
 }
 
 void InputGeom::deleteOffMeshConnection(int i)
 {
-	m_offMeshConCount--;
-	float* src = &m_offMeshConVerts[m_offMeshConCount*3*2];
-	float* dst = &m_offMeshConVerts[i*3*2];
-	rcVcopy(&dst[0], &src[0]);
-	rcVcopy(&dst[3], &src[3]);
-	m_offMeshConRads[i] = m_offMeshConRads[m_offMeshConCount];
-	m_offMeshConDirs[i] = m_offMeshConDirs[m_offMeshConCount];
-	m_offMeshConAreas[i] = m_offMeshConAreas[m_offMeshConCount];
-	m_offMeshConFlags[i] = m_offMeshConFlags[m_offMeshConCount];
-	m_offMeshConId[i] = m_offMeshConId[m_offMeshConCount];
+	if (i < 0 || static_cast<std::size_t>(i) >= m_offMeshConnections.size())
+		return;
+	m_offMeshConnections[static_cast<std::size_t>(i)] =
+		m_offMeshConnections.back();
+	m_offMeshConnections.pop_back();
 }
 
 void InputGeom::drawOffMeshConnections(duDebugDraw* dd, bool hilight)
@@ -685,23 +678,27 @@ void InputGeom::drawOffMeshConnections(duDebugDraw* dd, bool hilight)
 	dd->depthMask(false);
 
 	dd->begin(DU_DRAW_LINES, 2.0f);
-	for (int i = 0; i < m_offMeshConCount; ++i)
+	for (const OffMeshConnection& connection : m_offMeshConnections)
 	{
-		float* v = &m_offMeshConVerts[i*3*2];
-
-		dd->vertex(v[0],v[1],v[2], baseColor);
-		dd->vertex(v[0],v[1]+0.2f,v[2], baseColor);
+		dd->vertex(connection.Start[0], connection.Start[1], connection.Start[2], baseColor);
+		dd->vertex(connection.Start[0], connection.Start[1] + 0.2f,
+			connection.Start[2], baseColor);
 		
-		dd->vertex(v[3],v[4],v[5], baseColor);
-		dd->vertex(v[3],v[4]+0.2f,v[5], baseColor);
+		dd->vertex(connection.End[0], connection.End[1], connection.End[2], baseColor);
+		dd->vertex(connection.End[0], connection.End[1] + 0.2f,
+			connection.End[2], baseColor);
 		
-		duAppendCircle(dd, v[0],v[1]+0.1f,v[2], m_offMeshConRads[i], baseColor);
-		duAppendCircle(dd, v[3],v[4]+0.1f,v[5], m_offMeshConRads[i], baseColor);
+		duAppendCircle(dd, connection.Start[0], connection.Start[1] + 0.1f,
+			connection.Start[2], connection.Radius, baseColor);
+		duAppendCircle(dd, connection.End[0], connection.End[1] + 0.1f,
+			connection.End[2], connection.Radius, baseColor);
 
 		if (hilight)
 		{
-			duAppendArc(dd, v[0],v[1],v[2], v[3],v[4],v[5], 0.25f,
-						(m_offMeshConDirs[i]&1) ? 0.6f : 0.0f, 0.6f, conColor);
+			duAppendArc(dd,
+				connection.Start[0], connection.Start[1], connection.Start[2],
+				connection.End[0], connection.End[1], connection.End[2], 0.25f,
+				(connection.Direction & 1) ? 0.6f : 0.0f, 0.6f, conColor);
 		}
 	}	
 	dd->end();

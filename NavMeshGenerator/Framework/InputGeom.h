@@ -22,6 +22,10 @@
 #include "ChunkyTriMesh.h"
 #include "MeshLoaderObj.h"
 
+#include <array>
+#include <cstdint>
+#include <vector>
+
 static const int MAX_CONVEXVOL_PTS = 12;
 struct ConvexVolume
 {
@@ -69,6 +73,31 @@ struct BuildSettings
 	float tileSize;
 };
 
+/// <summary>
+/// Identifies whether an off-mesh connection came from authored input or
+/// deterministic generator discovery.
+/// </summary>
+enum class OffMeshConnectionSource
+{
+    Authored,
+    Generated,
+};
+
+/// <summary>
+/// Owns one off-mesh connection without fixed-capacity parallel arrays.
+/// </summary>
+struct OffMeshConnection
+{
+    std::array<float, 3> Start{};
+    std::array<float, 3> End{};
+    float Radius = 0.0f;
+    std::uint8_t Direction = 0;
+    std::uint8_t Area = 0;
+    std::uint16_t Flags = 0;
+    std::uint32_t UserId = 0;
+    OffMeshConnectionSource Source = OffMeshConnectionSource::Authored;
+};
+
 class InputGeom
 {
 	rcChunkyTriMesh* m_chunkyMesh;
@@ -77,17 +106,7 @@ class InputGeom
 	BuildSettings m_buildSettings;
 	bool m_hasBuildSettings;
 	
-	/// @name Off-Mesh connections.
-	///@{
-	static const int MAX_OFFMESH_CONNECTIONS = 256;
-	float m_offMeshConVerts[MAX_OFFMESH_CONNECTIONS*3*2];
-	float m_offMeshConRads[MAX_OFFMESH_CONNECTIONS];
-	unsigned char m_offMeshConDirs[MAX_OFFMESH_CONNECTIONS];
-	unsigned char m_offMeshConAreas[MAX_OFFMESH_CONNECTIONS];
-	unsigned short m_offMeshConFlags[MAX_OFFMESH_CONNECTIONS];
-	unsigned int m_offMeshConId[MAX_OFFMESH_CONNECTIONS];
-	int m_offMeshConCount;
-	///@}
+	std::vector<OffMeshConnection> m_offMeshConnections;
 
 	/// @name Convex Volumes.
 	///@{
@@ -123,13 +142,14 @@ public:
 
 	/// @name Off-Mesh connections.
 	///@{
-	int getOffMeshConnectionCount() const { return m_offMeshConCount; }
-	const float* getOffMeshConnectionVerts() const { return m_offMeshConVerts; }
-	const float* getOffMeshConnectionRads() const { return m_offMeshConRads; }
-	const unsigned char* getOffMeshConnectionDirs() const { return m_offMeshConDirs; }
-	const unsigned char* getOffMeshConnectionAreas() const { return m_offMeshConAreas; }
-	const unsigned short* getOffMeshConnectionFlags() const { return m_offMeshConFlags; }
-	const unsigned int* getOffMeshConnectionId() const { return m_offMeshConId; }
+	std::size_t getOffMeshConnectionCount() const { return m_offMeshConnections.size(); }
+	/// <summary>
+	/// Returns the typed off-mesh connection at the specified index.
+	/// </summary>
+	const OffMeshConnection& getOffMeshConnection(std::size_t index) const
+	{
+		return m_offMeshConnections.at(index);
+	}
 	void addOffMeshConnection(const float* spos, const float* epos, const float rad,
 							  unsigned char bidir, unsigned char area, unsigned short flags);
 	/// <summary>
@@ -142,7 +162,8 @@ public:
 		unsigned char bidir,
 		unsigned char area,
 		unsigned short flags,
-		unsigned int userId);
+		unsigned int userId,
+		OffMeshConnectionSource source = OffMeshConnectionSource::Authored);
 	void deleteOffMeshConnection(int i);
 	void drawOffMeshConnections(struct duDebugDraw* dd, bool hilight = false);
 	///@}

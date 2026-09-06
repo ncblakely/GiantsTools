@@ -1141,6 +1141,37 @@ NavMeshGenerator::TileBuildResult NavMeshGenerator::BuildTileMesh(
 			}
 		}
 
+		const std::size_t offMeshConnectionCount =
+			m_geom->getOffMeshConnectionCount();
+		if (offMeshConnectionCount >
+			static_cast<std::size_t>((std::numeric_limits<int>::max)()))
+			return fail("too many off-mesh connections");
+
+		std::vector<float> offMeshVerts(offMeshConnectionCount * 6);
+		std::vector<float> offMeshRadii(offMeshConnectionCount);
+		std::vector<unsigned char> offMeshDirections(offMeshConnectionCount);
+		std::vector<unsigned char> offMeshAreas(offMeshConnectionCount);
+		std::vector<unsigned short> offMeshFlags(offMeshConnectionCount);
+		std::vector<unsigned int> offMeshUserIds(offMeshConnectionCount);
+		for (std::size_t i = 0; i < offMeshConnectionCount; ++i)
+		{
+			const OffMeshConnection& connection =
+				m_geom->getOffMeshConnection(i);
+			std::copy(
+				connection.Start.begin(),
+				connection.Start.end(),
+				offMeshVerts.begin() + i * 6);
+			std::copy(
+				connection.End.begin(),
+				connection.End.end(),
+				offMeshVerts.begin() + i * 6 + 3);
+			offMeshRadii[i] = connection.Radius;
+			offMeshDirections[i] = connection.Direction;
+			offMeshAreas[i] = connection.Area;
+			offMeshFlags[i] = connection.Flags;
+			offMeshUserIds[i] = connection.UserId;
+		}
+
 		dtNavMeshCreateParams params{};
 		params.verts = m_pmesh->verts;
 		params.vertCount = m_pmesh->nverts;
@@ -1154,13 +1185,13 @@ NavMeshGenerator::TileBuildResult NavMeshGenerator::BuildTileMesh(
 		params.detailVertsCount = m_dmesh->nverts;
 		params.detailTris = m_dmesh->tris;
 		params.detailTriCount = m_dmesh->ntris;
-		params.offMeshConVerts = m_geom->getOffMeshConnectionVerts();
-		params.offMeshConRad = m_geom->getOffMeshConnectionRads();
-		params.offMeshConDir = m_geom->getOffMeshConnectionDirs();
-		params.offMeshConAreas = m_geom->getOffMeshConnectionAreas();
-		params.offMeshConFlags = m_geom->getOffMeshConnectionFlags();
-		params.offMeshConUserID = m_geom->getOffMeshConnectionId();
-		params.offMeshConCount = m_geom->getOffMeshConnectionCount();
+		params.offMeshConVerts = offMeshVerts.data();
+		params.offMeshConRad = offMeshRadii.data();
+		params.offMeshConDir = offMeshDirections.data();
+		params.offMeshConAreas = offMeshAreas.data();
+		params.offMeshConFlags = offMeshFlags.data();
+		params.offMeshConUserID = offMeshUserIds.data();
+		params.offMeshConCount = static_cast<int>(offMeshConnectionCount);
 		params.walkableHeight = m_agentHeight;
 		params.walkableRadius = m_agentRadius;
 		params.walkableClimb = m_agentMaxClimb;
