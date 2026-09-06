@@ -379,15 +379,26 @@ bool InputGeom::loadGeomSet(rcContext* ctx, const std::string& filepath)
 			// Off-mesh connection
 			if (m_offMeshConCount < MAX_OFFMESH_CONNECTIONS)
 			{
-				float* v = &m_offMeshConVerts[m_offMeshConCount*3*2];
+				const int connectionIndex = m_offMeshConCount;
+				float* v = &m_offMeshConVerts[connectionIndex*3*2];
 				int bidir, area = 0, flags = 0;
 				float rad;
-				sscanf(row+1, "%f %f %f  %f %f %f %f %d %d %d",
-					   &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &rad, &bidir, &area, &flags);
-				m_offMeshConRads[m_offMeshConCount] = rad;
-				m_offMeshConDirs[m_offMeshConCount] = (unsigned char)bidir;
-				m_offMeshConAreas[m_offMeshConCount] = (unsigned char)area;
-				m_offMeshConFlags[m_offMeshConCount] = (unsigned short)flags;
+				unsigned int userId = 0;
+				const int parsed = sscanf(
+					row+1,
+					"%f %f %f  %f %f %f %f %d %d %d %u",
+					&v[0], &v[1], &v[2], &v[3], &v[4], &v[5],
+					&rad, &bidir, &area, &flags, &userId);
+				if (parsed < 10)
+					continue;
+
+				m_offMeshConRads[connectionIndex] = rad;
+				m_offMeshConDirs[connectionIndex] = (unsigned char)bidir;
+				m_offMeshConAreas[connectionIndex] = (unsigned char)area;
+				m_offMeshConFlags[connectionIndex] = (unsigned short)flags;
+				m_offMeshConId[connectionIndex] = parsed == 11
+					? userId
+					: 1000u + static_cast<unsigned int>(connectionIndex);
 				m_offMeshConCount++;
 			}
 		}
@@ -513,8 +524,9 @@ bool InputGeom::saveGeomSet(const BuildSettings* settings)
 		const int bidir = m_offMeshConDirs[i];
 		const int area = m_offMeshConAreas[i];
 		const int flags = m_offMeshConFlags[i];
-		fprintf(fp, "c %f %f %f  %f %f %f  %f %d %d %d\n",
-				v[0], v[1], v[2], v[3], v[4], v[5], rad, bidir, area, flags);
+		fprintf(fp, "c %f %f %f  %f %f %f  %f %d %d %d %u\n",
+				v[0], v[1], v[2], v[3], v[4], v[5], rad, bidir, area, flags,
+				m_offMeshConId[i]);
 	}
 
 	// Convex volumes
@@ -615,16 +627,41 @@ bool InputGeom::raycastMesh(float* src, float* dst, float& tmin)
 void InputGeom::addOffMeshConnection(const float* spos, const float* epos, const float rad,
 									 unsigned char bidir, unsigned char area, unsigned short flags)
 {
-	if (m_offMeshConCount >= MAX_OFFMESH_CONNECTIONS) return;
+	addOffMeshConnectionWithId(
+		spos,
+		epos,
+		rad,
+		bidir,
+		area,
+		flags,
+		1000u + static_cast<unsigned int>(m_offMeshConCount));
+}
+
+bool InputGeom::addOffMeshConnectionWithId(
+	const float* spos,
+	const float* epos,
+	const float rad,
+	unsigned char bidir,
+	unsigned char area,
+	unsigned short flags,
+	unsigned int userId)
+{
+	if (!spos || !epos || m_offMeshConCount >= MAX_OFFMESH_CONNECTIONS ||
+		userId == 0)
+	{
+		return false;
+	}
+
 	float* v = &m_offMeshConVerts[m_offMeshConCount*3*2];
 	m_offMeshConRads[m_offMeshConCount] = rad;
 	m_offMeshConDirs[m_offMeshConCount] = bidir;
 	m_offMeshConAreas[m_offMeshConCount] = area;
 	m_offMeshConFlags[m_offMeshConCount] = flags;
-	m_offMeshConId[m_offMeshConCount] = 1000 + m_offMeshConCount;
+	m_offMeshConId[m_offMeshConCount] = userId;
 	rcVcopy(&v[0], spos);
 	rcVcopy(&v[3], epos);
 	m_offMeshConCount++;
+	return true;
 }
 
 void InputGeom::deleteOffMeshConnection(int i)
@@ -638,6 +675,7 @@ void InputGeom::deleteOffMeshConnection(int i)
 	m_offMeshConDirs[i] = m_offMeshConDirs[m_offMeshConCount];
 	m_offMeshConAreas[i] = m_offMeshConAreas[m_offMeshConCount];
 	m_offMeshConFlags[i] = m_offMeshConFlags[m_offMeshConCount];
+	m_offMeshConId[i] = m_offMeshConId[m_offMeshConCount];
 }
 
 void InputGeom::drawOffMeshConnections(duDebugDraw* dd, bool hilight)

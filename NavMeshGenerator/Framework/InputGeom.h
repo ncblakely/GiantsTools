@@ -132,6 +132,17 @@ public:
 	const unsigned int* getOffMeshConnectionId() const { return m_offMeshConId; }
 	void addOffMeshConnection(const float* spos, const float* epos, const float rad,
 							  unsigned char bidir, unsigned char area, unsigned short flags);
+	/// <summary>
+	/// Adds an off-mesh connection with a caller-supplied stable user ID.
+	/// </summary>
+	bool addOffMeshConnectionWithId(
+		const float* spos,
+		const float* epos,
+		float rad,
+		unsigned char bidir,
+		unsigned char area,
+		unsigned short flags,
+		unsigned int userId);
 	void deleteOffMeshConnection(int i);
 	void drawOffMeshConnections(struct duDebugDraw* dd, bool hilight = false);
 	///@}

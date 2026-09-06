@@ -1,5 +1,9 @@
 #pragma once
 
+#include <array>
+#include <cstdint>
+#include <string>
+
 // Recast
 #include "Recast.h"
 #include "DetourNavMesh.h"
@@ -11,6 +15,16 @@
 
 #include "NavMeshUtil.h"
 #include "RecastContext.h"
+
+/// <summary>
+/// Describes the Detour-space query used to validate one explicit ground drop.
+/// </summary>
+struct ExplicitGroundDropValidation
+{
+    std::array<float, 3> QueryStart{};
+    std::array<float, 3> QueryEnd{};
+    std::uint32_t UserId{};
+};
 
 class NavMeshGenerator
 {
@@ -36,6 +50,13 @@ public:
     bool Serialize(const std::filesystem::path& path, bool saveStatistics = false);
     /// <summary>Returns the most recent build or serialization failure, or an empty string on success.</summary>
     const std::string& GetLastError() const { return m_lastError; }
+    /// <summary>
+    /// Verifies that one authored ground-drop connection is stored once and
+    /// selected only by a drop-enabled, directionally valid Detour query.
+    /// </summary>
+    bool ValidateExplicitGroundDrop(const ExplicitGroundDropValidation& validation);
+    /// <summary>Overrides the Recast tile width in cells before building a test artifact.</summary>
+    bool SetTileSize(float tileSize);
 private:
     enum class TileBuildStatus
     {

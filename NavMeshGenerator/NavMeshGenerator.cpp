@@ -2,10 +2,13 @@
 
 #include "DetourNavMesh.h"
 #include "DetourNavMeshBuilder.h"
+#include "Navigation/Public/NavMeshFlags.h"
 #include "Recast.h"
 #include "RecastContext.h"
 
 #include <array>
+#include <algorithm>
+#include <cmath>
 #include <Windows.h>
 #include <new>
 
@@ -109,6 +112,182 @@ namespace
         return payload;
     }
 
+    bool NearlyEqual(const float left, const float right)
+    {
+        return std::fabs(left - right) <= 0.001f;
+    }
+
+    bool NearlyEqualPoint(
+        const std::array<float, 3>& left,
+        const float* right)
+    {
+        return NearlyEqual(left[0], right[0]) &&
+            NearlyEqual(left[1], right[1]) &&
+            NearlyEqual(left[2], right[2]);
+    }
+
+    struct LocatedGroundDrop
+    {
+        dtPolyRef PolyRef{};
+        const dtMeshTile* Tile{};
+        const dtPoly* Poly{};
+        const dtOffMeshConnection* Connection{};
+    };
+
+    bool LocateGroundDrop(
+        const dtNavMesh& navMesh,
+        const std::uint32_t userId,
+        LocatedGroundDrop& result,
+        std::string& error)
+    {
+        int matchCount = 0;
+        for (int tileIndex = 0; tileIndex < navMesh.getMaxTiles(); ++tileIndex)
+        {
+            const dtMeshTile* tile = navMesh.getTile(tileIndex);
+            if (!tile || !tile->header)
+                continue;
+
+            for (int connectionIndex = 0;
+                connectionIndex < tile->header->offMeshConCount;
+                ++connectionIndex)
+            {
+                const dtOffMeshConnection* connection =
+                    &tile->offMeshCons[connectionIndex];
+                if (connection->userId != userId)
+                    continue;
+
+                ++matchCount;
+                result.Tile = tile;
+                result.Connection = connection;
+                result.PolyRef = navMesh.getPolyRefBase(tile) + connection->poly;
+                const dtPoly* poly = nullptr;
+                if (dtStatusFailed(navMesh.getTileAndPolyByRef(
+                        result.PolyRef, &result.Tile, &poly)))
+                {
+                    error = "ground-drop user ID resolves to an invalid polygon";
+                    return false;
+                }
+                result.Poly = poly;
+            }
+        }
+
+        if (matchCount == 0)
+        {
+            error = "ground-drop user ID was not stored in the navmesh";
+            return false;
+        }
+        if (matchCount != 1)
+        {
+            error = "ground-drop user ID was stored in more than one tile";
+            return false;
+        }
+        return true;
+    }
+
+    bool QueryDetourPath(
+        const dtNavMeshQuery& query,
+        const std::array<float, 3>& start,
+        const std::array<float, 3>& end,
+        const dtQueryFilter& filter,
+        std::vector<dtPolyRef>& polys,
+        std::vector<float>& straightPoints,
+        std::vector<unsigned char>& straightFlags,
+        std::vector<dtPolyRef>& straightPolys,
+        std::string* failure = nullptr)
+    {
+        constexpr int MaxPathLength = 256;
+        constexpr float QueryExtents[3] = {2.0f, 4.0f, 2.0f};
+        dtPolyRef startRef = 0;
+        dtPolyRef endRef = 0;
+        float nearestStart[3]{};
+        float nearestEnd[3]{};
+        const bool foundStart = dtStatusSucceed(query.findNearestPoly(
+            start.data(), QueryExtents, &filter, &startRef, nearestStart));
+        const bool foundEnd = dtStatusSucceed(query.findNearestPoly(
+            end.data(), QueryExtents, &filter, &endRef, nearestEnd));
+        if (!foundStart ||
+            !foundEnd ||
+            startRef == 0 || endRef == 0)
+        {
+            if (failure)
+            {
+                *failure = "nearest ground polygons unavailable (start=" +
+                    std::string(foundStart ? "found" : "missing") +
+                    ", ref=" + std::to_string(startRef) +
+                    ", end=" + std::string(foundEnd ? "found" : "missing") +
+                    ", ref=" + std::to_string(endRef) +
+                    ", start=(" + std::to_string(start[0]) + "," +
+                    std::to_string(start[1]) + "," + std::to_string(start[2]) +
+                    "), end=(" + std::to_string(end[0]) + "," +
+                    std::to_string(end[1]) + "," + std::to_string(end[2]) + "))";
+                *failure += " nearestStart=(" + std::to_string(nearestStart[0]) +
+                    "," + std::to_string(nearestStart[1]) + "," +
+                    std::to_string(nearestStart[2]) + "), nearestEnd=(" +
+                    std::to_string(nearestEnd[0]) + "," +
+                    std::to_string(nearestEnd[1]) + "," +
+                    std::to_string(nearestEnd[2]) + ")";
+            }
+            return false;
+        }
+
+        polys.resize(MaxPathLength);
+        int polyCount = 0;
+        if (dtStatusFailed(query.findPath(
+                startRef,
+                endRef,
+                start.data(),
+                end.data(),
+                &filter,
+                polys.data(),
+                &polyCount,
+                MaxPathLength)) ||
+            polyCount <= 0)
+        {
+            if (failure)
+            {
+                *failure = "Detour path unavailable (startRef=" +
+                    std::to_string(startRef) + ", endRef=" +
+                    std::to_string(endRef) + ")";
+            }
+            polys.clear();
+            return false;
+        }
+        polys.resize(polyCount);
+
+        straightPoints.resize(MaxPathLength * 3);
+        straightFlags.resize(MaxPathLength);
+        straightPolys.resize(MaxPathLength);
+        int straightCount = 0;
+        if (dtStatusFailed(query.findStraightPath(
+                start.data(),
+                end.data(),
+                polys.data(),
+                polyCount,
+                straightPoints.data(),
+                straightFlags.data(),
+                straightPolys.data(),
+                &straightCount,
+                MaxPathLength,
+                0)) ||
+            straightCount <= 0)
+        {
+            if (failure)
+            {
+                *failure = "straight path unavailable (polygons=" +
+                    std::to_string(polyCount) + ")";
+            }
+            polys.clear();
+            straightPoints.clear();
+            straightFlags.clear();
+            straightPolys.clear();
+            return false;
+        }
+        straightPoints.resize(straightCount * 3);
+        straightFlags.resize(straightCount);
+        straightPolys.resize(straightCount);
+        return true;
+    }
+
 }
 
 inline unsigned int nextPow2(unsigned int v)
@@ -148,6 +327,220 @@ NavMeshGenerator::NavMeshGenerator(std::shared_ptr<InputGeom> geom, std::shared_
 NavMeshGenerator::~NavMeshGenerator()
 {
 	Cleanup();
+}
+
+bool NavMeshGenerator::SetTileSize(const float tileSize)
+{
+    if (!std::isfinite(tileSize) || tileSize <= 0.0f)
+    {
+        m_lastError = "tile size must be finite and positive";
+        return false;
+    }
+
+    m_tileSize = tileSize;
+    return true;
+}
+
+bool NavMeshGenerator::ValidateExplicitGroundDrop(
+    const ExplicitGroundDropValidation& validation)
+{
+    if (!m_buildSucceeded || !m_navMesh || !m_navMeshQuery)
+    {
+        m_lastError = "navmesh must be built before validating a ground drop";
+        return false;
+    }
+
+    LocatedGroundDrop drop;
+    if (!LocateGroundDrop(*m_navMesh, validation.UserId, drop, m_lastError))
+        return false;
+    if (!drop.Poly || drop.Poly->getType() != DT_POLYTYPE_OFFMESH_CONNECTION ||
+        drop.Poly->getArea() != GiantsNav::GiantsPolyAreaGroundDrop ||
+        (drop.Poly->flags & GiantsNav::GiantsPolyFlagGroundDrop) == 0)
+    {
+        m_lastError = "ground-drop polygon has inconsistent area or flags";
+        return false;
+    }
+    if ((drop.Connection->flags & DT_OFFMESH_CON_BIDIR) != 0)
+    {
+        m_lastError = "ground-drop connection is bidirectional";
+        return false;
+    }
+
+    dtQueryFilter ordinaryFilter;
+    ordinaryFilter.setIncludeFlags(GiantsNav::GiantsPolyFlagWalk);
+    ordinaryFilter.setExcludeFlags(
+        GiantsNav::GiantsPolyFlagDisabled |
+        GiantsNav::GiantsPolyFlagGroundDrop);
+    dtQueryFilter dropFilter;
+    dropFilter.setIncludeFlags(
+        GiantsNav::GiantsPolyFlagWalk |
+        GiantsNav::GiantsPolyFlagGroundDrop);
+    dropFilter.setExcludeFlags(GiantsNav::GiantsPolyFlagDisabled);
+
+    std::vector<dtPolyRef> ordinaryPolys;
+    std::vector<float> ordinaryStraightPoints;
+    std::vector<unsigned char> ordinaryStraightFlags;
+    std::vector<dtPolyRef> ordinaryStraightPolys;
+    if (QueryDetourPath(
+            *m_navMeshQuery,
+            validation.QueryStart,
+            validation.QueryEnd,
+            ordinaryFilter,
+            ordinaryPolys,
+            ordinaryStraightPoints,
+            ordinaryStraightFlags,
+            ordinaryStraightPolys) &&
+        std::find(ordinaryPolys.begin(), ordinaryPolys.end(), drop.PolyRef) !=
+            ordinaryPolys.end())
+    {
+        m_lastError = "ordinary ground query traversed the ground-drop polygon";
+        return false;
+    }
+
+    std::vector<dtPolyRef> dropPolys;
+    std::vector<float> dropStraightPoints;
+    std::vector<unsigned char> dropStraightFlags;
+    std::vector<dtPolyRef> dropStraightPolys;
+    if (!QueryDetourPath(
+            *m_navMeshQuery,
+            validation.QueryStart,
+            validation.QueryEnd,
+            dropFilter,
+            dropPolys,
+            dropStraightPoints,
+            dropStraightFlags,
+            dropStraightPolys,
+            &m_lastError))
+    {
+        if (m_lastError.empty())
+            m_lastError = "drop-enabled query did not produce a path";
+        return false;
+    }
+
+    const auto dropPolyIt = std::find(dropPolys.begin(), dropPolys.end(), drop.PolyRef);
+    if (dropPolyIt == dropPolys.end() || dropPolyIt == dropPolys.begin())
+    {
+        const dtOffMeshConnection& connection = *drop.Connection;
+        float projectedStart[3]{};
+        float projectedEnd[3]{};
+        dtPolyRef projectedStartRef = 0;
+        dtPolyRef projectedEndRef = 0;
+        constexpr float ProjectionExtents[3] = {100.0f, 400.0f, 100.0f};
+        m_navMeshQuery->findNearestPoly(
+            validation.QueryStart.data(),
+            ProjectionExtents,
+            &dropFilter,
+            &projectedStartRef,
+            projectedStart);
+        m_navMeshQuery->findNearestPoly(
+            validation.QueryEnd.data(),
+            ProjectionExtents,
+            &dropFilter,
+            &projectedEndRef,
+            projectedEnd);
+        m_lastError = "drop-enabled query did not traverse the explicit ground drop "
+            "(pathPolys=" + std::to_string(dropPolys.size()) +
+            ", linkPolyRef=" + std::to_string(drop.PolyRef) +
+            ", linkFirst=" + std::to_string(drop.Poly->firstLink) +
+            ", start=(" + std::to_string(connection.pos[0]) + "," +
+            std::to_string(connection.pos[1]) + "," +
+            std::to_string(connection.pos[2]) + "), end=(" +
+            std::to_string(connection.pos[3]) + "," +
+            std::to_string(connection.pos[4]) + "," +
+            std::to_string(connection.pos[5]) + "), projectedStartRef=" +
+            std::to_string(projectedStartRef) + ", projectedStart=(" +
+            std::to_string(projectedStart[0]) + "," +
+            std::to_string(projectedStart[1]) + "," +
+            std::to_string(projectedStart[2]) + "), projectedEndRef=" +
+            std::to_string(projectedEndRef) + ", projectedEnd=(" +
+            std::to_string(projectedEnd[0]) + "," +
+            std::to_string(projectedEnd[1]) + "," +
+            std::to_string(projectedEnd[2]) + "))";
+        return false;
+    }
+
+    float orderedStart[3]{};
+    float orderedEnd[3]{};
+    if (dtStatusFailed(m_navMesh->getOffMeshConnectionPolyEndPoints(
+            *(dropPolyIt - 1),
+            drop.PolyRef,
+            orderedStart,
+            orderedEnd)))
+    {
+        m_lastError = "could not resolve ordered ground-drop endpoints";
+        return false;
+    }
+    if (orderedStart[1] <= orderedEnd[1])
+    {
+        m_lastError = "ground-drop endpoint order is not upper-to-lower";
+        return false;
+    }
+
+    bool foundStraightDrop = false;
+    for (std::size_t i = 0; i < dropStraightPolys.size(); ++i)
+    {
+        if ((dropStraightFlags[i] & DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0 &&
+            dropStraightPolys[i] == drop.PolyRef)
+        {
+            if (!NearlyEqualPoint(
+                    {dropStraightPoints[i * 3], dropStraightPoints[i * 3 + 1],
+                        dropStraightPoints[i * 3 + 2]},
+                    orderedStart))
+            {
+                m_lastError = "straight-path ground-drop start differs from Detour endpoint";
+                return false;
+            }
+            if (i + 1 >= dropStraightPoints.size() / 3 ||
+                !NearlyEqualPoint(
+                    {dropStraightPoints[(i + 1) * 3],
+                        dropStraightPoints[(i + 1) * 3 + 1],
+                        dropStraightPoints[(i + 1) * 3 + 2]},
+                    orderedEnd))
+            {
+                m_lastError = "straight-path ground-drop end differs from Detour endpoint";
+                return false;
+            }
+            foundStraightDrop = true;
+            break;
+        }
+    }
+    if (!foundStraightDrop)
+    {
+        m_lastError = "straight path did not preserve the explicit ground drop "
+            "(straight points: " + std::to_string(dropStraightPolys.size()) + ")";
+        for (std::size_t i = 0; i < dropStraightPolys.size(); ++i)
+        {
+            m_lastError += std::format(
+                " [{} flags=0x{:02X} ref={}]",
+                i,
+                dropStraightFlags[i],
+                dropStraightPolys[i]);
+        }
+        return false;
+    }
+
+    std::vector<dtPolyRef> reversePolys;
+    std::vector<float> reverseStraightPoints;
+    std::vector<unsigned char> reverseStraightFlags;
+    std::vector<dtPolyRef> reverseStraightPolys;
+    if (QueryDetourPath(
+            *m_navMeshQuery,
+            validation.QueryEnd,
+            validation.QueryStart,
+            dropFilter,
+            reversePolys,
+            reverseStraightPoints,
+            reverseStraightFlags,
+            reverseStraightPolys) &&
+        std::find(reversePolys.begin(), reversePolys.end(), drop.PolyRef) !=
+            reversePolys.end())
+    {
+        m_lastError = "one-way ground-drop connection was traversable in reverse";
+        return false;
+    }
+
+    m_lastError.clear();
+    return true;
 }
 
 void NavMeshGenerator::Cleanup()

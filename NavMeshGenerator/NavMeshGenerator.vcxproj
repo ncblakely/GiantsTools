@@ -93,7 +93,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\External\recastnavigation\DebugUtils\Include;..\External\recastnavigation\Detour\Include;..\External\recastnavigation\DetourTileCache\Include;..\External\recastnavigation\Recast\Include;..\..\..\cpp\Tools\Private</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\External\recastnavigation\DebugUtils\Include;..\External\recastnavigation\Detour\Include;..\External\recastnavigation\DetourTileCache\Include;..\External\recastnavigation\Recast\Include;..\..\..\cpp;..\..\..\cpp\Tools\Private</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -112,7 +112,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\External\recastnavigation\DebugUtils\Include;..\External\recastnavigation\Detour\Include;..\External\recastnavigation\DetourTileCache\Include;..\External\recastnavigation\Recast\Include;..\..\..\cpp\Tools\Private</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\External\recastnavigation\DebugUtils\Include;..\External\recastnavigation\Detour\Include;..\External\recastnavigation\DetourTileCache\Include;..\External\recastnavigation\Recast\Include;..\..\..\cpp;..\..\..\cpp\Tools\Private</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
       <PrecompiledHeader>Use</PrecompiledHeader>
